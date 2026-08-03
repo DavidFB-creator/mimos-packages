@@ -1,0 +1,42 @@
+# Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
+
+pkgname=mimos-installer
+pkgver=0.3.0.beta.4
+pkgrel=1
+pkgdesc='Entry point that opens the reviewed MimOS installation path'
+arch=('any')
+url='https://github.com/DavidFB-creator/MimOS'
+license=('MIT')
+# The Qt/QML presentation prototype is gone, so nothing in this package is a
+# QML application any more and qt6-declarative is no longer a dependency. The
+# interface a user now sees belongs to Calamares.
+depends=('bash')
+optdepends=(
+  'calamares: the installer this package opens'
+  'kdialog: show graphical error messages'
+  'mimos-calamares-config: reviewed MimOS installation policy'
+)
+source=(
+  'mimos-installer'
+  'mimos-installer-real'
+  'mimos-installer-exec'
+  'mimos-installer.desktop'
+  'LICENSE'
+)
+sha256sums=('ac786596dc6694571d3b5b9c112bc09984e95dd45428b914a319127a0388dd97'
+            'f1005f445d631cf12b5fd8eedf54369de2995a3d899380374ef9f2b88f48417b'
+            '98d02356843e35677df94eca6e24964311f1e3e647960c88a27ee31bbdfe8e5f'
+            'f6cd7610ff338024c09297131dc9fccd550dc23f18a35ff55eccb1f40cedcac7'
+            '97d7ba0977ea88730c942625f66849bbef6536c3c6e103a39a4bb05b9fd3d9cf')
+
+package() {
+  install -Dm755 mimos-installer "${pkgdir}/usr/bin/mimos-installer"
+  install -Dm755 mimos-installer-real \
+    "${pkgdir}/usr/lib/mimos/mimos-installer-real"
+  install -Dm755 mimos-installer-exec \
+    "${pkgdir}/usr/lib/mimos/mimos-installer-exec"
+  install -Dm644 mimos-installer.desktop \
+    "${pkgdir}/usr/share/applications/mimos-installer.desktop"
+  install -Dm644 LICENSE \
+    "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}

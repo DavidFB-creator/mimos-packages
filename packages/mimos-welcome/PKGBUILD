@@ -1,0 +1,42 @@
+# Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
+
+pkgname=mimos-welcome
+pkgver=0.3.0.beta.4
+pkgrel=2
+pkgdesc='Centro de MimOS welcome and privacy application'
+arch=('any')
+url='https://github.com/DavidFB-creator/MimOS'
+license=('MIT')
+depends=('bash' 'qt6-declarative')
+optdepends=(
+  'kdialog: show graphical error messages'
+  'mimos-installer: launch MimOS Installer'
+  'mimos-release: version-aware autostart'
+  'plasma-workspace: apply the MimOS wallpaper'
+)
+source=(
+  'mimos-welcome'
+  'Main.qml'
+  'Window.qml'
+  'mimos-welcome.desktop'
+  'mimos-welcome-autostart.desktop'
+  'LICENSE'
+)
+sha256sums=('cac6b2573214d9de53b6ec72ca35e62c2e1e9c778122c99e33f8c2727b89d858'
+            '23e9e40b4fe232e5a5dc200b75bd6c7a5bb7d5b06f8513390d207c052f038c3e'
+            '4e3b3aa9f1587f76cdd736ab2b7b611628221e4a69ceecee4044c6b13d7dbf35'
+            'e6b7ed15a3ee1242bdf4c349e9ca0efb082df0d3e64ffb1863f3e834fa125d69'
+            '96f32c2ba9b28ea3ef05949523963af931952e56930323df3ee48dd29e11da6d'
+            '97d7ba0977ea88730c942625f66849bbef6536c3c6e103a39a4bb05b9fd3d9cf')
+
+package() {
+  install -Dm755 mimos-welcome "${pkgdir}/usr/bin/mimos-welcome"
+  install -Dm644 Main.qml "${pkgdir}/usr/share/mimos/welcome/Main.qml"
+  install -Dm644 Window.qml "${pkgdir}/usr/share/mimos/welcome/Window.qml"
+  install -Dm644 mimos-welcome.desktop \
+    "${pkgdir}/usr/share/applications/mimos-welcome.desktop"
+  install -Dm644 mimos-welcome-autostart.desktop \
+    "${pkgdir}/etc/xdg/autostart/mimos-welcome.desktop"
+  install -Dm644 LICENSE \
+    "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Centro de MimOS
+Comment=Bienvenida, privacidad y estado de MimOS
+Exec=/usr/bin/mimos-welcome
+Icon=preferences-desktop-theme
+Terminal=false
+Categories=Settings;
+Keywords=MimOS;welcome;privacy;privacidad;

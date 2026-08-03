@@ -1,0 +1,44 @@
+From: XI14 <https://github.com/DavidFB-creator/MimOS>
+Subject: [PATCH] Size the sidebar logo from the artwork, not a fixed square
+
+CalamaresWindow.cpp forces the sidebar logo label to 80x80 and then asks branding
+for an image of exactly that size. A square box suits a symbol and is wrong for
+anything else: a distribution whose logo is a horizontal lockup gets it rendered
+inside a square, so a 979x400 lockup comes out 80x33 -- a stamp, with the
+wordmark barely legible, no matter how much room the sidebar has.
+
+The fix is not a different hardcoded number. The label is sized from the pixmap
+branding actually returned, so a square logo still comes out square and a wide
+lockup uses the width it needs. The requested box keeps the previous height and
+allows a generous width; nothing changes for a square logo.
+
+deviceIndependentSize() is used rather than the raw pixmap size, because
+Branding::image multiplies by the device pixel ratio, and sizing a widget in
+device pixels would double the label on a HiDPI display.
+
+Found while restyling the sidebar for MimOS, whose lockup pairs a heart with the
+wordmark. There is no stylesheet workaround: setFixedSize pins minimum and
+maximum together, so no QSS min-width or max-width can widen it.
+
+Reported upstream by MimOS (XI14). See ADR-065 in that project.
+---
+--- a/src/calamares/CalamaresWindow.cpp
++++ b/src/calamares/CalamaresWindow.cpp
+@@ -154,8 +154,15 @@
+         logoLabel->setPalette( plt );
+     }
+     logoLabel->setAlignment( Qt::AlignCenter );
+-    logoLabel->setFixedSize( 80, 80 );
+-    logoLabel->setPixmap( branding->image( Calamares::Branding::ProductLogo, logoLabel->size() ) );
++    // Size the label from the artwork instead of forcing it square. A fixed
++    // 80x80 box suits a symbol and squeezes any wider lockup: a 979x400 one
++    // renders 80x33, which is a stamp rather than a logo. The box is sized to fit
++    // this height and generous width lets a square logo stay square while a
++    // horizontal lockup uses the width it needs.
++    const QSize logoBox( 216, 88 );
++    const QPixmap logo = branding->image( Calamares::Branding::ProductLogo, logoBox );
++    logoLabel->setFixedSize( logo.deviceIndependentSize().toSize() );
++    logoLabel->setPixmap( logo );
+     logoLayout->addWidget( logoLabel );
+     logoLayout->addStretch();
+ 

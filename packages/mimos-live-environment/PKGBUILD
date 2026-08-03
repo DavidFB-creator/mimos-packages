@@ -1,0 +1,54 @@
+# Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
+
+pkgname=mimos-live-environment
+pkgver=0.3.0.beta.4
+pkgrel=2
+pkgdesc='Removable Live-session state for MimOS installation media'
+arch=('any')
+url='https://github.com/DavidFB-creator/MimOS'
+license=('MIT')
+install='mimos-live-environment.install'
+depends=('bash' 'e2fsprogs' 'shadow')
+optdepends=(
+  'mimos-installer: launch the MimOS system installer'
+  'sddm: start the passwordless Live session'
+)
+source=(
+  '10-live-mimos'
+  '10-mimos.conf'
+  'live-setup'
+  'MimOS Installer.desktop'
+  'mimos-live-setup.service'
+  'linux.preset'
+  'LICENSE'
+)
+sha256sums=('865ab28ace6c525113cf18b07ff3b0dd805baf89d9ba3447ae6dab958c4b3c08'
+            '451ce6b91c279fc1ca9713466ae487a7731e892a6421b9fea9c5cabdcb9e17de'
+            '01318af35721ea361913b8d75fdb9598fb846a57e05a69eb8435db5e1c0a1b0b'
+            '56f95a97dd27a178f9a8e471efe072c8771f300efa873b30a71d21dc17d42963'
+            '19c7eeb84cb74ce447e0c4a52fc17579dd91e98ad9e1c3cb2dac639d7c5b034f'
+            'f21ae0678525af4b22644b3a83057ef035471e52f3052389c58ca1c65223fd6f'
+            '97d7ba0977ea88730c942625f66849bbef6536c3c6e103a39a4bb05b9fd3d9cf')
+
+package() {
+  install -Dm440 10-live-mimos \
+    "${pkgdir}/etc/sudoers.d/10-live-mimos"
+  install -Dm644 10-mimos.conf \
+    "${pkgdir}/etc/sddm.conf.d/10-mimos.conf"
+  install -Dm755 live-setup \
+    "${pkgdir}/usr/lib/mimos/live-setup"
+  install -Dm755 'MimOS Installer.desktop' \
+    "${pkgdir}/etc/skel/Desktop/MimOS Installer.desktop"
+  install -Dm644 mimos-live-setup.service \
+    "${pkgdir}/usr/lib/systemd/system/mimos-live-setup.service"
+  install -Dm644 linux.preset \
+    "${pkgdir}/usr/share/mimos/live-environment/linux.preset"
+  install -Dm644 /dev/null \
+    "${pkgdir}/usr/lib/mimos/live-environment"
+  install -d \
+    "${pkgdir}/usr/lib/systemd/system/multi-user.target.wants"
+  ln -s ../mimos-live-setup.service \
+    "${pkgdir}/usr/lib/systemd/system/multi-user.target.wants/mimos-live-setup.service"
+  install -Dm644 LICENSE \
+    "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}

@@ -1,0 +1,12 @@
+[Unit]
+Description=Prepare the MimOS live session
+Before=display-manager.service
+After=systemd-remount-fs.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/lib/mimos/live-setup
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,42 @@
+---
+componentName: mimos
+welcomeStyleCalamares: false
+welcomeExpandingLogo: true
+windowExpanding: normal
+windowSize: 960px,640px
+windowPlacement: center
+sidebar: widget
+navigation: widget
+
+strings:
+  productName: MimOS
+  shortProductName: MimOS
+  version: 0.3.0-beta.4
+  shortVersion: 0.3
+  versionedName: 'MimOS 0.3 "Achuchón" Beta 4'
+  shortVersionedName: MimOS 0.3
+  bootloaderEntryName: MimOS
+  productUrl: ''
+  supportUrl: ''
+  knownIssuesUrl: ''
+  releaseNotesUrl: ''
+  donateUrl: ''
+
+images:
+  productIcon: mimos-symbol.svg
+  productLogo: mimos-logo-horizontal-dark-no-tagline.svg
+  productWelcome: mimos-logo-horizontal.svg
+
+style:
+  SidebarBackground: '#5B3BE0'
+  SidebarText: '#FFFFFF'
+  SidebarTextCurrent: '#221B3A'
+  SidebarBackgroundCurrent: '#FF6FAE'
+
+slideshow: show.qml
+slideshowAPI: 2
+
+uploadServer:
+  type: none
+  url: ''
+  sizeLimit: 0

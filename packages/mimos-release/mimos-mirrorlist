@@ -1,0 +1,24 @@
+# MimOS package mirrors.
+#
+# Owned by mimos-release, so a mirror change ships as a package update rather
+# than as an instruction to edit a file by hand.
+#
+# The primary mirror is enabled because it is published and answers.
+# Verified on 2026-07-29 by fetching over HTTPS: signatures good against the
+# key shipped in mimos-keyring, bytes identical to the locally built packages,
+# and the database parses with nine entries.
+#
+# The rule that gated this has not changed: a configured repository that does
+# not answer fails `pacman -Syu`, and the Live acceptance matrix runs exactly
+# that. Never enable a mirror before confirming it answers.
+# See packages/mimos-keyring/KEY.md.
+#
+# Signatures are required. The MimOS signing key travels in mimos-keyring,
+# which is already in the image, so an installed system can verify this
+# repository before it has ever contacted it.
+
+## Primary — GitHub Pages
+Server = https://davidfb-creator.github.io/mimos-repo/$arch
+
+## Alternate — Codeberg Pages
+#Server = https://davidfb-creator.codeberg.page/mimos-repo/$arch

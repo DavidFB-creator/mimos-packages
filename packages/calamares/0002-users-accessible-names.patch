@@ -1,0 +1,122 @@
+From: XI14 <https://github.com/DavidFB-creator/MimOS>
+Subject: [PATCH] users: give the credential fields an accessible name
+
+The five fields a person must fill in to create their account expose an
+accessible description and no accessible name. A screen reader leads with the
+name, so a user tabbing into them hears an unnamed text field. Every other
+interactive node on the reviewed pages is named.
+
+Measured with AT-SPI against Calamares 3.4.2 under Wayland: 679 interactive
+nodes across welcome, locale, keyboard, partition and users; five with no name;
+none with neither a name nor a description. Keyboard navigation itself is fine,
+so this is a labelling defect and not a navigation one.
+
+The file carries no accessible* property at all and no <buddies> section, so Qt
+has nothing to derive a name from. The description assistive technology does
+see comes from placeholderText and toolTip. That is why the defect is easy to
+miss: an audit that accepts "name or description" reports no problem here.
+
+accessibleName is used rather than buddies because buddies would also change
+what is announced for the labels themselves.
+
+The strings are deliberately ones that ALREADY EXIST AND ARE TRANSLATED in this
+file's own Qt context. A first version of this patch invented new source strings
+-- "Full name", "Login name", "Computer name", "Repeat password" -- and they
+announced in English on a Spanish system, because a new source string has no
+translation in any of the sixty-odd catalogues Calamares ships. Only "Password"
+came out right, and only by coincidence: it already existed here.
+
+Qt resolves translations per context, so reusing a source string that is already
+translated in Page_UserSetup fixes every language at once rather than only the
+one someone thinks to check. "Repeat Password" versus "Repeat password" is a
+single capital letter and it is the whole difference between "Repite la
+contraseña" and English.
+
+The full-name and computer-name fields therefore take their placeholder strings,
+which does make the accessible name and description identical. That is a real
+cost and it is smaller than announcing English. The login field takes its visible
+question, which is verbose for an accessible name and correct in every language.
+
+The two administrator fields keep new English strings: no suitable short label
+exists translated in this context, and giving them the same names as the user
+fields would put two identically named password fields on one page, which is
+worse than untranslated. MimOS hides them, so nothing here reaches its users.
+
+The two root-password fields are included: MimOS hides them, so they were not
+in the measurement, but they are the same widgets with the same omission.
+
+Reported upstream by MimOS (XI14). See docs/upstream/ in that project for the
+measurement and the two instruments that gave wrong answers first.
+---
+--- a/src/modules/users/page_usersetup.ui
++++ b/src/modules/users/page_usersetup.ui
+@@ -45,6 +45,9 @@
+     <layout class="QHBoxLayout" name="fullNameLayout">
+      <item>
+       <widget class="QLineEdit" name="textBoxFullName">
++       <property name="accessibleName">
++        <string>Your Full Name</string>
++       </property>
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+@@ -132,6 +135,9 @@
+     <layout class="QHBoxLayout" name="usernameLayout">
+      <item>
+       <widget class="QLineEdit" name="textBoxLoginName">
++       <property name="accessibleName">
++        <string>What name do you want to use to log in?</string>
++       </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+@@ -231,6 +237,9 @@
+     <layout class="QHBoxLayout" name="hostnameLayout">
+      <item>
+       <widget class="QLineEdit" name="textBoxHostname">
++       <property name="accessibleName">
++        <string>Computer Name</string>
++       </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+@@ -333,6 +342,9 @@
+     <layout class="QHBoxLayout" name="userPasswordLayout">
+      <item>
+       <widget class="QLineEdit" name="textBoxUserPassword">
++       <property name="accessibleName">
++        <string>Password</string>
++       </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+@@ -358,6 +370,9 @@
+      </item>
+      <item>
+       <widget class="QLineEdit" name="textBoxUserVerifiedPassword">
++       <property name="accessibleName">
++        <string>Repeat Password</string>
++       </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+@@ -503,6 +518,9 @@
+     <layout class="QHBoxLayout" name="rootPasswordLayout">
+      <item>
+       <widget class="QLineEdit" name="textBoxRootPassword">
++       <property name="accessibleName">
++        <string>Administrator password</string>
++       </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+@@ -528,6 +546,9 @@
+      </item>
+      <item>
+       <widget class="QLineEdit" name="textBoxVerifiedRootPassword">
++       <property name="accessibleName">
++        <string>Repeat administrator password</string>
++       </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>

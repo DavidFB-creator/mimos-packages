@@ -1,0 +1,23 @@
+pkgbase = mimos-installer
+	pkgdesc = Entry point that opens the reviewed MimOS installation path
+	pkgver = 0.3.0.beta.4
+	pkgrel = 1
+	url = https://github.com/DavidFB-creator/MimOS
+	arch = any
+	license = MIT
+	depends = bash
+	optdepends = calamares: the installer this package opens
+	optdepends = kdialog: show graphical error messages
+	optdepends = mimos-calamares-config: reviewed MimOS installation policy
+	source = mimos-installer
+	source = mimos-installer-real
+	source = mimos-installer-exec
+	source = mimos-installer.desktop
+	source = LICENSE
+	sha256sums = ac786596dc6694571d3b5b9c112bc09984e95dd45428b914a319127a0388dd97
+	sha256sums = f1005f445d631cf12b5fd8eedf54369de2995a3d899380374ef9f2b88f48417b
+	sha256sums = 98d02356843e35677df94eca6e24964311f1e3e647960c88a27ee31bbdfe8e5f
+	sha256sums = f6cd7610ff338024c09297131dc9fccd550dc23f18a35ff55eccb1f40cedcac7
+	sha256sums = 97d7ba0977ea88730c942625f66849bbef6536c3c6e103a39a4bb05b9fd3d9cf
+
+pkgname = mimos-installer

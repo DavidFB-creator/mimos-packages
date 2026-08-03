@@ -1,0 +1,19 @@
+pkgbase = mimos-keyring
+	pkgdesc = MimOS package signing keys
+	pkgver = 0.3.0.beta.4
+	pkgrel = 1
+	url = https://github.com/DavidFB-creator/MimOS
+	install = mimos-keyring.install
+	arch = any
+	license = MIT
+	depends = pacman
+	source = mimos.gpg
+	source = mimos-trusted
+	source = mimos-revoked
+	source = LICENSE
+	sha256sums = a64f9c7c3061029d1994192f932f2f407b0c23bea87e495f88d6dee1819a870a
+	sha256sums = 42de32fef8362b0647e130a2d2964c446e8646b78daad577ca1a3a0b8b090904
+	sha256sums = e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+	sha256sums = 97d7ba0977ea88730c942625f66849bbef6536c3c6e103a39a4bb05b9fd3d9cf
+
+pkgname = mimos-keyring

@@ -1,0 +1,56 @@
+# shellcheck shell=bash
+#
+# pacman does not run install scriptlets under `set -e`, so every step that
+# must not be skipped is checked explicitly and the function returns non-zero
+# rather than continuing past a failure. The same lesson as
+# mimos-live-environment: a partial run that reports success is the dangerous
+# case.
+
+_mimos_populate_keyring() {
+  local keyring='/usr/share/pacman/keyrings/mimos.gpg'
+
+  if [[ ! -f "${keyring}" ]]; then
+    printf 'mimos-keyring: no se encuentra %s.\n' "${keyring}" >&2
+    return 1
+  fi
+
+  if ! command -v pacman-key >/dev/null 2>&1; then
+    printf 'mimos-keyring: pacman-key no está disponible.\n' >&2
+    return 1
+  fi
+
+  # --populate imports the keyring and applies mimos-trusted and
+  # mimos-revoked. Without it the key file exists on disk but pacman does not
+  # trust it, and every MimOS package would fail verification.
+  if ! pacman-key --populate mimos; then
+    printf 'mimos-keyring: no se pudo poblar el llavero de MimOS.\n' >&2
+    return 1
+  fi
+
+  return 0
+}
+
+post_install() {
+  if ! _mimos_populate_keyring; then
+    printf 'mimos-keyring: la instalación no dejó el llavero utilizable.\n' >&2
+    return 1
+  fi
+}
+
+post_upgrade() {
+  if ! _mimos_populate_keyring; then
+    printf 'mimos-keyring: la actualización no dejó el llavero utilizable.\n' >&2
+    return 1
+  fi
+}
+
+pre_remove() {
+  # Removing the keyring while the [mimos] repository is still configured
+  # would leave pacman unable to verify packages it is still being offered.
+  # This only warns: refusing the removal would trap the user.
+  if grep -Rqs '^\[mimos\]' /etc/pacman.conf /etc/pacman.d 2>/dev/null; then
+    printf 'mimos-keyring: el repositorio [mimos] sigue configurado.\n' >&2
+    printf 'Quítalo también o pacman no podrá verificar sus paquetes.\n' >&2
+  fi
+  return 0
+}

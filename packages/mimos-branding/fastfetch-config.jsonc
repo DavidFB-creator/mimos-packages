@@ -1,0 +1,119 @@
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/master/doc/json_schema.json",
+  "logo": {
+    "type": "file",
+    "source": "/usr/share/mimos/branding/mimos-fastfetch-heart.txt",
+    "color": {
+      "1": "#FF6FAE",
+      "2": "#7C5CFC"
+    },
+    "padding": {
+      "top": 1,
+      "right": 3
+    }
+  },
+  "display": {
+    "separator": "  ",
+    "color": {
+      "keys": "#FF6FAE",
+      "title": "#7C5CFC",
+      "output": "default",
+      "separator": "#7C5CFC"
+    },
+    "brightColor": true,
+    "key": {
+      "width": 11
+    }
+  },
+  "modules": [
+    {
+      "type": "title",
+      "format": "{user-name}@{host-name}"
+    },
+    {
+      "type": "custom",
+      "format": "──────────────────────────",
+      "outputColor": "#7C5CFC"
+    },
+    {
+      "type": "custom",
+      "key": "Sistema",
+      "format": "MimOS 0.3 · Achuchón Beta 4"
+    },
+    {
+      "type": "custom",
+      "key": "Base",
+      "format": "Arch Linux"
+    },
+    {
+      "type": "host",
+      "key": "Equipo"
+    },
+    {
+      "type": "kernel",
+      "key": "Kernel"
+    },
+    {
+      "type": "uptime",
+      "key": "Activo"
+    },
+    {
+      "type": "packages",
+      "key": "Paquetes"
+    },
+    {
+      "type": "shell",
+      "key": "Shell"
+    },
+    {
+      "type": "display",
+      "key": "Pantalla"
+    },
+    {
+      "type": "de",
+      "key": "Escritorio"
+    },
+    {
+      "type": "wm",
+      "key": "Sesión"
+    },
+    {
+      "type": "theme",
+      "key": "Tema"
+    },
+    {
+      "type": "icons",
+      "key": "Iconos"
+    },
+    {
+      "type": "terminal",
+      "key": "Terminal"
+    },
+    {
+      "type": "cpu",
+      "key": "CPU"
+    },
+    {
+      "type": "gpu",
+      "key": "GPU"
+    },
+    {
+      "type": "memory",
+      "key": "Memoria"
+    },
+    {
+      "type": "disk",
+      "key": "Disco",
+      "folders": "/"
+    },
+    {
+      "type": "battery",
+      "key": "Batería"
+    },
+    "break",
+    {
+      "type": "custom",
+      "format": "{##FF6FAE}● ●{#}  {##7C5CFC}● ●{#}  {##F8F4FF}● ●{#}  {##221B3A}● ●{#}  {##70D6C5}● ●{#}"
+    }
+  ]
+}

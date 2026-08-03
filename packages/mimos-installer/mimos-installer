@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Public entry point for installing MimOS.
+#
+# This used to open a presentation-only prototype, because the destructive path
+# had no acceptance evidence and shipping an installer that could not be shown
+# to behave would have been dishonest. That evidence now exists against exact
+# images: an accepted installation cannot be abandoned mid-write (ADR-041), a
+# failed one discloses no credential (ADR-042), and a non-ASCII password
+# survives byte for byte (ADR-043).
+#
+# The launcher itself grants nothing. Every precondition lives in the two
+# helpers below it, which still require an intact Live session and the reviewed
+# Calamares settings.
+set -Eeuo pipefail
+
+real_launcher='/usr/lib/mimos/mimos-installer-real'
+
+show_error() {
+  local message="$1"
+  if command -v kdialog >/dev/null 2>&1; then
+    kdialog --title 'Instalar MimOS' --error "${message}" || true
+  else
+    printf '%s\n' "${message}" >&2
+  fi
+}
+
+if [[ ! -x "${real_launcher}" ]]; then
+  show_error 'No se encuentra el instalador de MimOS.'
+  exit 1
+fi
+
+exec "${real_launcher}"

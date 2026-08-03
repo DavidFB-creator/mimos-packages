@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+# The one-use QEMU fw_cfg fixture token that used to be required here is gone.
+# It existed to keep the real installer reachable only from a disposable VM
+# while the destructive path had no acceptance evidence, and on real hardware
+# it could never be satisfied. That evidence now exists: cancellation during
+# execution (ADR-041), failed-install redaction (ADR-042) and non-ASCII
+# credentials (ADR-043) all pass against exact images.
+#
+# The remaining preconditions are not test scaffolding and stay. They are what
+# keeps the installer from running anywhere other than an intact Live session
+# with the settings it was reviewed with.
+live_marker='/usr/lib/mimos/live-environment'
+settings='/etc/calamares/settings.conf'
+
+# Where the immutable system image lives depends on how the machine was booted,
+# and this used to be one hand-written path.
+#
+# On the first physical machine MimOS ever ran on, booted from a Ventoy USB, the
+# public installer refused to start: /run/archiso/bootmnt was not mounted at all
+# and the squashfs was at /run/archiso/copytoram/airootfs.sfs. The kernel command
+# line carried no copytoram parameter, so nobody asked for that -- archiso had
+# copied the image into RAM and released the boot medium on its own. The session
+# was entirely legitimate; the check was wrong. Every VM scenario passed because
+# QEMU boots the ISO as a CD-ROM, which is not how a person boots it.
+#
+# So the gate no longer asks "is there a file at this path". It asks the question
+# it was always for: is the running system the read-only MimOS image rather than a
+# writable copy of it. /run/archiso/airootfs is a squashfs mount in both layouts,
+# and that is a stronger statement than the existence of a file somewhere.
+# The image file itself is then located among the layouts archiso really produces.
+running_image_mount='/run/archiso/airootfs'
+copytoram_image='/run/archiso/copytoram/airootfs.sfs'
+bootmnt_dir='/run/archiso/bootmnt'
+findmnt_bin='findmnt'
+
+die() {
+  printf 'MimOS Installer: %s\n' "$*" >&2
+  exit 1
+}
+
+(( EUID == 0 )) || die 'the reviewed executor requires root.'
+[[ -f "${live_marker}" && ! -L "${live_marker}" ]] ||
+  die 'the Live marker is missing or invalid.'
+[[ -f "${settings}" && ! -L "${settings}" ]] ||
+  die 'the Calamares settings file is missing or invalid.'
+mount_fstype="$(
+  "${findmnt_bin}" -no FSTYPE -- "${running_image_mount}" 2>/dev/null || true
+)"
+[[ "${mount_fstype}" == 'squashfs' ]] ||
+  die "the running system is not the immutable MimOS image (${running_image_mount}: ${mount_fstype:-not mounted})."
+
+# The basedir is whatever this image was built with, read from the command line
+# archiso itself was given rather than assumed to be 'mimos'.
+archiso_basedir="$(
+  sed -n 's/.*archisobasedir=\([^[:space:]]*\).*/\1/p' /proc/cmdline 2>/dev/null
+)"
+system_image=''
+for candidate in \
+  "${copytoram_image}" \
+  "${bootmnt_dir}/${archiso_basedir:-mimos}/$(uname -m)/airootfs.sfs"; do
+  if [[ -f "${candidate}" && ! -L "${candidate}" ]]; then
+    system_image="${candidate}"
+    break
+  fi
+done
+[[ -n "${system_image}" ]] ||
+  die 'the immutable MimOS system image is unavailable.'
+[[ -x /usr/bin/calamares ]] || die 'Calamares is unavailable.'
+
+settings_metadata="$(stat -Lc '%u:%g:%a' -- "${settings}")"
+[[ "${settings_metadata}" == '0:0:644' ]] ||
+  die "unexpected settings ownership or mode: ${settings_metadata}."
+
+exec /usr/bin/calamares

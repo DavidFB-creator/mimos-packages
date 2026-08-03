@@ -1,0 +1,71 @@
+# Point GRUB at the MimOS boot menu theme.
+#
+# The theme is only a set of files until /etc/default/grub names it, and that
+# file belongs to the grub package. So this appends a marker-delimited block and
+# never edits a line it did not write -- the same shape as the channel and
+# os-prober blocks in mimos-release, and for the same reason: there is no
+# pristine copy of that file to base ours on.
+#
+# How this reaches an installed system: MimOS installs by copying the Live
+# filesystem with unpackfs, so the file this scriptlet edits during the image
+# build is the file the target receives, and Calamares runs grub-mkconfig
+# afterwards.
+#
+# GRUB_GFXMODE=auto matters as much as the theme. Without it GRUB may pick a
+# text mode, and in text mode a graphical theme is not drawn at all -- the
+# machine would show the stock menu and nothing would look broken enough to
+# investigate.
+
+mimos_theme_marker_begin='# >>> mimos grub theme >>>'
+mimos_theme_marker_end='# <<< mimos grub theme <<<'
+mimos_theme_default='/etc/default/grub'
+mimos_theme_path='/usr/share/grub/themes/mimos/theme.txt'
+
+_mimos_enable_theme() {
+  [[ -f "${mimos_theme_default}" ]] || return 0
+  if grep -Fq "${mimos_theme_marker_begin}" "${mimos_theme_default}" 2>/dev/null
+  then
+    return 0
+  fi
+
+  cat >> "${mimos_theme_default}" <<EOF
+
+${mimos_theme_marker_begin}
+# Added by mimos-grub-theme. Remove this block, or the package, to opt out.
+GRUB_THEME="${mimos_theme_path}"
+GRUB_GFXMODE=auto
+GRUB_GFXPAYLOAD_LINUX=keep
+${mimos_theme_marker_end}
+EOF
+  printf '  MimOS boot menu theme enabled (%s)\n' "${mimos_theme_default}"
+  printf '  Run grub-mkconfig -o /boot/grub/grub.cfg to apply it.\n'
+}
+
+_mimos_disable_theme() {
+  [[ -f "${mimos_theme_default}" ]] || return 0
+  grep -Fq "${mimos_theme_marker_begin}" "${mimos_theme_default}" 2>/dev/null ||
+    return 0
+  local trimmed
+  trimmed="$(mktemp)"
+  sed "/^${mimos_theme_marker_begin}\$/,/^${mimos_theme_marker_end}\$/d" \
+    "${mimos_theme_default}" > "${trimmed}"
+  cat "${trimmed}" > "${mimos_theme_default}"
+  rm -f -- "${trimmed}"
+  printf '  MimOS boot menu theme block removed from %s\n' \
+    "${mimos_theme_default}"
+}
+
+post_install() {
+  _mimos_enable_theme
+}
+
+post_upgrade() {
+  _mimos_enable_theme
+}
+
+pre_remove() {
+  # Before the files go, so GRUB is never pointed at a theme that is not there:
+  # a missing theme file leaves the menu unstyled rather than unbootable, but
+  # there is no reason to arrange even that.
+  _mimos_disable_theme
+}

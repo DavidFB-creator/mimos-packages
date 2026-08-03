@@ -1,0 +1,27 @@
+# MimOS branding for the SDDM login screen.
+#
+# This is Breeze's documented per-installation override file. SDDM's Breeze
+# theme reads theme.conf and then theme.conf.user, and theme.conf.user is not
+# shipped by plasma-desktop, so writing it creates no file conflict and no fork
+# of an upstream theme.
+#
+# Replacing the whole theme with a MimOS QML theme was rejected here, then done
+# anyway, and then undone: see ADR-079. A broken SDDM theme means nobody can log
+# in, and the login screen is not the place to carry that risk for a visual
+# change. The custom theme also drew a session selector unconditionally, which
+# offered a choice the image does not have -- MimOS ships exactly one session,
+# and Breeze hides that control by itself when there is nothing to choose.
+#
+# The background is the login image, not the desktop wallpaper. Breeze paints
+# the clock, the user name and the power labels directly onto it in near-white,
+# so its centre must stay dark; scripts/check-login-contrast.py measures the
+# worst pixel of each of those regions against WCAG AA.
+#
+# The colour is Noche, the canonical dark background from docs/BRAND.md. It is
+# the fallback shown if the image cannot be read, so it must stay legible
+# behind Breeze's light-on-dark login text.
+[General]
+type=image
+background=/usr/share/backgrounds/mimos/login-abrazo.png
+color=#221B3A
+needsFullUserModel=false

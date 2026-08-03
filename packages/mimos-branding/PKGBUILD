@@ -1,0 +1,137 @@
+# Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
+
+pkgname=mimos-branding
+pkgver=0.3.0.beta.4
+pkgrel=3
+pkgdesc='Runtime visual identity assets for MimOS'
+arch=('any')
+url='https://github.com/DavidFB-creator/MimOS'
+license=('MIT')
+source=(
+  'mimos-logo-horizontal.svg'
+  'mimos-logo-monochrome-dark.svg'
+  'mimos-logo-monochrome-light.svg'
+  'mimos-logo-stacked.svg'
+  'mimos-symbol.svg'
+  'mimos-wordmark.svg'
+  'mimos-logo-horizontal-dark.svg'
+  'mimos-logo-horizontal-dark-no-tagline.svg'
+  'mimos-logo-stacked-dark.svg'
+  'mimos-wordmark-dark.svg'
+  'mimos-logo-horizontal-2400.png'
+  'mimos-logo-stacked-1800.png'
+  'mimos-symbol-1024.png'
+  'mimos-wordmark-2000.png'
+  'primer-abrazo.svg'
+  'primer-abrazo.png'
+  'login-abrazo.svg'
+  'login-abrazo.png'
+  'fastfetch-config.jsonc'
+  'mimos-fastfetch-heart.txt'
+  'palette.json'
+  'mimos-claro.colors'
+  'mimos-oscuro.colors'
+  'mimos-nocturnos.colors'
+  'kdeglobals'
+  'speechd.conf'
+  'sddm-theme.conf.user'
+  '20-mimos-theme.conf'
+  'LICENSE'
+)
+sha256sums=('aa6a29280c9f2b64dac3dc348724159af59dcc3d3fdf9892998d5e8815d52708'
+            '1cb6334368044eb94b229755e698c9cb2a610649af8d409bf6842a108c23bedf'
+            'a2ff852c55de94a4ed8740423f8405571e715be6f01d2f63d54ba828426c04d9'
+            'fe023d58de87e45f8da036f87f7ff82894d1cb439d387c1a4f88d441a31278a4'
+            'f7532814cf714803e16dc1e05faa8a8c99e06b97e632d8f1bc93cec2a707bc61'
+            '31c10510c4127abf1ffcaef0d3413b4d657134bda7b6fce0cbe56281b6d8a981'
+            '71b555c0524c10191b7b94152849bb25793e6c71723c3537129737ddf5606da5'
+            '8c6a16c91a8d70629b8f1a0081700ce097de89583d131e18a83c84c45176693f'
+            '5ce2b9fe9736bc9d1397bf4a0725e761212c7894a77e44327c30fe53cf10dbb0'
+            'ae5d34913303954956126eea6740f7d75a5c0e8bdc2a815e26a9100d08cca07f'
+            'edd48653cc23ec38a749deb37f5faa0ce7c0acfe841fb39d603c7ce8eb625282'
+            'ff0522e1138fde59c7de8738598c3c8c4a627db84e9383d3629f11631cd96ff4'
+            '45f3cf341d5930a0886c84bfe4da22de2a551db152344d71dc0a7f909193188e'
+            'b9cd85e40526e9173706749ce08169dbb26d1b6a3dd66696e73660d5cf99b06b'
+            '0cba13fcb92e359d17db2a6cf484ef5fd6ddd58039b65dd9e237fc400bcc703f'
+            '00259071377e8814df8063161a03ec7a789c70c66b177d3b08d7d9c5e05fba1a'
+            '22ee4ad84260d0600f89a867d6f711adf11bb6215c6dbabda7db004acb81c5f5'
+            'f49235701cbe5d9961c7ee41e6b31890805ac8ec226a2fd870cf0582026dae4d'
+            '9ebd205a7d257a4b53c028cfe70dd348b70443e36bc323581304222adb20d876'
+            '1f79f9f432724100c9a4a3ac6bd52eb113787b96c5429e088f017c5344cf6ddd'
+            '32b037249cda14fbc70ab4fd99771a425fd4be751ae2ef38aa58fe3aad6c756b'
+            'fdd4d0723ef7ece718257f96f19f8f11c027f51e65dc7c12e663e2105551e21f'
+            'fde2b70a125130e3ae2e6c6596543cb3a9c451365670b35a7564269ebe9d2233'
+            'ff248cfb1eaa2b29fe04d646ee37597593b318815b9e43eb0be9f3496ed96ce1'
+            '509911308559a868af26219f1474ce45b1b1a7d679615c59535d8ba951d78007'
+            '33a2721f8e59d1b7a95b145db2e3683e82043c952d34c113baabaf4364664c82'
+            '8b5513b88b58e76f196f233a97fe80a64b4383cdd94bae6429a3125c46bff2f7'
+            '8e7908d5f6ea54dd896e79d0bf8b9737df305213f2cd251e63b1e15dd2ba39f3'
+            '97d7ba0977ea88730c942625f66849bbef6536c3c6e103a39a4bb05b9fd3d9cf')
+
+package() {
+  local asset
+  for asset in \
+    mimos-logo-horizontal.svg \
+    mimos-logo-monochrome-dark.svg \
+    mimos-logo-monochrome-light.svg \
+    mimos-logo-stacked.svg \
+    mimos-symbol.svg \
+    mimos-wordmark.svg \
+    mimos-logo-horizontal-dark.svg \
+    mimos-logo-horizontal-dark-no-tagline.svg \
+    mimos-logo-stacked-dark.svg \
+    mimos-wordmark-dark.svg \
+    mimos-logo-horizontal-2400.png \
+    mimos-logo-stacked-1800.png \
+    mimos-symbol-1024.png \
+    mimos-wordmark-2000.png; do
+    install -Dm644 "${asset}" \
+      "${pkgdir}/usr/share/mimos/branding/${asset}"
+  done
+
+  install -Dm644 primer-abrazo.svg \
+    "${pkgdir}/usr/share/backgrounds/mimos/primer-abrazo.svg"
+  install -Dm644 primer-abrazo.png \
+    "${pkgdir}/usr/share/backgrounds/mimos/primer-abrazo.png"
+  # The login background is a separate image from the desktop wallpaper, and
+  # deliberately so: Breeze draws the clock, the user name and the power
+  # labels straight onto it in near-white, so its middle has to stay dark and
+  # quiet. Reusing the desktop wallpaper is why the old greeter read as busy.
+  install -Dm644 login-abrazo.svg \
+    "${pkgdir}/usr/share/backgrounds/mimos/login-abrazo.svg"
+  install -Dm644 login-abrazo.png \
+    "${pkgdir}/usr/share/backgrounds/mimos/login-abrazo.png"
+  install -Dm644 fastfetch-config.jsonc \
+    "${pkgdir}/etc/xdg/fastfetch/config.jsonc"
+  install -Dm644 mimos-fastfetch-heart.txt \
+    "${pkgdir}/usr/share/mimos/branding/mimos-fastfetch-heart.txt"
+
+  # Colour schemes are selectable from System Settings; kdeglobals sets the
+  # MimOS default for the Live user and for any user a real installation
+  # creates, because Calamares populates a new home from /etc/skel.
+  local scheme
+  for scheme in mimos-claro mimos-oscuro mimos-nocturnos; do
+    install -Dm644 "${scheme}.colors" \
+      "${pkgdir}/usr/share/color-schemes/${scheme}.colors"
+  done
+  install -Dm644 kdeglobals "${pkgdir}/etc/skel/.config/kdeglobals"
+
+  # The same reasoning applies to speech. The image is Spanish and ships Orca,
+  # but nothing told the synthesiser, so it read Spanish text with an English
+  # accent. This is a skel default rather than a system file so a user can
+  # override it without editing anything root owns.
+  install -Dm644 speechd.conf \
+    "${pkgdir}/etc/skel/.config/speech-dispatcher/speechd.conf"
+  install -Dm644 palette.json \
+    "${pkgdir}/usr/share/mimos/branding/palette.json"
+
+  # Branding survives installation, so the login screen stays MimOS on the
+  # installed system. theme.conf.user is Breeze's documented override and is
+  # not shipped by plasma-workspace, so this conflicts with no package.
+  install -Dm644 sddm-theme.conf.user \
+    "${pkgdir}/usr/share/sddm/themes/breeze/theme.conf.user"
+  install -Dm644 20-mimos-theme.conf \
+    "${pkgdir}/etc/sddm.conf.d/20-mimos-theme.conf"
+  install -Dm644 LICENSE \
+    "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}

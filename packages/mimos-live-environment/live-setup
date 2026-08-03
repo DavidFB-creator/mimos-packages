@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+if ! id mimos >/dev/null 2>&1; then
+  live_groups=()
+  for group_name in wheel audio video storage optical; do
+    if getent group "${group_name}" >/dev/null 2>&1; then
+      live_groups+=("${group_name}")
+    fi
+  done
+
+  group_list="$(IFS=,; printf '%s' "${live_groups[*]}")"
+  useradd -m -c 'MimOS Live' -s /bin/bash -G "${group_list}" mimos
+  passwd -d mimos >/dev/null
+fi
+
+install -d -o mimos -g mimos /home/mimos/.config
+
+if [[ -f /etc/locale.gen ]] && ! grep -Eq '^es_ES\.UTF-8 UTF-8$' /etc/locale.gen; then
+  sed -i 's/^#es_ES\.UTF-8 UTF-8/es_ES.UTF-8 UTF-8/' /etc/locale.gen
+  locale-gen
+fi
+
+if command -v loadkeys >/dev/null 2>&1; then
+  loadkeys es >/dev/null 2>&1 || true
+fi

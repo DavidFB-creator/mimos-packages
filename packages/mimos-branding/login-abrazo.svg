@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <!--
+    Login background B — "Abrazo".
+
+    The embrace as pure gesture: two arcs sweeping in from the edges and
+    stopping short of each other. The gap they leave is where the login card
+    sits, so the composition holds the card rather than the card interrupting
+    the composition.
+
+    No mascot, no wordmark. The centre is empty on purpose — that is the whole
+    idea, and it is also what the previous greeter got wrong by putting the
+    logo exactly where the form goes.
+  -->
+  <defs>
+    <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#241C40"/>
+      <stop offset="1" stop-color="#191331"/>
+    </linearGradient>
+    <linearGradient id="armL" x1="0" y1="0" x2="1" y2="0.4">
+      <stop offset="0" stop-color="#7C5CFC" stop-opacity="0.30"/>
+      <stop offset="1" stop-color="#7C5CFC" stop-opacity="0.06"/>
+    </linearGradient>
+    <linearGradient id="armR" x1="1" y1="0" x2="0" y2="0.4">
+      <stop offset="0" stop-color="#7C5CFC" stop-opacity="0.30"/>
+      <stop offset="1" stop-color="#7C5CFC" stop-opacity="0.06"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#ground)"/>
+
+  <g fill="none" stroke-linecap="round" stroke-width="104">
+    <path d="M-60 300C260 300 470 520 700 790" stroke="url(#armL)"/>
+    <path d="M1980 300c-320 0-530 220-760 490" stroke="url(#armR)"/>
+  </g>
+
+  <g fill="none" stroke-linecap="round" stroke-width="26" opacity="0.5">
+    <path d="M-40 470C230 470 400 640 590 860" stroke="#FF6FAE" stroke-opacity="0.16"/>
+    <path d="M1960 470c-270 0-440 170-630 390" stroke="#FF6FAE" stroke-opacity="0.16"/>
+  </g>
+</svg>

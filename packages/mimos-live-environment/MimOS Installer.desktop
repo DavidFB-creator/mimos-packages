@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Instalar MimOS
+Comment=Abre el instalador de MimOS
+Exec=/usr/bin/mimos-installer
+Icon=system-software-install
+Terminal=false
+Categories=System;

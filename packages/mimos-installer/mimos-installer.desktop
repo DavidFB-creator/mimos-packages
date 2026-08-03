@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Instalar MimOS
+GenericName=Instalador del sistema
+Comment=Instala MimOS en este equipo
+Exec=/usr/bin/mimos-installer
+Icon=system-software-install
+Terminal=false
+Categories=System;
+Keywords=install;installer;mimos;sistema;
+StartupNotify=true
+X-KDE-FormFactor=desktop;tablet;

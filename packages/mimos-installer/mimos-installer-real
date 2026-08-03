@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+live_marker='/usr/lib/mimos/live-environment'
+real_executor='/usr/lib/mimos/mimos-installer-exec'
+
+show_error() {
+  local message="$1"
+  if command -v kdialog >/dev/null 2>&1; then
+    kdialog --title 'MimOS Installer' --error "${message}" || true
+  else
+    printf '%s\n' "${message}" >&2
+  fi
+}
+
+if (( EUID == 0 )); then
+  show_error 'El lanzador debe iniciarse desde la sesión Live, no como root.'
+  exit 1
+fi
+
+if [[ "$(id -un)" != 'mimos' ]]; then
+  show_error 'El instalador real solo está habilitado para la sesión Live de MimOS.'
+  exit 1
+fi
+
+if [[ ! -f "${live_marker}" || -L "${live_marker}" ]]; then
+  show_error 'No se encuentra el marcador íntegro del entorno Live.'
+  exit 1
+fi
+
+if [[ ! -x "${real_executor}" ]]; then
+  show_error 'No se encuentra el ejecutor revisado del instalador.'
+  exit 1
+fi
+
+if ! sudo -n true >/dev/null 2>&1; then
+  show_error 'La sesión Live no dispone de la autorización esperada.'
+  exit 1
+fi
+
+exec sudo -n \
+  --preserve-env=XDG_RUNTIME_DIR,WAYLAND_DISPLAY,DBUS_SESSION_BUS_ADDRESS,AT_SPI_BUS_ADDRESS,QT_LINUX_ACCESSIBILITY_ALWAYS_ON,QT_QPA_PLATFORM,LANG \
+  "${real_executor}"

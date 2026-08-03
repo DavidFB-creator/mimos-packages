@@ -1,0 +1,92 @@
+# Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
+
+pkgname=mimos-calamares-config
+pkgver=0.3.0.beta.4
+pkgrel=1
+pkgdesc='Disconnected Calamares configuration and branding for MimOS'
+arch=('any')
+url='https://github.com/DavidFB-creator/MimOS'
+license=('MIT')
+depends=('calamares=3.4.2' 'mimos-branding' 'qt6-declarative')
+source=(
+  'settings.conf'
+  'branding.desc'
+  'show.qml'
+  'stylesheet.qss'
+  'welcome.conf'
+  'locale.conf'
+  'keyboard.conf'
+  'partition.conf'
+  'users.conf'
+  'mount.conf'
+  'unpackfs.conf'
+  'shellprocess@initialize-keyring.conf'
+  'machineid.conf'
+  'fstab.conf'
+  'initcpiocfg.conf'
+  'initcpio.conf'
+  'packages.conf'
+  'removeuser.conf'
+  'displaymanager.conf'
+  'services-systemd.conf'
+  'bootloader.conf'
+  'umount.conf'
+  'finished.conf'
+  'LICENSE'
+)
+sha256sums=('20dfe6a987656de2e4014d283cdfdfff21a4d2b30c2710478ebbe1398c599055'
+            'bd1e915129ed8ce377bda3891b9318d49fd4f3433ebe50dacd0c77b25257c9e0'
+            '8af434ccaf9f9506fd1de0713bc656a04fcb68df9cb2072fc135bbb117314e10'
+            '107186878b244d95692e1beafe8a76a5bb5929a391e33e327b28ab1571bdc8c1'
+            '31dd620a1344d3d74d4834e2cc9b15eca4fe5c4d694c65c44045725e9379706c'
+            'ecb634ac231dc72ef0c4523be5d3cb8b5f322e6bdb3c9113f57a340432315317'
+            '1ac18c9b99f80e1a245aa43927d9bc9d3a88c85258e3c90c625423d7a208918a'
+            '304580b7aec5ba5b685fc2786c405cfd133a365f7f06b8a0158a235d5ac441a0'
+            '13f3f734f1bceb1ec5b247dad0dedb71d34d68139fc0e5b7e1c281c86bc003ff'
+            '4a7a8f0c8e63ed455060f510bfbc459ebc8ceb34529e67ffd3a7ed695f35970b'
+            '7156aa2599a837f05ed63de21b498fef0e3d7beba8b15b189d4853a43f194643'
+            'dcfcfbe62ad079d4799cda3acbacb9d8f19866c4c9183b3a2329111987e9a5d2'
+            'c7da961c74c6025810caa03fb70c97b8941792cb738dd65b9120a02b1468df61'
+            '47d1b65b4c743e34fed4b3995951742986665c7c5a44067b61b9efaa05c49d89'
+            '0fff5f0792c9f9e820ba62497b352c63766b333cfb1f888b20a0ae217cddd158'
+            '1179275b51d3c2c8885a325074a988458131af8f9872fbfa27863a1d8c635adb'
+            '96c3ee037333ecf003d1e5dd905a4898b00aa88e21d099b9e69e96f49231a5ee'
+            'b952793d8ba22fac6eeb484b25970edd61380552608c9cc5a105351ced192e68'
+            'da630dedc94f3ab996429e2465a6988cfa82f00f7ed4282a46b503c6f7fc2551'
+            '244216d5d32450be80ccb54ee0c14d1aaf4468fc0089ce25425f7b13d00a60cd'
+            '5fee85394fff2ad1a72f9db2749f9a83c517ca00fec6aa1cc401cb5e7f050bbc'
+            '4b544dbc209af6da1c2b7dd2469a0fa77eb93d299f820d04c95ec87ec0c7ed8a'
+            'a58ea98db51aac6ad37cca397191f84cc510504aef018a770f8608d82132b4c6'
+            '97d7ba0977ea88730c942625f66849bbef6536c3c6e103a39a4bb05b9fd3d9cf')
+
+package() {
+  local module_config
+
+  install -Dm644 settings.conf "${pkgdir}/etc/calamares/settings.conf"
+  for module_config in \
+    welcome locale keyboard partition users mount unpackfs \
+    shellprocess@initialize-keyring machineid \
+    fstab initcpiocfg initcpio packages removeuser \
+    displaymanager services-systemd bootloader umount finished; do
+    install -Dm644 "${module_config}.conf" \
+      "${pkgdir}/etc/calamares/modules/${module_config}.conf"
+  done
+
+  install -Dm644 branding.desc \
+    "${pkgdir}/usr/share/calamares/branding/mimos/branding.desc"
+  install -Dm644 show.qml \
+    "${pkgdir}/usr/share/calamares/branding/mimos/show.qml"
+  install -Dm644 stylesheet.qss \
+    "${pkgdir}/usr/share/calamares/branding/mimos/stylesheet.qss"
+  ln -s ../../../mimos/branding/mimos-symbol.svg \
+    "${pkgdir}/usr/share/calamares/branding/mimos/mimos-symbol.svg"
+  ln -s ../../../mimos/branding/mimos-logo-horizontal.svg \
+    "${pkgdir}/usr/share/calamares/branding/mimos/mimos-logo-horizontal.svg"
+  # The sidebar sits on Abrazo-dark, which is neither surface the other
+  # horizontal masters declare, and the tagline fails contrast there. See
+  # palette.json and ADR-065.
+  ln -s ../../../mimos/branding/mimos-logo-horizontal-dark-no-tagline.svg     "${pkgdir}/usr/share/calamares/branding/mimos/mimos-logo-horizontal-dark-no-tagline.svg"
+
+  install -Dm644 LICENSE \
+    "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}

@@ -1,0 +1,62 @@
+# shellcheck shell=bash
+# pacman sources this scriptlet; it has no shebang by design.
+
+_mimos_restore_installed_boot() {
+  local kernel_source kernel_bytes copied_bytes
+  local -a kernel_sources
+
+  mapfile -t kernel_sources < <(
+    find /usr/lib/modules -mindepth 2 -maxdepth 2 -type f -name vmlinuz -print
+  )
+  if (( ${#kernel_sources[@]} != 1 )); then
+    printf 'Expected exactly one installed kernel image, found %d.\n' \
+      "${#kernel_sources[@]}" >&2
+    return 1
+  fi
+  kernel_source="${kernel_sources[0]}"
+  kernel_bytes="$(stat -c %s "${kernel_source}")" || return 1
+
+  install -d -m755 /boot || return 1
+  if [[ "$(stat -f -c %T /boot)" == 'btrfs' ]]; then
+    # A shared Btrfs extent makes GRUB reject the kernel, so /boot must be
+    # NOCOW before the bytes are streamed into a fresh extent.
+    chattr +C /boot || return 1
+  fi
+
+  # pacman does not run install scriptlets under `set -e`. Without the checks
+  # below, a partial write would still be followed by the preset replacement
+  # and Calamares would build an initramfs around a truncated kernel, which
+  # only surfaces as an unbootable system at first reboot.
+  : > /boot/vmlinuz-linux || return 1
+  if ! cat "${kernel_source}" > /boot/vmlinuz-linux; then
+    printf 'Failed to copy %s into /boot/vmlinuz-linux.\n' "${kernel_source}" >&2
+    rm -f /boot/vmlinuz-linux
+    return 1
+  fi
+  chmod 0644 /boot/vmlinuz-linux || return 1
+
+  copied_bytes="$(stat -c %s /boot/vmlinuz-linux)" || return 1
+  if [[ "${copied_bytes}" != "${kernel_bytes}" ]]; then
+    printf 'Copied kernel is %s bytes but the source is %s bytes.\n' \
+      "${copied_bytes}" "${kernel_bytes}" >&2
+    rm -f /boot/vmlinuz-linux
+    return 1
+  fi
+  if ! cmp -s "${kernel_source}" /boot/vmlinuz-linux; then
+    printf 'Copied kernel does not match %s.\n' "${kernel_source}" >&2
+    rm -f /boot/vmlinuz-linux
+    return 1
+  fi
+
+  # The destructive preset change happens only after a verified kernel exists.
+  install -Dm644 /usr/share/mimos/live-environment/linux.preset \
+    /etc/mkinitcpio.d/linux.preset || return 1
+  rm -f /etc/mkinitcpio.conf.d/archiso.conf || return 1
+}
+
+pre_remove() {
+  if ! _mimos_restore_installed_boot; then
+    printf 'mimos-live-environment: refusing to complete the installed-system transition.\n' >&2
+    return 1
+  fi
+}

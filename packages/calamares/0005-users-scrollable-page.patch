@@ -1,0 +1,125 @@
+From: XI14 <https://github.com/DavidFB-creator/MimOS>
+Subject: [PATCH] users: put the page inside a scroll area
+
+At 200% display scaling the users page does not fit the space it is given, and
+until now the part that did not fit was simply unreachable: the confirm-password
+field ran past the right edge of the pane with its status icon painted on top of
+it, and the sidebar's last step scrolled out of a column it no longer fits.
+
+Two previous attempts treated this as an arithmetic problem and reasoned about
+how much room the row needed. Both were wrong in the same way -- they assumed
+there was room to be found. The measured numbers say there is not. The test
+display is 1024x768 physical, so at 200% the whole window is 512x384 device
+independent pixels and the right-hand pane is roughly 262 of them wide. That is
+narrower than a phone. No arrangement of a credential form fits a two-column row
+into 262dip, and no arrangement fits this page's height into 384dip either.
+
+ADR-062 rejected the second attempt for exactly this reason: stacking the two
+password fields solved the horizontal overflow and produced a vertical one,
+because the page then needed more than the window's height. The horizontal
+overflow was traded for a vertical one. Neither can be arithmetic'd away.
+
+A scroll area is the fix for a page that genuinely needs more space than exists.
+The page keeps its natural minimum size, the viewport gives it whatever room the
+pane has, and anything beyond that becomes scrollable rather than clipped.
+Nothing overlaps, nothing is drawn outside the pane, and every field remains
+reachable by keyboard and by pointer.
+
+The scroll area is created with setWidgetResizable( true ) so the page still
+expands to fill the pane at scales where it fits, which is every scale the
+matrix measures except 200%. At 100% and 150% the scrollbars do not appear and
+the page is unchanged. That is the falsifiable part: if the 100% or 150%
+captures differ from the previous image, this patch did something it should not.
+
+The frame is removed because the pane already provides the visual boundary, and
+a sunken frame inside a themed page would read as a second panel.
+
+The scroll area is given an object name so a stylesheet can address it and its
+children exactly. Without one the only handle is the QScrollArea type, and how far
+a type selector reaches into a scroll area depends on which of the widgets
+involved honour a stylesheet background: a QFrame does, a plain QWidget subclass
+does not unless it carries WA_StyledBackground, and the viewport is a separate
+child of the scroll area rather than of the page. That question cannot be settled
+by reading the class hierarchy, and finding out from a composed image costs a
+forty-minute cycle. An object name removes the question instead of answering it.
+
+UsersViewStep now owns the scroll area rather than the page, so the destructor
+guard moves with it: the scroll area is the widget handed to the view manager,
+and it is the one that may or may not have been reparented. Deleting it deletes
+the page it owns.
+
+Reported upstream by MimOS (XI14). See ADR-050, ADR-059 and ADR-062 in that
+project.
+---
+--- a/src/modules/users/UsersViewStep.h
++++ b/src/modules/users/UsersViewStep.h
+@@ -18,6 +18,8 @@
+ #include <QObject>
+ #include <QVariant>
+ 
++class QScrollArea;
++
+ class Config;
+ class UsersPage;
+ 
+@@ -47,6 +49,7 @@
+     void setConfigurationMap( const QVariantMap& configurationMap ) override;
+ 
+ private:
++    QScrollArea* m_scroll;
+     UsersPage* m_widget;
+     Config* m_config;
+ };
+--- a/src/modules/users/UsersViewStep.cpp
++++ b/src/modules/users/UsersViewStep.cpp
+@@ -20,10 +20,13 @@
+ #include "utils/NamedEnum.h"
+ #include "utils/Variant.h"
+ 
++#include <QScrollArea>
++
+ CALAMARES_PLUGIN_FACTORY_DEFINITION( UsersViewStepFactory, registerPlugin< UsersViewStep >(); )
+ 
+ UsersViewStep::UsersViewStep( QObject* parent )
+     : Calamares::ViewStep( parent )
++    , m_scroll( nullptr )
+     , m_widget( nullptr )
+     , m_config( new Config( this ) )
+ {
+@@ -35,9 +38,9 @@
+ 
+ UsersViewStep::~UsersViewStep()
+ {
+-    if ( m_widget && m_widget->parent() == nullptr )
++    if ( m_scroll && m_scroll->parent() == nullptr )
+     {
+-        m_widget->deleteLater();
++        m_scroll->deleteLater();
+     }
+ }
+ 
+@@ -52,11 +55,22 @@
+ QWidget*
+ UsersViewStep::widget()
+ {
+-    if ( !m_widget )
++    if ( !m_scroll )
+     {
+         m_widget = new UsersPage( m_config );
++
++        // At 200% scaling on a 1024x768 display this page has about 262
++        // device-independent pixels of width and 384 of height to work
++        // with. It does not fit, and without a scroll area the part that
++        // does not fit is drawn outside the pane or on top of another
++        // widget. See ADR-062.
++        m_scroll = new QScrollArea();
++        m_scroll->setObjectName( "usersScrollArea" );
++        m_scroll->setWidgetResizable( true );
++        m_scroll->setFrameShape( QFrame::NoFrame );
++        m_scroll->setWidget( m_widget );
+     }
+-    return m_widget;
++    return m_scroll;
+ }
+ 
+ 

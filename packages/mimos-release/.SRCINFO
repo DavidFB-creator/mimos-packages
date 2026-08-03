@@ -1,0 +1,19 @@
+pkgbase = mimos-release
+	pkgdesc = Release identity for MimOS
+	pkgver = 0.3.0.beta.4
+	pkgrel = 1
+	url = https://github.com/DavidFB-creator/MimOS
+	install = mimos-release.install
+	arch = any
+	license = MIT
+	backup = etc/pacman.d/mimos-mirrorlist
+	source = mimos-release
+	source = mimos-mirrorlist
+	source = mimos-release.install
+	source = LICENSE
+	sha256sums = da2b50c224f18008894185e8bc9f43dff90ba680901eef3e768b94f246fa67a6
+	sha256sums = 324741c65ad2bdafe4d9c45f15ea24e57c6e48ae31bd3f89e08c7e5df482f8ae
+	sha256sums = a33d37fc8dd7428197a09cbce640f438c0eab88908e663e2103c0074666274ca
+	sha256sums = 97d7ba0977ea88730c942625f66849bbef6536c3c6e103a39a4bb05b9fd3d9cf
+
+pkgname = mimos-release

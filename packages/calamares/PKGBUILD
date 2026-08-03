@@ -1,0 +1,202 @@
+# Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
+
+pkgname=calamares
+pkgver=3.4.2
+pkgrel=8
+pkgdesc='Distribution-independent system installer framework'
+arch=('x86_64')
+url='https://calamares.io/'
+license=('GPL-3.0-or-later')
+depends=(
+  'hicolor-icon-theme'
+  'kcoreaddons'
+  'kcrash'
+  'kpmcore'
+  'libpwquality'
+  'parted'
+  'python'
+  'python-toml'
+  'qt6-declarative'
+  'qt6-svg'
+  'yaml-cpp'
+)
+makedepends=(
+  'extra-cmake-modules'
+  'libglvnd'
+  'ninja'
+  'qt6-tools'
+  'qt6-translations'
+)
+options=('!debug')
+source=(
+  "calamares-${pkgver}.tar.gz::https://codeberg.org/Calamares/calamares/releases/download/v${pkgver}/calamares-${pkgver}.tar.gz"
+  "calamares-${pkgver}.signature::https://codeberg.org/Calamares/calamares/releases/download/v${pkgver}/calamares-${pkgver}.tar.gz.asc"
+  'calamares-maintainer-2026.key::https://euroquis.nl/doc/pubkey.asc'
+  '0001-redact-any-password-hash-format.patch'
+  '0002-users-accessible-names.patch'
+  '0003-users-password-row-scaling.patch'
+  '0004-sidebar-logo-aspect.patch'
+  '0005-users-scrollable-page.patch'
+  '0006-users-stack-password-fields.patch'
+  '0007-x11-omit-empty-keyboard-options.patch'
+  'check-accessible-translations.py'
+)
+sha256sums=('733bbbb00dc9f84874bd5c22960952f317ea2537565431179fa2152b2fbfdccc'
+            'f3c898eddaef42abd7f01fd8c3a586c1db4d748550d7775ee9ee32273251199b'
+            '60fc6a45a99bb0cf8fcc3e1876e98f36d0c9746b25516b164ce231649c3008d9'
+            'b5da33b513a5d406a3ed6cd28e26f91f256d8d2c739e95ee423b73761e15f08b'
+            'c4da9bd8726fb21241d30b2ce99bf8d05f738b3adc7e103a8139650ecf122966'
+            'e865101050ea2913968e6a36cd86d6da7ea429583c4f51cfa7486f18b3310cd7'
+            'ea5a06ca2af4b546fac90fb91897f87980003a44afafba625575b92f63ec672c'
+            '4ba53ae52326e52b61414b4de07976cc0189c3682be1ead985b25d0f31c5cd7c'
+            'dd33bc2528cfe8bb04b98274edf50dbc0b4d81d1c2b698921c364a77fa6bdd61'
+            'b2ef768b14abef4975ba268b8c74932a2ac7e6c0ecae6761d7f97a420bc4825d'
+            '76941ebe479b30b06ae2a822f678a2b86d746a35d0222ce2985e447e1fde522b')
+
+prepare() {
+  local expected_primary='00ACD15E25A79FEE028B0EE57FEA3DA6169C77D6'
+  local expected_signer='6D0837841C068A233F24127B14B6CC381BC256D6'
+  local keyring="${srcdir}/calamares-gnupg"
+  local primary_fingerprint
+  local verify_status
+
+  rm -rf -- "${keyring}"
+  install -dm700 "${keyring}"
+  GNUPGHOME="${keyring}" gpg --batch --quiet \
+    --import "${srcdir}/calamares-maintainer-2026.key"
+
+  primary_fingerprint="$(
+    GNUPGHOME="${keyring}" gpg --batch --with-colons --fingerprint \
+      "${expected_primary}" |
+      awk -F: '$1 == "fpr" { print $10; exit }'
+  )"
+  if [[ "${primary_fingerprint}" != "${expected_primary}" ]]; then
+    printf 'Unexpected Calamares primary key: %s\n' \
+      "${primary_fingerprint:-missing}" >&2
+    return 1
+  fi
+
+  verify_status="$(
+    GNUPGHOME="${keyring}" gpg --batch --status-fd 1 \
+      --verify "${srcdir}/calamares-${pkgver}.signature" \
+      "${srcdir}/calamares-${pkgver}.tar.gz" 2>/dev/null
+  )"
+  if ! grep -Eq \
+    "^\[GNUPG:\] VALIDSIG ${expected_signer} .* ${expected_primary}$" \
+    <<< "${verify_status}"; then
+    printf 'Calamares release signature did not match the pinned signing key.\n' >&2
+    return 1
+  fi
+
+  rm -rf -- "${keyring}"
+
+  # Upstream redacts the hashed password it passes to usermod, but only when
+  # the hash starts with "$6$". SetPasswordJob builds the hash with
+  # crypt_gensalt(), and libxcrypt on Arch answers with a yescrypt salt, so the
+  # complete hash of the user's real password was written verbatim into
+  # ~/.cache/calamares/session.log -- the file a user attaches when reporting a
+  # failed installation. See ADR-042.
+  patch -d "${srcdir}/calamares-${pkgver}" -p1 --forward \
+    < "${srcdir}/0001-redact-any-password-hash-format.patch"
+
+  # The five fields a person fills in to create their account exposed an
+  # accessible description and no accessible name, so a screen reader announced
+  # an unlabelled text field. Measured across 679 interactive nodes; every other
+  # interactive node on those pages is named. Upstream behaviour, reported
+  # there, and carried here because a beta should not ship a form assistive
+  # technology cannot label. See ADR-045 and ADR-049.
+  patch -d "${srcdir}/calamares-${pkgver}" -p1 --forward \
+    < "${srcdir}/0002-users-accessible-names.patch"
+
+  # Each password row packed two 200px line edits, a 24px status icon and a
+  # 100px error label into one QHBoxLayout: 524 device-independent pixels of
+  # minimum width. Qt scales those minimums, so at 200% the row demands ~1048px
+  # inside a 1024px window, cannot be satisfied, and overflows -- the status icon
+  # lands on the confirm field and the message runs off the right edge. Moving
+  # the message to its own row brings the row to 424dip. 200% is the scale a
+  # low-vision user chooses. See ADR-050 and ADR-059.
+  patch -d "${srcdir}/calamares-${pkgver}" -p1 --forward \
+    < "${srcdir}/0003-users-password-row-scaling.patch"
+
+  # The sidebar logo label is pinned to 80x80 in C++, so a horizontal lockup is
+  # squeezed into a square and renders 80x33 however wide the sidebar is. No
+  # stylesheet can widen it: setFixedSize pins minimum and maximum together. The
+  # label is sized from the artwork instead. See ADR-065.
+  patch -d "${srcdir}/calamares-${pkgver}" -p1 --forward \
+    < "${srcdir}/0004-sidebar-logo-aspect.patch"
+
+  # At 200% on the 1024x768 test display the whole window is 512x384 device
+  # independent pixels and the right-hand pane about 262 of them wide -- narrower
+  # than a phone. Two attempts reasoned about how much room the credential form
+  # needed; the measurement says there is none to find, in either axis. The page
+  # goes in a scroll area so what does not fit scrolls instead of being drawn
+  # outside the pane or on top of another widget. See ADR-067.
+  patch -d "${srcdir}/calamares-${pkgver}" -p1 --forward \
+    < "${srcdir}/0005-users-scrollable-page.patch"
+
+  # With the page scrollable, stacking the two password fields costs a row that
+  # is no longer expensive, and removes the horizontal overflow so no horizontal
+  # scrollbar is needed to fill in a form. This patch was composed once, rejected
+  # for causing vertical clipping, and is restored because 0005 removes that
+  # cause. It stays separate so it can be dropped again without giving up the
+  # scroll area. See ADR-062 and ADR-067.
+  patch -d "${srcdir}/calamares-${pkgver}" -p1 --forward \
+    < "${srcdir}/0006-users-stack-password-fields.patch"
+
+  # The first physical installation came up with a Spanish console and an English
+  # desktop, from files that both said "es". writeX11Data always emitted
+  # Option "XkbVariant" "" for a layout with no variant, and systemd-localed
+  # discards the whole file when any option carries an empty value -- so the
+  # correct XkbLayout line two lines above it had no effect and localectl
+  # reported X11 Layout: (unset). Measured against systemd 261; an empty
+  # XkbOptions or XkbModel breaks it identically, so the trigger is the empty
+  # value and not the key. See ADR-074.
+  patch -d "${srcdir}/calamares-${pkgver}" -p1 --forward \
+    < "${srcdir}/0007-x11-omit-empty-keyboard-options.patch"
+
+  # An accessible name that exists but reads in English is not an accessible
+  # name on a Spanish system. The first version of 0002 invented new source
+  # strings, which have no translation in any catalogue Calamares ships, and four
+  # separate measurements passed anyway: nameless count zero, unnamed count zero,
+  # strings present in the binary, and a person confirming the fields announce
+  # their names. All true, none of them about language. This refuses the build
+  # instead. See ADR-060.
+  ( cd "${srcdir}/calamares-${pkgver}" &&
+    python "${srcdir}/check-accessible-translations.py" )
+}
+
+build() {
+  local skip_modules=(
+    dracut
+    dracutlukscfg
+    dummycpp
+    dummyprocess
+    dummypython
+    dummypythonqt
+    initramfs
+    initramfscfg
+    interactiveterminal
+    packagechooser
+    packagechooserq
+    services-openrc
+  )
+
+  export CFLAGS="${CFLAGS} -ffile-prefix-map=${srcdir}=/usr/src/debug/${pkgname}"
+  export CXXFLAGS="${CXXFLAGS} -ffile-prefix-map=${srcdir}=/usr/src/debug/${pkgname}"
+  cmake -S "calamares-${pkgver}" -B build -G Ninja \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_INSTALL_LIBDIR=lib \
+    -DBUILD_TESTING=OFF \
+    -DINSTALL_CONFIG=OFF \
+    -DSKIP_MODULES="${skip_modules[*]}" \
+    -DWITH_QT6=ON
+  cmake --build build
+}
+
+package() {
+  DESTDIR="${pkgdir}" cmake --install build
+  install -dm755 "${pkgdir}/usr/share/licenses/${pkgname}"
+  cp -a "calamares-${pkgver}/LICENSES/." \
+    "${pkgdir}/usr/share/licenses/${pkgname}/"
+}

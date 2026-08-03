@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#221B3A"/>
+      <stop offset="0.52" stop-color="#493B78"/>
+      <stop offset="1" stop-color="#7C5CFC"/>
+    </linearGradient>
+    <radialGradient id="glow">
+      <stop offset="0" stop-color="#FFB8D7" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#FFB8D7" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="22"/></filter>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#sky)"/>
+  <circle cx="1470" cy="250" r="410" fill="url(#glow)" filter="url(#soft)"/>
+  <circle cx="300" cy="900" r="360" fill="#70D6C5" opacity="0.12" filter="url(#soft)"/>
+  <g fill="#F8F4FF" opacity="0.16">
+    <path d="M180 210c-38-62-132-18-94 53l94 88 94-88c38-71-56-115-94-53z"/>
+    <path d="M1640 760c-30-49-104-14-74 42l74 69 74-69c30-56-44-91-74-42z"/>
+    <path d="M1380 110c-18-30-64-9-45 25l45 43 46-43c18-34-28-55-46-25z"/>
+  </g>
+  <g transform="translate(960 510)">
+    <path d="M0 210C-52 155-240 45-240-95c0-172 212-215 240-54 28-161 240-118 240 54C240 45 52 155 0 210z" fill="#FF6FAE"/>
+    <path d="M-185 17c-125 22-178 101-203 173" fill="none" stroke="#F8F4FF" stroke-width="42" stroke-linecap="round"/>
+    <path d="M185 17c125 22 178 101 203 173" fill="none" stroke="#F8F4FF" stroke-width="42" stroke-linecap="round"/>
+    <circle cx="-66" cy="-58" r="13" fill="#221B3A"/>
+    <circle cx="66" cy="-58" r="13" fill="#221B3A"/>
+    <path d="M-48-10c30 34 66 34 96 0" fill="none" stroke="#221B3A" stroke-width="12" stroke-linecap="round"/>
+  </g>
+  <text x="960" y="830" text-anchor="middle" fill="#F8F4FF" font-family="sans-serif" font-size="72" font-weight="700">Mim<tspan fill="#FF6FAE">OS</tspan></text>
+  <text x="960" y="900" text-anchor="middle" fill="#F8F4FF" opacity="0.9" font-family="sans-serif" font-size="30">Tu ordenador también merece unos mimos</text>
+</svg>

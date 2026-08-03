@@ -1,0 +1,84 @@
+# Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
+
+pkgname=mimos-grub-theme
+pkgver=0.3.0.beta.4
+pkgrel=1
+pkgdesc='MimOS boot menu theme for GRUB'
+arch=('any')
+url='https://github.com/DavidFB-creator/MimOS'
+license=('MIT')
+# grub is a hard dependency because this package is only meaningful once a GRUB
+# menu exists, and the scriptlet edits /etc/default/grub, which grub owns.
+depends=('grub')
+# The artwork is committed rather than generated at package time on purpose.
+# Building it needs rsvg-convert, ImageMagick, grub-mkfont and the real Inter
+# face; requiring all four on the ISO build host to produce files that never
+# change would trade a reproducible input for a fragile one. Regenerate with
+# scripts/generate-grub-theme.py when the palette or the artwork moves.
+source=(
+  'LICENSE'
+  'mimos-grub-theme.install'
+  'theme.txt'
+  'background.png'
+  'inter-menu.pf2'
+  'menu_c.png'
+  'menu_e.png'
+  'menu_n.png'
+  'menu_ne.png'
+  'menu_nw.png'
+  'menu_s.png'
+  'menu_se.png'
+  'menu_sw.png'
+  'menu_w.png'
+  'select_c.png'
+  'select_e.png'
+  'select_n.png'
+  'select_ne.png'
+  'select_nw.png'
+  'select_s.png'
+  'select_se.png'
+  'select_sw.png'
+  'select_w.png'
+)
+sha256sums=('97d7ba0977ea88730c942625f66849bbef6536c3c6e103a39a4bb05b9fd3d9cf'
+            'ec1c8b7a595c6e20cf592f780eaf55bf84439ff06a6980c3fd4d7d19aea91a0f'
+            'bae5e4a29c4f7fbb79b38f3cefdd91911c04a8a7721e8c74c3a488d2b557d439'
+            'f3279447563e8fbb25d9ca8002b759b337c49c4144a642d83f1b2f89d193d785'
+            'd6cbead87351bab6e8819d3aa659ddbbd4196bac3b4726bbce3cef682b2db46a'
+            '4646a95e58963dbaf30ea35351fc31eb1cbfa8d40a9b1cee301483796ba557c8'
+            'ee8ff985fc4afac856d764ef70992645dd46e2007e5988487e681e074d21a7e7'
+            '482f7d43a16bc2639b150c9f597bc0f1fa72be5fac6b6bf08f550e2f907db199'
+            'd55443db66ff6ad6dc75b29b3ad1599e8dfab63ab755fcaf662418a2f8ccbe29'
+            '12e0180170cae622d394a820a98b72d7c6cb9acb5a7dc9507c7c0958c85a442a'
+            'dbff903fae22bc116c3275e1b7c850672977bd95b27bc6b31492c6f42a0eb0ad'
+            'd360d2c589eee3ef7e1c1ac74c215dbd5ffeeea3fd346d33dc6d709a72883438'
+            'a355badc70600556846aa380c320f0aed2e65806d46893fd371889b2f7945b3c'
+            '282d388ca554975b350ffe00a0f1c30a98c017ed12dbc27122a68869bd1ce8e1'
+            '4ca5d744227a40f36297776327e093bc4d51ca7fed6716fa1ca581b458f83ac5'
+            '5696133acd254a750d340cee24d7120fd066c778562bb51cb4684b58c9b35a46'
+            'a6aba8cc0a89c2b97cff759f25b2115fcb153f8df4b1081215cbb52240575499'
+            '64731c0ab5182d1411a72e3b4a3851da1ade093c0f81c1d2f03cb7a2e2070136'
+            '3df4a964f9a8bbafc46449d53dd0ac61f842a015c90a7f45e2f98bc43a29f40b'
+            '4b6c8fd21657263223b71a730780621d5fe67fdfc17f7a8c4910f1a96c86efc7'
+            '32fa742c0ae5d766429292bbd988b76e0f2ef4ab4f60031502d5188815cfb930'
+            '60a1215ea3f1418f0046817311144231c2c20390315b65396f3f0c026725d6b5'
+            '7b6fe03afc35694602b039307ecb3216c53624a05d95eab1935c1c5984216a7a')
+install='mimos-grub-theme.install'
+
+package() {
+  local dest="${pkgdir}/usr/share/grub/themes/mimos"
+
+  install -Dm644 theme.txt "${dest}/theme.txt"
+  install -Dm644 background.png "${dest}/background.png"
+  install -Dm644 inter-menu.pf2 "${dest}/inter-menu.pf2"
+
+  local slice
+  for slice in menu select; do
+    local piece
+    for piece in c e n ne nw s se sw w; do
+      install -Dm644 "${slice}_${piece}.png" "${dest}/${slice}_${piece}.png"
+    done
+  done
+
+  install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}

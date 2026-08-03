@@ -1,0 +1,145 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+window='/usr/share/mimos/welcome/Window.qml'
+release_file='/etc/mimos-release'
+wallpaper='/usr/share/backgrounds/mimos/primer-abrazo.png'
+live_marker='/usr/lib/mimos/live-environment'
+state_dir="${XDG_STATE_HOME:-${HOME}/.local/state}/mimos"
+config_dir="${XDG_CONFIG_HOME:-${HOME}/.config}/mimos"
+config_file="${config_dir}/centro.conf"
+autostart=false
+runtime_context='installed'
+
+show_error() {
+  local message="$1"
+  if command -v kdialog >/dev/null 2>&1; then
+    kdialog --title 'Centro de MimOS' --error "${message}" || true
+  else
+    printf '%s\n' "${message}" >&2
+  fi
+}
+
+case "${1:-}" in
+  '')
+    ;;
+  --autostart)
+    autostart=true
+    ;;
+  *)
+    printf 'Usage: %s [--autostart]\n' "$0" >&2
+    exit 2
+    ;;
+esac
+
+if [[ ! -f "${window}" ]]; then
+  show_error 'No se encuentra la interfaz de Centro de MimOS.'
+  exit 1
+fi
+
+if [[ -f "${live_marker}" && ! -L "${live_marker}" ]] && \
+  [[ "$(stat -c '%u:%g:%a' "${live_marker}")" == '0:0:644' ]]; then
+  runtime_context='live'
+fi
+
+version_id='development'
+if [[ -f "${release_file}" ]]; then
+  detected_version="$(sed -n 's/^VERSION_ID="\(.*\)"/\1/p' "${release_file}")"
+  [[ -n "${detected_version}" ]] && version_id="${detected_version}"
+fi
+marker="${state_dir}/welcome-${version_id}"
+
+mkdir -p -- "${state_dir}" "${config_dir}"
+
+if [[ "${autostart}" == true ]]; then
+  if [[ -e "${marker}" ]]; then
+    exit 0
+  fi
+  if [[ -f "${config_file}" ]] && \
+    grep -Eq '^showAfterUpdates=(false|0)$' "${config_file}"; then
+    touch -- "${marker}"
+    exit 0
+  fi
+fi
+
+# The brand wallpaper must not depend on the user closing this window.
+#
+# The previous version called plasma-apply-wallpaperimage once before the
+# window opened and once after it closed. On autostart the first call lands
+# while Plasma is still restoring its containment and fails, and the second
+# never runs while the window stays open, so the Live session showed the stock
+# Plasma wallpaper for as long as Centro de MimOS was on screen. Both calls
+# ended in `|| true`, so nothing reported it.
+#
+# This retries in the background with a bounded budget and gives up quietly.
+# It never blocks the interface and never fails the session.
+apply_wallpaper() {
+  local attempt
+  local plasma_config="${XDG_CONFIG_HOME:-${HOME}/.config}/plasma-org.kde.plasma.desktop-appletsrc"
+  if ! command -v plasma-apply-wallpaperimage >/dev/null 2>&1; then
+    return 0
+  fi
+  if [[ ! -f "${wallpaper}" ]]; then
+    return 0
+  fi
+  for ((attempt = 0; attempt < 20; attempt++)); do
+    # Plasma may return success before its containment exists. Success from the
+    # helper is therefore not evidence that the desktop accepted the change.
+    # Retry until Plasma's own configuration records the exact packaged file.
+    plasma-apply-wallpaperimage "${wallpaper}" >/dev/null 2>&1 || true
+    sleep 1
+    if grep -Fq "Image=file://${wallpaper}" "${plasma_config}" 2>/dev/null; then
+      return 0
+    fi
+  done
+  return 0
+}
+
+if command -v qml6 >/dev/null 2>&1; then
+  qml_runner='qml6'
+elif [[ -x /usr/lib/qt6/bin/qml ]]; then
+  qml_runner='/usr/lib/qt6/bin/qml'
+else
+  show_error 'El entorno Qt/QML necesario no está disponible.'
+  exit 1
+fi
+
+# Runs alongside the window rather than around it, so the wallpaper appears
+# whether or not the user ever opens or closes Centro de MimOS.
+apply_wallpaper &
+wallpaper_pid=$!
+
+export QT_QUICK_CONTROLS_STYLE='Basic'
+
+set +e
+"${qml_runner}" "${window}" -- "--mimos-context=${runtime_context}"
+status=$?
+set -e
+
+if [[ "${autostart}" == true ]]; then
+  touch -- "${marker}"
+fi
+
+wait "${wallpaper_pid}" 2>/dev/null || true
+
+case "${status}" in
+  0)
+    exit 0
+    ;;
+  10)
+    if [[ "${runtime_context}" != 'live' ]]; then
+      show_error 'El instalador solo está disponible desde el entorno Live.'
+      exit 1
+    fi
+    if [[ -x /usr/bin/mimos-installer ]]; then
+      /usr/bin/mimos-installer >/dev/null 2>&1 &
+      exit 0
+    fi
+    show_error 'MimOS Installer todavía no está disponible.'
+    exit 1
+    ;;
+  *)
+    printf 'Centro de MimOS exited with status %s.\n' "${status}" >&2
+    exit "${status}"
+    ;;
+esac

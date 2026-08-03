@@ -1,0 +1,11 @@
+NAME="MimOS"
+VERSION="0.3 Achuchón Beta 4"
+VERSION_ID="0.3.0-beta.4"
+VERSION_CODENAME=achuchon
+ID=mimos
+ID_LIKE=arch
+PRETTY_NAME="MimOS 0.3 (Achuchón) Beta 4"
+VARIANT="Live system"
+VARIANT_ID=live
+HOME_URL="https://github.com/DavidFB-creator/MimOS"
+BUG_REPORT_URL="https://github.com/DavidFB-creator/MimOS/issues"
