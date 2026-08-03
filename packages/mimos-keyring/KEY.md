@@ -20,6 +20,12 @@ because the absence is visible and the false one is not.
 `tests/shell/tst_keyring_staging.sh` still fails if the package is listed while
 the key is a placeholder.
 
+## If the key is ever lost or compromised
+
+See `docs/vault/KEY_CONTINGENCY.md`. Until its checklist is ticked, the key
+exists in one place and its loss is the only project failure with no recovery
+path.
+
 ## What Claude must never do
 
 Claude does not generate this key, does not hold it, and never sees the
@@ -99,10 +105,12 @@ The sequence matters, and getting it wrong locks users out of updates.
 6. ~~Ship the `[mimos]` section pointing at it.~~ **Done.** `mimos-release`
    appends it to `/etc/pacman.conf` from an install scriptlet and enables the
    mirror in `mimos-mirrorlist`. A Live session reaches the channel: 17/17.
-7. **Republish on every version bump.** This is the standing open item and it is
-   currently *not* satisfied: the channel serves `0.2.0.alpha.3` while images
-   ship `0.3.0.beta.1-1`, so an update offers a user older MimOS packages than
-   the image already carries.
+7. **Republish on every version bump.** Currently satisfied: the channel
+   serves `0.3.0.beta.4`, republished 2026-08-02 and verified on the served
+   bytes. (An earlier revision of this step described the channel as three
+   versions behind long after it was not — the third time this file went
+   stale. If you change what is true here, change this list in the same
+   commit.)
 
    Run `scripts/republish-channel.sh`, which does the whole sequence in one
    command and is the only thing that needs David's passphrase:
@@ -118,6 +126,18 @@ The sequence matters, and getting it wrong locks users out of updates.
    public keyring the image ships rather than against David's own keyring, and
    after pushing re-fetches the database over HTTPS and verifies the signature on
    the bytes actually served.
+
+8. **Snapshot the sources with every republish.** The channel distributes a
+   patched GPL Calamares, so the public repository
+   <https://github.com/DavidFB-creator/mimos-packages> must gain, in the same
+   sitting, a commit with the `packages/` tree at the exact source commit the
+   channel was built from, tagged with the release. First done for
+   `v0.3.0-beta.4` (source commit `9f8b5fb`) on 2026-08-03:
+
+   ```bash
+   git archive <release-commit> packages LICENSE | tar -x -C <clone-of-mimos-packages>
+   # commit, tag vX.Y.Z, push both
+   ```
 
 Step 6 after 5 is not optional: the Live matrix runs `pacman -Syu`, so a
 configured repository that does not exist fails the acceptance run.

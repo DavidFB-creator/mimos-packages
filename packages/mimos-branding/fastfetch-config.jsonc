@@ -5,7 +5,8 @@
     "source": "/usr/share/mimos/branding/mimos-fastfetch-heart.txt",
     "color": {
       "1": "#FF6FAE",
-      "2": "#7C5CFC"
+      "2": "#7C5CFC",
+      "3": "#221B3A"
     },
     "padding": {
       "top": 1,
@@ -38,7 +39,7 @@
     {
       "type": "custom",
       "key": "Sistema",
-      "format": "MimOS 0.3 · Achuchón Beta 4"
+      "format": "MimOS 0.4 · Arrumaco Beta 1"
     },
     {
       "type": "custom",

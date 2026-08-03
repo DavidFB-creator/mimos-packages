@@ -136,3 +136,6 @@ activeForeground=255,255,255
 inactiveBackground=237,231,250
 inactiveBlend=237,231,250
 inactiveForeground=86,80,112
+
+[Icons]
+Theme=mimos-escritorio

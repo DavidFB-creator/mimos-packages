@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <!-- Mirror of go-next, for RTL layouts: Breeze's login button swaps to
+       go-previous under LayoutMirroring. Same fixed Abrazo, same reason. -->
+  <g fill="none" stroke="#7C5CFC" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M19.4 12H5.2"/>
+    <path d="M10.8 6.4 5.2 12l5.6 5.6"/>
+  </g>
+</svg>

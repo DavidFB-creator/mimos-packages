@@ -1,0 +1,33 @@
+#!/bin/bash
+# Give the first human account MIMI as its login avatar.
+#
+# SDDM 0.21 resolves a user's avatar in this order: FacesDir/<name>.face.icon,
+# then ~/.face.icon, then AccountsService. The home route cannot work here:
+# Arch creates homes mode 0700 and the greeter runs as `sddm`, which cannot
+# read them. A global default cannot work either, because SDDM prefers the
+# theme's own faces/.face.icon -- Breeze's grey placeholder -- over the
+# FacesDir default whenever it exists, and it always exists. Naming the
+# account's own face file is the one path that wins everywhere, and it needs
+# the account to exist first, which is why Calamares runs this after `users`.
+set -euo pipefail
+
+faces_dir='/usr/share/sddm/faces'
+face_source='/usr/share/mimos/branding/mimi-face.png'
+
+# The first human account is UID 1000: the one Calamares creates on a target,
+# or the Live account on the ISO. Asking /etc/passwd needs no NSS services,
+# which an installer chroot does not have running.
+user_name="$(awk -F: '$3 == 1000 { print $1; exit }' /etc/passwd)"
+
+if [[ -z "${user_name}" ]]; then
+  echo 'mimos-install-default-face: no UID-1000 account; nothing to do.' >&2
+  exit 0
+fi
+
+target="${faces_dir}/${user_name}.face.icon"
+if [[ -e "${target}" ]]; then
+  # A face already named for this account is a choice; never overwrite it.
+  exit 0
+fi
+
+install -Dm644 "${face_source}" "${target}"

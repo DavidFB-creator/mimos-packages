@@ -1,0 +1,26 @@
+[Icon Theme]
+Name=MimOS Escritorio
+Comment=Iconos de aplicación de MimOS sobre Breeze
+Inherits=breeze
+Directories=small/apps,scalable/apps,scalable/places
+
+[small/apps]
+Size=16
+MinSize=8
+MaxSize=31
+Context=Applications
+Type=Scalable
+
+[scalable/apps]
+Size=48
+MinSize=32
+MaxSize=512
+Context=Applications
+Type=Scalable
+
+[scalable/places]
+Size=48
+MinSize=8
+MaxSize=512
+Context=Places
+Type=Scalable

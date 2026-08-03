@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Instalar MimOS: the heart with an Abrazo install badge. One drawing
+       for every size, because a face-plus-badge composition is mush at 16
+       and the badge alone carries the meaning. -->
+  <path d="M256 405C200 350 106 268 106 195c0-65 46-100 90-100 30 0 52 23 60 50 8-27 30-50 60-50 44 0 90 35 90 100 0 73-94 155-150 210z" fill="#FF6FAE" transform="translate(256,250) scale(1.45) translate(-256,-250)"/>
+  <circle cx="384" cy="384" r="104" fill="#7C5CFC"/>
+  <g fill="none" stroke="#F8F4FF" stroke-width="34" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M384 328v92"/>
+    <path d="M340 382l44 44 44-44"/>
+  </g>
+</svg>

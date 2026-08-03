@@ -1,13 +1,14 @@
 # Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
 
 pkgname=mimos-branding
-pkgver=0.3.0.beta.4
-pkgrel=3
+pkgver=0.4.0.beta.1
+pkgrel=1
 pkgdesc='Runtime visual identity assets for MimOS'
 arch=('any')
 url='https://github.com/DavidFB-creator/MimOS'
 license=('MIT')
 source=(
+  'mimi.svg'
   'mimos-logo-horizontal.svg'
   'mimos-logo-monochrome-dark.svg'
   'mimos-logo-monochrome-light.svg'
@@ -36,9 +37,29 @@ source=(
   'speechd.conf'
   'sddm-theme.conf.user'
   '20-mimos-theme.conf'
+  'system-hibernate.svg'
+  'system-reboot.svg'
+  'system-shutdown.svg'
+  'system-suspend.svg'
+  'system-user-list.svg'
+  'system-user-prompt.svg'
+  'go-next.svg'
+  'go-previous.svg'
+  'index.theme'
+  'app-mimos-centro.svg'
+  'app-mimos-centro-small.svg'
+  'app-mimos-instalador.svg'
+  'start-here.svg'
+  'start-here-symbolic.svg'
+  'mimos-escritorio-index.theme'
+  'sddm-kdeglobals'
+  'mimos-tmpfiles.conf'
+  'mimi-face.png'
+  'mimos-install-default-face'
   'LICENSE'
 )
-sha256sums=('aa6a29280c9f2b64dac3dc348724159af59dcc3d3fdf9892998d5e8815d52708'
+sha256sums=('c4eba059e0aec667b32e76e73b24c493e02cd87f962dfd133d50da134d510cd0'
+            'aa6a29280c9f2b64dac3dc348724159af59dcc3d3fdf9892998d5e8815d52708'
             '1cb6334368044eb94b229755e698c9cb2a610649af8d409bf6842a108c23bedf'
             'a2ff852c55de94a4ed8740423f8405571e715be6f01d2f63d54ba828426c04d9'
             'fe023d58de87e45f8da036f87f7ff82894d1cb439d387c1a4f88d441a31278a4'
@@ -54,23 +75,43 @@ sha256sums=('aa6a29280c9f2b64dac3dc348724159af59dcc3d3fdf9892998d5e8815d52708'
             'b9cd85e40526e9173706749ce08169dbb26d1b6a3dd66696e73660d5cf99b06b'
             '0cba13fcb92e359d17db2a6cf484ef5fd6ddd58039b65dd9e237fc400bcc703f'
             '00259071377e8814df8063161a03ec7a789c70c66b177d3b08d7d9c5e05fba1a'
-            '22ee4ad84260d0600f89a867d6f711adf11bb6215c6dbabda7db004acb81c5f5'
-            'f49235701cbe5d9961c7ee41e6b31890805ac8ec226a2fd870cf0582026dae4d'
-            '9ebd205a7d257a4b53c028cfe70dd348b70443e36bc323581304222adb20d876'
-            '1f79f9f432724100c9a4a3ac6bd52eb113787b96c5429e088f017c5344cf6ddd'
+            '470e5729b35f6044c0a691ea90aeab5792fcb1f76d3561ad1db8a13170a76ba5'
+            'f83db83900ef01e14a9e3b26d8aa0becc378b128b7829bbfa44ed4422a31be3b'
+            '802809221afb0cf01ed186bf879e22e6d9fa879936b0ed89ac7bc9f8ca8356a4'
+            '67fd3d0f31f568871054d368387bfd8505163ea627b2bcbef1dba18a5ce99aef'
             '32b037249cda14fbc70ab4fd99771a425fd4be751ae2ef38aa58fe3aad6c756b'
             'fdd4d0723ef7ece718257f96f19f8f11c027f51e65dc7c12e663e2105551e21f'
             'fde2b70a125130e3ae2e6c6596543cb3a9c451365670b35a7564269ebe9d2233'
             'ff248cfb1eaa2b29fe04d646ee37597593b318815b9e43eb0be9f3496ed96ce1'
-            '509911308559a868af26219f1474ce45b1b1a7d679615c59535d8ba951d78007'
+            '31c84ce9b4b4526d92d9089e4821538c41c8cfda806b634909d9ec8ea51fa92a'
             '33a2721f8e59d1b7a95b145db2e3683e82043c952d34c113baabaf4364664c82'
             '8b5513b88b58e76f196f233a97fe80a64b4383cdd94bae6429a3125c46bff2f7'
             '8e7908d5f6ea54dd896e79d0bf8b9737df305213f2cd251e63b1e15dd2ba39f3'
+            '8a8f1f755c2be1dfd80c911f300c3c4795968914cf25817e47d5842dfea00031'
+            'a7bcecb2d80b893f158f0f04838441dec92e186cee03871b8f9f03d1ac0208f8'
+            '1f6ef48e36cb42aa5f2b962df77a2081cf044b3eba7f05032a52d971d64cd925'
+            '7a734190a4423770e82338876f5a8fdf625b295155b3860dbc0d3d3ec5cb6e56'
+            '1e6737958fd799b06979910f3a773e8813e7a698778a8276d7717247f003428d'
+            '813802d62787c53fc5b535bc6543bd47d0a5e8a1fb087b72fdb3aa7ab5a1c696'
+            '6088fe79582bb8fd2f46bf313355a036bee428ab005923c60ef368ff1a55356d'
+            '8984ea80889872dac561d8565537702454a2b73b9202218ba7749316eb6135ea'
+            '51edbb5327ccc72aaaf1c2101413204798ff78237276041535ff41aad8584bfb'
+            'c4eba059e0aec667b32e76e73b24c493e02cd87f962dfd133d50da134d510cd0'
+            '8d6a159572081bc920809405c81348d9f21cb68d2413eec46161de63c6485646'
+            '71807ea204370b435bedd25c4f53cd1d5e194e0fbd2155eec5dcdac51e458055'
+            '58b713183603e748d8e84228f94df868e8276303bfefa6f22ffe46180bef61f8'
+            '028540bdc60320eb086cf89c8cca748909559429f98563a2f1f0452026dd0cf3'
+            '60bfaacc4aee58559bfbbfc97daa445bf02f8ed14681f0be6ad2b7a82aeea76c'
+            '042ff2440843ee3c9ec12264dc116d4740dc398aacab12b24868df52cf148910'
+            'cec8cccc2b7634e6696395c792bbc0b03f83fbf58903811da05df9f360c97c7d'
+            'e89d52a76ad2c2fdc3a2d4108d5fc81ac5a3d71a4606f6f8f9b147536cdef1b7'
+            'f63607f9e5aadb3230d308776f5343f7f9e898a8d1ac1e1d4d6661efba7ddefd'
             '97d7ba0977ea88730c942625f66849bbef6536c3c6e103a39a4bb05b9fd3d9cf')
 
 package() {
   local asset
   for asset in \
+    mimi.svg \
     mimos-logo-horizontal.svg \
     mimos-logo-monochrome-dark.svg \
     mimos-logo-monochrome-light.svg \
@@ -132,6 +173,76 @@ package() {
     "${pkgdir}/usr/share/sddm/themes/breeze/theme.conf.user"
   install -Dm644 20-mimos-theme.conf \
     "${pkgdir}/etc/sddm.conf.d/20-mimos-theme.conf"
+
+  # The greeter's power row asks the icon theme for six names (read out of
+  # Breeze's Main.qml at v6.7.3, see ADR-084). The `mimos` theme overrides
+  # exactly those six and inherits breeze-dark for everything else; only the
+  # greeter selects it, through the sddm user's kdeglobals below, so the
+  # desktop keeps Breeze. go-next and go-previous are the seventh and eighth:
+  # the login button's arrow, fixed Abrazo on purpose, because the greeter
+  # recolours themed icons to the same near-white the button is filled with,
+  # and a recolourable arrow is invisible there whether it is drawn or not.
+  local icon
+  for icon in \
+    system-hibernate \
+    system-reboot \
+    system-shutdown \
+    system-suspend \
+    system-user-list \
+    system-user-prompt \
+    go-next \
+    go-previous; do
+    install -Dm644 "${icon}.svg" \
+      "${pkgdir}/usr/share/icons/mimos/scalable/actions/${icon}.svg"
+  done
+  install -Dm644 index.theme "${pkgdir}/usr/share/icons/mimos/index.theme"
+
+  # Application icons and the launcher heart (ADR-087). The desktop selects
+  # mimos-escritorio through the generated skel kdeglobals; it inherits
+  # breeze, so only these names change. MIMI carries the Centro icon at 32 px
+  # and above; below that the small directory serves the bare heart, because
+  # a face at 16 px is a smudge (branding/mimi/README.md, measured). The two
+  # app icons also land in hicolor so they survive a user changing themes.
+  local esc="${pkgdir}/usr/share/icons/mimos-escritorio"
+  install -Dm644 mimos-escritorio-index.theme "${esc}/index.theme"
+  install -Dm644 app-mimos-centro.svg "${esc}/scalable/apps/mimos-centro.svg"
+  install -Dm644 app-mimos-instalador.svg "${esc}/scalable/apps/mimos-instalador.svg"
+  install -Dm644 app-mimos-centro-small.svg "${esc}/small/apps/mimos-centro.svg"
+  install -Dm644 app-mimos-instalador.svg "${esc}/small/apps/mimos-instalador.svg"
+  install -Dm644 app-mimos-centro.svg \
+    "${pkgdir}/usr/share/icons/hicolor/scalable/apps/mimos-centro.svg"
+  install -Dm644 app-mimos-instalador.svg \
+    "${pkgdir}/usr/share/icons/hicolor/scalable/apps/mimos-instalador.svg"
+  # Every start-here name Breeze itself ships, coloured and symbolic, so
+  # whichever one Kickoff's default asks for resolves to the heart.
+  local sh
+  for sh in start-here start-here-kde start-here-kde-plasma; do
+    install -Dm644 start-here.svg "${esc}/scalable/places/${sh}.svg"
+    install -Dm644 start-here-symbolic.svg "${esc}/scalable/places/${sh}-symbolic.svg"
+  done
+
+  # Selecting the theme for the greeter alone: sddm-greeter runs with
+  # HOME=/var/lib/sddm and reads that home's kdeglobals -- the file KDE's own
+  # SDDM settings module writes. The packaged copy lives under /usr/share and
+  # a tmpfiles rule copies it into place at boot only when nothing is there
+  # yet, because a package cannot own paths inside another package's home
+  # directory without fighting its ownership.
+  install -Dm644 sddm-kdeglobals \
+    "${pkgdir}/usr/share/mimos/branding/sddm-kdeglobals"
+  install -Dm644 mimos-tmpfiles.conf \
+    "${pkgdir}/usr/lib/tmpfiles.d/mimos-branding.conf"
+
+  # MIMI as the login avatar. Generated by scripts/generate-face-icon.py from
+  # branding/mimi/mimi.svg on canonical Noche; the helper names it for the
+  # UID-1000 account under /usr/share/sddm/faces, which is the only avatar
+  # path SDDM prefers over Breeze's grey placeholder. Calamares runs the
+  # helper after `users`; see shellprocess@default-face in
+  # mimos-calamares-config.
+  install -Dm644 mimi-face.png \
+    "${pkgdir}/usr/share/mimos/branding/mimi-face.png"
+  install -Dm755 mimos-install-default-face \
+    "${pkgdir}/usr/bin/mimos-install-default-face"
+
   install -Dm644 LICENSE \
     "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }

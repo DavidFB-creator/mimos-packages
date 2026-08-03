@@ -1,40 +1,62 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
   <!--
-    Login background B — "Abrazo".
+    Login background B - "Abrazo".
 
-    The embrace as pure gesture: two arcs sweeping in from the edges and
-    stopping short of each other. The gap they leave is where the login card
-    sits, so the composition holds the card rather than the card interrupting
-    the composition.
+    Two arms cradling the login card, drawn as round-capped strokes that rise
+    rather than cut across. The diagonal sweeps this replaces read as speed;
+    an embrace is slow, so the curves ease outward and the caps are round.
 
-    No mascot, no wordmark. The centre is empty on purpose — that is the whole
-    idea, and it is also what the previous greeter got wrong by putting the
-    logo exactly where the form goes.
+    Everything lives outside x 576-1344, which is where check-login-contrast.py
+    says Breeze puts the clock, the card, the name and the power buttons. The
+    centre is empty on purpose.
   -->
   <defs>
-    <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#241C40"/>
-      <stop offset="1" stop-color="#191331"/>
+    <linearGradient id="ground" x1="0.1" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#33243E"/>
+      <stop offset="0.58" stop-color="#2A1D33"/>
+      <stop offset="1" stop-color="#211724"/>
     </linearGradient>
-    <linearGradient id="armL" x1="0" y1="0" x2="1" y2="0.4">
-      <stop offset="0" stop-color="#7C5CFC" stop-opacity="0.30"/>
-      <stop offset="1" stop-color="#7C5CFC" stop-opacity="0.06"/>
+    <linearGradient id="armL" x1="0" y1="1" x2="0.7" y2="0">
+      <stop offset="0" stop-color="#FF6FAE" stop-opacity="0.34"/>
+      <stop offset="1" stop-color="#FF6FAE" stop-opacity="0.10"/>
     </linearGradient>
-    <linearGradient id="armR" x1="1" y1="0" x2="0" y2="0.4">
-      <stop offset="0" stop-color="#7C5CFC" stop-opacity="0.30"/>
-      <stop offset="1" stop-color="#7C5CFC" stop-opacity="0.06"/>
+    <linearGradient id="armR" x1="1" y1="1" x2="0.3" y2="0">
+      <stop offset="0" stop-color="#FF6FAE" stop-opacity="0.34"/>
+      <stop offset="1" stop-color="#FF6FAE" stop-opacity="0.10"/>
     </linearGradient>
+    <radialGradient id="warm" cx="0.5" cy="1.05" r="0.75">
+      <stop offset="0" stop-color="#FF6FAE" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#FF6FAE" stop-opacity="0"/>
+    </radialGradient>
+    <path id="c" d="M0 0c-22-20-58-52-58-80 0-24 18-38 34-38 12 0 20 9 24 19 4-10 12-19 24-19 16 0 34 14 34 38 0 28-36 60-58 80z"/>
   </defs>
 
   <rect width="1920" height="1080" fill="url(#ground)"/>
+  <rect width="1920" height="1080" fill="url(#warm)"/>
 
-  <g fill="none" stroke-linecap="round" stroke-width="104">
-    <path d="M-60 300C260 300 470 520 700 790" stroke="url(#armL)"/>
-    <path d="M1980 300c-320 0-530 220-760 490" stroke="url(#armR)"/>
+  <!-- The arms. Round caps and a slow ease; nothing crosses the centre band. -->
+  <g fill="none" stroke-linecap="round" stroke-width="112">
+    <path d="M-90 1010C170 940 400 760 468 396" stroke="url(#armL)"/>
+    <path d="M2010 1010c-260-70-490-250-558-614" stroke="url(#armR)"/>
+  </g>
+  <g fill="none" stroke-linecap="round" stroke-width="26" opacity="0.5">
+    <path d="M-70 830C140 770 300 620 352 340" stroke="#FF6FAE" stroke-opacity="0.20"/>
+    <path d="M1990 830c-210-60-370-210-422-490" stroke="#FF6FAE" stroke-opacity="0.20"/>
   </g>
 
-  <g fill="none" stroke-linecap="round" stroke-width="26" opacity="0.5">
-    <path d="M-40 470C230 470 400 640 590 860" stroke="#FF6FAE" stroke-opacity="0.16"/>
-    <path d="M1960 470c-270 0-440 170-630 390" stroke="#FF6FAE" stroke-opacity="0.16"/>
+  <!-- Where each arm ends, a heart, as if it were the hand. -->
+  <g fill="#FF6FAE" opacity="0.26">
+    <use href="#c" transform="translate(468 372) scale(1.05)"/>
+    <use href="#c" transform="translate(1452 372) scale(1.05)"/>
+  </g>
+
+  <!-- Drifting away from the hands, smaller and fainter. -->
+  <g fill="#FF6FAE" opacity="0.13">
+    <use href="#c" transform="translate(268 236) scale(0.52)"/>
+    <use href="#c" transform="translate(1676 300) scale(0.46)"/>
+    <use href="#c" transform="translate(150 508) scale(0.34)"/>
+    <use href="#c" transform="translate(1820 560) scale(0.30)"/>
+    <use href="#c" transform="translate(392 116) scale(0.28)"/>
+    <use href="#c" transform="translate(1552 132) scale(0.33)"/>
   </g>
 </svg>

@@ -1,0 +1,161 @@
+#!/bin/bash
+# mimos-diagnostico — a diagnostic bundle you can read before it exists.
+#
+# MimOS promises, in its privacy policy and in Centro de MimOS, that nothing
+# ever leaves the machine on its own. This tool is the manual half of that
+# promise: it collects a small set of named text files, REDACTS them, shows
+# the complete list, and only writes a local archive when asked to. It has no
+# network capability of any kind — sending the archive somewhere is a human
+# decision made afterwards, with the file in hand.
+#
+# Redaction is not optional and has no flag to disable it: IPv4 and IPv6
+# addresses, MAC addresses, e-mail addresses, /home paths, the first human
+# account's name and the hostname are replaced before anything reaches the
+# staging directory. `--filtrar` exposes the filter alone (stdin to stdout)
+# so tests can pin its behaviour.
+set -euo pipefail
+
+hardware=0
+registros=0
+solo_ver=0
+crear=0
+
+usage() {
+  cat <<'USO'
+mimos-diagnostico [opciones]
+
+Reúne información básica del sistema en ficheros de texto, la anonimiza,
+te la enseña entera y, solo si tú lo pides, crea un archivo local.
+Nunca envía nada a ninguna parte.
+
+  --hardware    incluye el inventario de hardware (PCI, USB, memoria, discos)
+  --registros   incluye los avisos y errores del arranque actual (anonimizados)
+  --todo        equivale a --hardware --registros
+  --solo-ver    lo muestra todo por pantalla y no escribe nada
+  --crear       crea el archivo sin preguntar (para uso no interactivo)
+  --filtrar     filtra la entrada estándar con la anonimización y sale
+  --ayuda       esta ayuda
+USO
+}
+
+escape_re() {
+  printf '%s' "$1" | sed -e 's/[][\.^$*+?(){}|/]/\\&/g'
+}
+
+redact() {
+  local user host
+  user="$(awk -F: '$3 == 1000 { print $1; exit }' /etc/passwd || true)"
+  host="$(uname -n || true)"
+  local args=(-E
+    -e 's/([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}/[MAC]/g'
+    -e 's/([0-9]{1,3}\.){3}[0-9]{1,3}/[IP]/g'
+    -e 's/\b([0-9A-Fa-f]{1,4}:){3,7}[0-9A-Fa-f]{1,4}\b/[IPv6]/g'
+    -e 's/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/[correo]/g'
+    -e 's|/home/[A-Za-z0-9._-]+|/home/[usuario]|g'
+  )
+  if [[ -n "${host}" && "${host}" != localhost ]]; then
+    args+=(-e "s/\b$(escape_re "${host}")\b/[equipo]/g")
+  fi
+  if [[ -n "${user}" ]]; then
+    args+=(-e "s/\b$(escape_re "${user}")\b/[usuario]/g")
+  fi
+  sed "${args[@]}"
+}
+
+# Every command's output goes through the same funnel. A missing command is
+# recorded as such rather than aborting: a bundle from an unusual system is
+# exactly the bundle somebody needs.
+seccion() {
+  local destino="$1"; shift
+  {
+    printf '$ %s\n' "$*"
+    "$@" 2>&1 || printf '(no disponible)\n'
+    printf '\n'
+  } | redact >> "${staging}/${destino}"
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --hardware) hardware=1 ;;
+    --registros) registros=1 ;;
+    --todo) hardware=1; registros=1 ;;
+    --solo-ver) solo_ver=1 ;;
+    --crear) crear=1 ;;
+    --filtrar) redact; exit 0 ;;
+    --ayuda|-h|--help) usage; exit 0 ;;
+    *) printf 'Opción desconocida: %s\n' "$1" >&2; usage >&2; exit 2 ;;
+  esac
+  shift
+done
+
+staging="$(mktemp -d "${TMPDIR:-/tmp}/mimos-diagnostico.XXXXXXXX")"
+chmod 700 "${staging}"
+keep_staging=0
+trap '[[ "${keep_staging}" -eq 1 ]] || rm -rf -- "${staging}"' EXIT
+
+cat > "${staging}/LEEME.txt" <<EOF
+Diagnóstico manual de MimOS, generado el $(date -Is).
+
+Este archivo se creó a mano con mimos-diagnostico y NO se ha enviado a
+ninguna parte: la herramienta no tiene ninguna capacidad de red. Antes de
+escribirse, cada fichero pasó por la anonimización: direcciones IP, MAC,
+correos, rutas personales, el nombre de usuario y el nombre del equipo se
+sustituyen por marcadores como [IP] o [usuario].
+
+Contenido: sistema.txt (versión e idioma), paquetes-mimos.txt (versiones de
+los paquetes de MimOS), servicios.txt (unidades fallidas), y si se pidieron,
+hardware.txt y registros.txt. Compartirlo, y con quién, es decisión tuya.
+EOF
+
+seccion sistema.txt cat /etc/mimos-release
+seccion sistema.txt uname -sr
+seccion sistema.txt localectl status
+seccion sistema.txt uptime
+
+seccion paquetes-mimos.txt bash -c "pacman -Q | grep -E '^(mimos-|calamares|ttf-)' || echo '(ningún paquete de MimOS instalado)'"
+
+seccion servicios.txt systemctl --failed --no-legend
+
+if [[ "${hardware}" -eq 1 ]]; then
+  seccion hardware.txt lspci -nn
+  seccion hardware.txt lsusb
+  seccion hardware.txt free -h
+  seccion hardware.txt lsblk -o NAME,SIZE,TYPE,FSTYPE,MOUNTPOINTS
+  seccion hardware.txt df -h /
+fi
+
+if [[ "${registros}" -eq 1 ]]; then
+  seccion registros.txt journalctl -b -p warning -n 800 --no-pager
+fi
+
+printf 'Esto es todo lo que contiene el diagnóstico:\n\n'
+(cd "${staging}" && find . -type f -printf '%9s bytes  %P\n' | sort -k3)
+printf '\n'
+
+if [[ "${solo_ver}" -eq 1 ]]; then
+  for f in "${staging}"/*.txt; do
+    printf '===== %s =====\n' "$(basename "${f}")"
+    cat "${f}"
+  done
+  exit 0
+fi
+
+destino="${HOME}/mimos-diagnostico-$(date +%Y%m%d-%H%M).tar.gz"
+
+if [[ "${crear}" -ne 1 ]]; then
+  if [[ ! -t 0 ]]; then
+    printf 'Sin terminal interactiva: usa --crear para escribir el archivo o --solo-ver para revisarlo.\n' >&2
+    exit 1
+  fi
+  printf 'Puedes revisar cada fichero en %s antes de decidir.\n' "${staging}"
+  read -r -p "¿Crear ${destino}? Escribe 'si' para crearlo: " respuesta
+  if [[ "${respuesta}" != si && "${respuesta}" != sí ]]; then
+    keep_staging=1
+    printf 'No se ha creado nada. Los ficheros quedan en %s para que los revises;\nbórralos con: rm -r %s\n' "${staging}" "${staging}"
+    exit 0
+  fi
+fi
+
+tar -czf "${destino}" -C "${staging}" .
+chmod 600 "${destino}"
+printf 'Creado %s (solo legible por ti).\nNo se ha enviado nada; compartirlo es siempre decisión tuya.\n' "${destino}"

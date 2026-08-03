@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <!-- Deliberately NOT recolourable: no .ColorScheme-Text, fixed Abrazo.
+       The greeter's login button asks for go-next, the button is Breeze
+       white, and the greeter recolours themed icons to Complementary text,
+       #fcfcfc, the button's own fill. A recolourable arrow is invisible
+       there by construction, drawn or not. -->
+  <g fill="none" stroke="#7C5CFC" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4.6 12h14.2"/>
+    <path d="M13.2 6.4 18.8 12l-5.6 5.6"/>
+  </g>
+</svg>

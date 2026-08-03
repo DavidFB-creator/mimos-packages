@@ -1,0 +1,12 @@
+[Icon Theme]
+Name=MimOS
+Comment=Iconos del greeter de MimOS
+Inherits=breeze-dark
+Directories=scalable/actions
+
+[scalable/actions]
+Size=32
+MinSize=8
+MaxSize=512
+Context=Actions
+Type=Scalable
