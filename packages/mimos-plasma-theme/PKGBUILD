@@ -1,0 +1,95 @@
+# Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
+
+pkgname=mimos-plasma-theme
+pkgver=0.5.0.beta.1
+pkgrel=2
+pkgdesc='MimOS Claro and MimOS Oscuro Plasma Global Themes with the MIMI splash'
+arch=('any')
+url='https://github.com/DavidFB-creator/MimOS'
+license=('MIT')
+# mimos-branding owns everything these themes point at: the colour schemes,
+# the mimos-escritorio icon theme, the wallpaper, MIMI and the wordmarks.
+# The symlinked artwork below cannot dangle while that dependency holds.
+depends=('mimos-branding')
+source=(
+  'metadata-claro.json'
+  'metadata-oscuro.json'
+  'defaults-claro'
+  'defaults-oscuro'
+  'splash-claro.qml'
+  'splash-oscuro.qml'
+  'desktoptheme-claro-colors'
+  'desktoptheme-claro-metadata.json'
+  'desktoptheme-oscuro-colors'
+  'desktoptheme-oscuro-metadata.json'
+  'desktoptheme-plasmarc'
+  'preview-claro.png'
+  'preview-oscuro.png'
+  'LICENSE'
+)
+sha256sums=('c64ce39587fdd00fcf3740ac706dd6e3e2e2f9efe341c32f0a5508d1c70fe879'
+            '6b9a9b32f608c44f560664c9dc9d65db83f2aba77051d5bdea1a507af6db6482'
+            'fe7ba2ae3bfbe9a366a38920932232041ed7883815df526d5792177098981168'
+            'b79d7410c3d995a22e42715a68533d0c5056ed510c2650082ccb3ca8daa6b48c'
+            '04b9f32a5b2596cd7f11bd62ffa6bd047df8603fcfc8352f59093d7cd2ac1638'
+            'db34c53c0f08202bc19ba5deb8354ab73b48ab9910a80efdd9b9c6bad7fda889'
+            '6dde0a3acf98981ba505950dd608605a487d6c46a991fdc42e70e8712543b9a5'
+            '88dff1e8cf35eb0c0b11bfbbcf75d7ed00f7aa127989c8e0632a51d992a6cfb9'
+            '197176328994327f22662e93a104df5dfc42c110d5db37d191249f81d8008100'
+            '83e391f5c02f90dd9a5d7bbc9b85923c59f1b6c0de5357c9fcafec7e89e2c36d'
+            'c4f48df31768ad576925151d2f2ccbaca91f4b3709f1aae6848b644e8cedde4a'
+            'e3fe67bf014a64022461b1f774a2b90d3f24a03672f5282a759aa4fe0bc45015'
+            '8f3ea114a646483afdc446d235b311cda2d11efab4b394302f203ca6968c8b34'
+            '97d7ba0977ea88730c942625f66849bbef6536c3c6e103a39a4bb05b9fd3d9cf')
+
+package() {
+  local lnf_root="${pkgdir}/usr/share/plasma/look-and-feel"
+  local variant lnf_id splash_dir wordmark
+
+  for variant in claro oscuro; do
+    lnf_id="org.mimos.${variant}.desktop"
+    splash_dir="${lnf_root}/${lnf_id}/contents/splash"
+
+    install -Dm644 "metadata-${variant}.json" \
+      "${lnf_root}/${lnf_id}/metadata.json"
+    install -Dm644 "defaults-${variant}" \
+      "${lnf_root}/${lnf_id}/contents/defaults"
+    install -Dm644 "splash-${variant}.qml" \
+      "${splash_dir}/Splash.qml"
+    # A real session capture of the theme, so the Quick Settings strip and
+    # the Global Themes page show MimOS rather than a grey placeholder.
+    install -Dm644 "preview-${variant}.png" \
+      "${lnf_root}/${lnf_id}/contents/previews/preview.png"
+
+    # The artwork ships in mimos-branding, a hard dependency; the splash
+    # references it relatively so the links cannot dangle on an installed
+    # system. Six levels up from images/ is /usr/share.
+    install -dm755 "${splash_dir}/images"
+    ln -s ../../../../../../mimos/branding/mimi.svg \
+      "${splash_dir}/images/mimi.svg"
+    if [[ "${variant}" == claro ]]; then
+      wordmark='mimos-wordmark.svg'
+    else
+      wordmark='mimos-wordmark-dark.svg'
+    fi
+    ln -s "../../../../../../mimos/branding/${wordmark}" \
+      "${splash_dir}/images/${wordmark}"
+  done
+
+  # The desktop theme pair: the colour scheme with the panel repainted to
+  # the raised pink surface, measured to come from the theme's Window group.
+  # Every SVG falls back to Breeze's default theme, so these three files are
+  # the whole theme.
+  local dt_root="${pkgdir}/usr/share/plasma/desktoptheme"
+  for variant in claro oscuro; do
+    install -Dm644 "desktoptheme-${variant}-colors" \
+      "${dt_root}/mimos-${variant}/colors"
+    install -Dm644 "desktoptheme-${variant}-metadata.json" \
+      "${dt_root}/mimos-${variant}/metadata.json"
+    install -Dm644 desktoptheme-plasmarc \
+      "${dt_root}/mimos-${variant}/plasmarc"
+  done
+
+  install -Dm644 LICENSE \
+    "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}

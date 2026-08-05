@@ -35,43 +35,48 @@
     "mimos-claro": {
       "name": "MimOS Claro",
       "appearance": "light",
-      "description": "Daytime scheme on Nube with Noche text and Abrazo accents.",
+      "description": "Daytime scheme on soft Besito pinks with Noche text; Besito carries the selection and titlebars.",
       "roles": {
-        "windowBackground": "#F8F4FF",
-        "windowBackgroundAlternate": "#EDE7FA",
+        "windowBackground": "#FFE9F3",
+        "windowBackgroundAlternate": "#FFD3E5",
         "windowForeground": "#221B3A",
         "viewBackground": "#FFFFFF",
-        "viewBackgroundAlternate": "#F5F1FE",
+        "viewBackgroundAlternate": "#FFEFF6",
         "viewForeground": "#221B3A",
-        "buttonBackground": "#EDE7FA",
+        "buttonBackground": "#FFD3E5",
         "buttonForeground": "#221B3A",
-        "selectionBackground": "#5B3BE0",
-        "selectionForeground": "#FFFFFF",
+        "selectionBackground": "#FF6FAE",
+        "selectionForeground": "#221B3A",
         "tooltipBackground": "#221B3A",
         "tooltipForeground": "#F8F4FF",
-        "headerBackground": "#EDE7FA",
+        "headerBackground": "#FFD3E5",
         "headerForeground": "#221B3A",
-        "inactiveForeground": "#565070",
+        "inactiveForeground": "#7A5670",
         "link": "#5B3BE0",
         "visited": "#7A3E9C",
         "positive": "#136B5B",
         "neutral": "#7A5200",
         "negative": "#B0123F",
         "focusDecoration": "#5B3BE0",
-        "hoverDecoration": "#9B86FF",
-        "activeTitleBackground": "#5B3BE0",
-        "activeTitleForeground": "#FFFFFF",
-        "inactiveTitleBackground": "#EDE7FA",
-        "inactiveTitleForeground": "#565070"
+        "hoverDecoration": "#FF6FAE",
+        "activeTitleBackground": "#FF6FAE",
+        "activeTitleForeground": "#221B3A",
+        "inactiveTitleBackground": "#FFD3E5",
+        "inactiveTitleForeground": "#7A5670"
       },
       "derivations": {
-        "selectionBackground": "Abrazo darkened to #5B3BE0 so white selection text reaches AA on a light surface; #7C5CFC does not.",
+        "selectionBackground": "Canonical Besito with Noche text (6.33:1). Chosen by David on 2026-08-04 over the deepened #C22E71 after seeing both rendered: Breeze folders wear the selection colour, and dark magenta folders lost to light pink ones. The 3:1 indicator pair this fails is a recorded exemption; see contrastRequirements.nonTextPairsComment.",
         "positive": "Calma is a 1.9:1 pair on white and cannot carry text at all; darkened to #136B5B, a teal of the same hue that reaches AA on both light surfaces.",
         "negative": "Besito is decorative and fails as light-surface text; deepened to #B0123F, a red-pink of the same family.",
         "neutral": "Amber #7A5200 has no canonical entry; chosen because no canonical colour reaches AA as a warning on both the window and view surfaces.",
-        "windowBackgroundAlternate": "A desktop needs at least three separable surfaces and the palette defines one light background. Nube tinted toward Abrazo gives #EDE7FA, the raised surface used by buttons, headers, and inactive titles.",
-        "viewBackgroundAlternate": "Alternating list rows need a step smaller than the window step, so Nube is tinted only slightly toward Abrazo to give #F5F1FE.",
-        "hoverDecoration": "Hover must be visible without reading as focus or selection, so Abrazo is lightened to #9B86FF. It is decoration only and carries no text, so it is exempt from the AA text pairs."
+        "windowBackgroundAlternate": "The raised pink surface (buttons, headers, inactive titles, the panel), Besito lightened to #FFD3E5; approved on screen at 255,211,229.",
+        "viewBackgroundAlternate": "Alternating list rows: a smaller pink step over white, #FFEFF6.",
+        "hoverDecoration": "Hover is canonical Besito now. It is decoration only and carries no text, so it is exempt from the AA text pairs, as the previous violet hover already was.",
+        "windowBackground": "#FFE9F3, chosen by David on 2026-08-04 from a live rendering: white tinted toward Besito rather than canonical Nube, because the theme's ground is deliberately pink now and Nube reads violet.",
+        "inactiveForeground": "Muted text pinked to #7A5670: 5.36:1 on the window ground and 4.63:1 on the raised pink, both AA.",
+        "activeTitleBackground": "Canonical Besito with Noche text (6.33:1): the pink titlebar David asked for, measured live before being adopted.",
+        "link": "Abrazo darkened to #5B3BE0: canonical Abrazo is 4.38:1 on white and fails AA as link text; the darkened value passes on every light surface.",
+        "focusDecoration": "#5B3BE0, the same darkened Abrazo as links: the focus ring must clear 3:1 on the pink grounds, which canonical Abrazo does not with margin."
       }
     },
     "mimos-oscuro": {
@@ -87,8 +92,8 @@
         "viewForeground": "#F8F4FF",
         "buttonBackground": "#2C2444",
         "buttonForeground": "#F8F4FF",
-        "selectionBackground": "#7452F5",
-        "selectionForeground": "#FFFFFF",
+        "selectionBackground": "#FF6FAE",
+        "selectionForeground": "#221B3A",
         "tooltipBackground": "#2C2444",
         "tooltipForeground": "#F8F4FF",
         "headerBackground": "#2C2444",
@@ -100,9 +105,9 @@
         "neutral": "#F1D58A",
         "negative": "#FF9AB4",
         "focusDecoration": "#70D6C5",
-        "hoverDecoration": "#9B86FF",
-        "activeTitleBackground": "#2C2444",
-        "activeTitleForeground": "#F8F4FF",
+        "hoverDecoration": "#FF6FAE",
+        "activeTitleBackground": "#FF6FAE",
+        "activeTitleForeground": "#221B3A",
         "inactiveTitleBackground": "#221B3A",
         "inactiveTitleForeground": "#B6ADCE",
         "surfaceRaised": "#3A3058"
@@ -113,9 +118,10 @@
         "focusDecoration": "Calma marks focus because it is the only canonical colour that separates clearly from Abrazo selection.",
         "windowBackgroundAlternate": "Noche lifted one step to #2C2444 for the raised surface used by buttons, headers, tooltips, and active titles. The palette defines one dark background and a desktop needs a hierarchy.",
         "viewBackground": "Noche lowered one step to #1A1430 so text views recede behind window chrome, which is the usual Plasma relationship.",
-        "hoverDecoration": "Hover must be visible without reading as focus or selection, so Abrazo is lightened to #9B86FF. It is decoration only and carries no text, so it is exempt from the AA text pairs.",
-        "selectionBackground": "Measured: white on canonical Abrazo #7C5CFC is 4.38:1, just under AA, so Abrazo cannot carry white text at any size. Neither can Noche sit on it (3.70:1). Abrazo is therefore darkened to #7452F5, which reaches 5.03:1 with white while staying 3.27:1 against the window background. This limit applies anywhere Abrazo is used as a filled button; it is a property of the canonical colour, not of this theme.",
-        "surfaceRaised": "Noche lifted two steps to #3A3058. The MimOS applications draw cards inside an already raised panel and need a third dark surface; windowBackgroundAlternate is the second. Carries no text of its own."
+        "hoverDecoration": "Canonical Besito; decoration only, exempt from the AA text pairs.",
+        "selectionBackground": "Same recipe as Claro: canonical Besito with Noche text (6.33:1). White on Besito fails AA on dark grounds too -- the pair travels with the colour, not the theme.",
+        "surfaceRaised": "Noche lifted two steps to #3A3058. The MimOS applications draw cards inside an already raised panel and need a third dark surface; windowBackgroundAlternate is the second. Carries no text of its own.",
+        "activeTitleBackground": "Canonical Besito with Noche text, matching Claro so the brand accent is the same in both variants."
       }
     },
     "mimos-nocturnos": {
@@ -277,13 +283,9 @@
         "focusDecoration",
         "viewBackground",
         3.0
-      ],
-      [
-        "selectionBackground",
-        "windowBackground",
-        3.0
       ]
-    ]
+    ],
+    "nonTextPairsComment": "selectionBackground/windowBackground carried a 3.0 pair until 2026-08-04. It is deliberately exempt now: David chose canonical Besito as the selection (2.24:1 on the pink window ground) because Breeze folder icons take the selection colour and the deepened #C22E71 alternative painted every folder dark magenta. Two measured facts support the exemption: KDE's own Breeze ships its selection at 2.36:1 against its window ground, and a selected row is identified by its text pair as well, which stays gated at 4.5 and measures 6.33:1 (Noche on Besito). This exempts exactly one pair; focus decoration keeps both 3.0 gates."
   },
   "logoSurfaces": {
     "mimos-logo-horizontal.svg": {
@@ -346,17 +348,34 @@
   },
   "logoSurfacesComment": "Every lockup declares the surface it is drawn for. #0D1117 is GitHub's dark canvas, the darkest surface MimOS artwork is placed on, so passing there passes on Noche too. scripts/check-logo-contrast.py measures the real fills in the SVG against these values and fails if prose drops below 4.5:1 or if the wordmark's emphasis inverts between surfaces.",
   "appTokens": {
-    "comment": "The token block the Qt/QML application declares. Generated into Main.qml between the mimos-palette markers so the application, the desktop schemes, and the artwork all resolve to one palette. Two applications used to declare it and disagreed; the installer prototype has since been removed, and Calamares takes its colours from packages/mimos-calamares-config/branding.desc instead. A value is either a role of the named theme or 'canonical:<name>'. The application is a branded dark surface regardless of which desktop scheme the user selects.",
-    "theme": "mimos-oscuro",
-    "map": {
-      "night": "windowBackground",
-      "panel": "windowBackgroundAlternate",
-      "panelRaised": "surfaceRaised",
-      "cloud": "windowForeground",
-      "muted": "inactiveForeground",
-      "hug": "link",
-      "kiss": "canonical:besito",
-      "calm": "focusDecoration"
+    "comment": "The token block both Centro de MimOS applications declare. Generated into each Main.qml between the mimos-palette markers so the applications, the desktop schemes, and the artwork resolve to one palette. The block carries both appearances as ternaries on root.darkAppearance: the launcher reads the session's ColorScheme and passes --mimos-appearance, so the app follows the desktop theme without gaining any file capability (ADR-093). A value is either a role of the variant's theme or 'canonical:<name>'. Besito (kiss) is decorative in the claro variant: at 1.6:1 on the pink grounds it may carry no text and no indicator there, the same exemption shape as the slideshow's.",
+    "variants": {
+      "claro": {
+        "theme": "mimos-claro",
+        "map": {
+          "ground": "windowBackground",
+          "panel": "windowBackgroundAlternate",
+          "panelRaised": "viewBackground",
+          "ink": "windowForeground",
+          "inkMuted": "inactiveForeground",
+          "hug": "link",
+          "kiss": "canonical:besito",
+          "calm": "positive"
+        }
+      },
+      "oscuro": {
+        "theme": "mimos-oscuro",
+        "map": {
+          "ground": "windowBackground",
+          "panel": "windowBackgroundAlternate",
+          "panelRaised": "surfaceRaised",
+          "ink": "windowForeground",
+          "inkMuted": "inactiveForeground",
+          "hug": "link",
+          "kiss": "canonical:besito",
+          "calm": "positive"
+        }
+      }
     }
   },
   "fontsComment": "Fonts the brand SVGs are allowed to name. It is empty, and that is now the point: every packaged lockup has its glyphs outlined by scripts/generate-brand-lockups.py, so no asset names a family and there is nothing left to resolve at runtime. That closes a class of defect this project hit twice. First the assets declared 'Inter, Montserrat, system-ui, sans-serif' and QtSvg handed the whole chain to QFont, which takes one family name, so it matched nothing (ADR-047). Then Baloo 2 was named plainly and Pango read it as the family Baloo at size 2 -- its font descriptions are 'Family Style Size' -- and rendered the wordmark in DejaVu Serif, byte-identical to asking for DejaVu Serif outright. Quoting fixes one renderer and breaks the other; outlining removes the question. check-brand-fonts.py still runs and now enforces the stronger invariant: a packaged brand asset may name no font at all. The vendor production files under branding/merch/apparel were always outlined, for the same reason.",

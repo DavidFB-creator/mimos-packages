@@ -1,6 +1,64 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <!-- The Plasma launcher button: the MimOS heart, verbatim from mimi.svg.
-       Installed under every start-here* name Breeze ships, so whichever of
-       them Kickoff's default asks for, this answers. -->
-  <path d="M256 405C200 350 106 268 106 195c0-65 46-100 90-100 30 0 52 23 60 50 8-27 30-50 60-50 44 0 90 35 90 100 0 73-94 155-150 210z" fill="#FF6FAE" transform="translate(256,250) scale(1.55) translate(-256,-250)"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="30 24 452 452" role="img" aria-labelledby="title desc">
+  <title id="title">Inicio de MimOS</title>
+  <desc id="desc">MIMI fills the launcher box edge to edge: the tight viewBox crops the artwork margins so the home button reads larger than its neighbours, the way David chose it from a live rendering on 2026-08-04.</desc>
+  <!--
+    Built, not traced.
+
+    Tracing the reference PNG produced a mushy heart, arms that did not touch
+    it and bites out of both: every boundary in that image is antialiased, the
+    seam pixels between pink and purple belong to neither, and dropping them
+    leaves a gap exactly where two shapes should meet. No amount of smoothing
+    fixes a hole.
+
+    So the geometry is constructed and symmetric, with the proportions measured
+    off the reference:
+
+      heart      275 x 284 px there, 300 x 310 here, cleft 17% down
+      arms       reach 25% of the heart's width past each side
+      arms       span from 49% to 92% of the heart's height
+      eyes       79 px apart, 39% down, centred on the heart's axis
+      mouth      68 px wide, 25 deep
+
+    The arms are stroked, not filled, so their width is uniform and their ends
+    are round by construction. They are drawn over the heart, which is what
+    makes them touch it: an arm that merely approaches reads as a hoop, and a
+    hug is defined by contact.
+
+    Colours are canonical, from palette.json.
+  -->
+
+  <!-- Arms, whole, behind the heart.
+       Each one starts well inside the heart's outline, so the heart drawn
+       over it hides the end and the arm reads as coming out of the body. The
+       previous version began them outside, and two rounded ends floating
+       beside a heart look like two rounded ends floating beside a heart.
+
+       Width 38: measured, the arm is 30px thick against a heart 275 wide,
+       which is 33 against this one. Thicker and it stops reading as an arm
+       and starts reading as a tube the heart is sitting in. -->
+  <g fill="none" stroke="#7C5CFC" stroke-width="38" stroke-linecap="round">
+    <path d="M176 236C130 232 98 236 84 250 44 276 40 332 96 358c36 16 80 22 112 10"/>
+    <path d="M336 236c46-4 78 0 92 14 40 26 44 82-12 108-36 16-80 22-112 10"/>
+  </g>
+
+  <!-- Heart. Symmetric about x=256. -->
+  <path d="M256 405C200 350 106 268 106 195c0-65 46-100 90-100 30 0 52 23 60 50 8-27 30-50 60-50 44 0 90 35 90 100 0 73-94 155-150 210z"
+        fill="#FF6FAE"/>
+
+  <!-- The forearms again, over the heart. Same path, same width, same colour,
+       so the join is invisible and the occlusion is what carries the depth.
+       The hands stop short of the centre on both sides: the heart's lower
+       body showing between them is what puts the arms in front of it. -->
+  <g fill="none" stroke="#7C5CFC" stroke-width="38" stroke-linecap="round">
+    <path d="M96 358c36 16 80 22 112 10"/>
+    <path d="M416 358c-36 16-80 22-112 10"/>
+  </g>
+
+  <!-- Face. -->
+  <g fill="#221B3A">
+    <circle cx="214" cy="222" r="11"/>
+    <circle cx="298" cy="222" r="11"/>
+  </g>
+  <path d="M221 250c7 30 67 30 74 0" fill="none" stroke="#221B3A"
+        stroke-width="12" stroke-linecap="round"/>
 </svg>

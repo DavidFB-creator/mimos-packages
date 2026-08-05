@@ -106,7 +106,7 @@ The sequence matters, and getting it wrong locks users out of updates.
    appends it to `/etc/pacman.conf` from an install scriptlet and enables the
    mirror in `mimos-mirrorlist`. A Live session reaches the channel: 17/17.
 7. **Republish on every version bump.** Currently satisfied: the channel
-   serves `0.3.0.beta.4`, republished 2026-08-02 and verified on the served
+   serves `0.4.0.beta.1`, republished 2026-08-04 and verified on the served
    bytes. (An earlier revision of this step described the channel as three
    versions behind long after it was not — the third time this file went
    stale. If you change what is true here, change this list in the same
@@ -131,8 +131,9 @@ The sequence matters, and getting it wrong locks users out of updates.
    patched GPL Calamares, so the public repository
    <https://github.com/DavidFB-creator/mimos-packages> must gain, in the same
    sitting, a commit with the `packages/` tree at the exact source commit the
-   channel was built from, tagged with the release. First done for
-   `v0.3.0-beta.4` (source commit `9f8b5fb`) on 2026-08-03:
+   channel was built from, tagged with the release. Done for
+   `v0.3.0-beta.4` (source commit `9f8b5fb`) on 2026-08-03 and for
+   `v0.4.0-beta.1` (source commit `97719fe`) on 2026-08-04:
 
    ```bash
    git archive <release-commit> packages LICENSE | tar -x -C <clone-of-mimos-packages>

@@ -1,4 +1,4 @@
-// Packaged as mimos-welcome.
+// Packaged as mimos-welcome. Installed context only (ADR-093).
 import QtCore
 import QtQuick
 import QtQuick.Controls
@@ -13,9 +13,11 @@ ApplicationWindow {
     minimumWidth: 760
     minimumHeight: 540
     title: "Centro de MimOS"
-    color: "#151320"
-    readonly property bool liveEnvironment:
-        Qt.application.arguments.indexOf("--mimos-context=live") !== -1
+    color: centro.ground
+    readonly property bool installedContext:
+        Qt.application.arguments.indexOf("--mimos-context=installed") !== -1
+    readonly property bool darkAppearance:
+        Qt.application.arguments.indexOf("--mimos-appearance=oscuro") !== -1
 
     Settings {
         location: StandardPaths.writableLocation(StandardPaths.ConfigLocation)
@@ -35,11 +37,19 @@ ApplicationWindow {
     Main {
         id: centro
         anchors.fill: parent
-        liveEnvironment: window.liveEnvironment
+        darkAppearance: window.darkAppearance
         onCloseRequested: window.close()
-        onInstallerRequested: {
-            if (window.liveEnvironment) {
-                Qt.exit(10)
+        onThemeRequested: variant => {
+            // The exits are the whole action channel: the launcher applies
+            // the Global Theme and relaunches (ADR-093). Fail closed on the
+            // context flag, mirroring the Live installer gate.
+            if (window.installedContext) {
+                Qt.exit(variant === "oscuro" ? 12 : 11)
+            }
+        }
+        onDiscoverRequested: {
+            if (window.installedContext) {
+                Qt.exit(13)
             }
         }
     }

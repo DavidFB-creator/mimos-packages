@@ -16,7 +16,7 @@
  * so neither is invented. */
 QWidget {
     color: #221B3A;
-    background-color: #EDE7FA;
+    background-color: #FFD3E5;
     font-family: "Inter";
     font-size: 10pt;
 }
@@ -26,8 +26,8 @@ QWidget {
  * that showed up as a box behind the welcome title. */
 #mainApp {
     background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-        stop: 0 #F5F1FE,
-        stop: 1 #EDE7FA);
+        stop: 0 #FFEFF6,
+        stop: 1 #FFD3E5);
 }
 
 /* The rule above sets a background on QWidget, and every widget inherits it --
@@ -59,8 +59,8 @@ QLabel,
  * and it lands badly here. Same information, same family, light. */
 QToolTip {
     color: #221B3A;
-    background-color: #F5F1FE;
-    border: 1px solid #5B3BE0;
+    background-color: #FFEFF6;
+    border: 1px solid #FF6FAE;
     border-radius: 6px;
     padding: 4px 8px;
 }
@@ -100,8 +100,8 @@ QToolTip {
     font-size: 9pt;
     padding: 4px 10px;
     color: #221B3A;
-    background-color: #EDE7FA;
-    border: 1px solid #5B3BE0;
+    background-color: #FFD3E5;
+    border: 1px solid #FF6FAE;
     border-radius: 8px;
 }
 
@@ -113,22 +113,22 @@ QToolTip {
 QPushButton {
     min-height: 34px;
     padding: 6px 14px;
-    border: 1px solid #5B3BE0;
+    border: 1px solid #FF6FAE;
     border-radius: 8px;
     color: #221B3A;
-    background-color: #EDE7FA;
+    background-color: #FFD3E5;
 }
 
 QPushButton:hover {
-    background-color: #F5F1FE;
+    background-color: #FFEFF6;
 }
 
 QPushButton:focus {
-    border: 2px solid #5B3BE0;
+    border: 2px solid #FF6FAE;
 }
 
 QPushButton:disabled {
-    color: #565070;
+    color: #7A5670;
 }
 
 /* The primary action, in Besito with Noche on it -- the same pink-with-dark-text
@@ -147,9 +147,9 @@ QPushButton#view-button-next {
 }
 
 QPushButton#view-button-next:disabled {
-    color: #565070;
-    background-color: #EDE7FA;
-    border-color: #565070;
+    color: #7A5670;
+    background-color: #FFD3E5;
+    border-color: #7A5670;
 }
 
 QLineEdit,
@@ -157,16 +157,16 @@ QComboBox,
 QSpinBox {
     min-height: 30px;
     padding: 4px 8px;
-    border: 1px solid #565070;
+    border: 1px solid #7A5670;
     border-radius: 6px;
     color: #221B3A;
-    background-color: #F5F1FE;
+    background-color: #FFEFF6;
 }
 
 QLineEdit:focus,
 QComboBox:focus,
 QSpinBox:focus {
-    border: 2px solid #5B3BE0;
+    border: 2px solid #FF6FAE;
 }
 
 /* The container, not just the menu. branding.desc paints the step list, but
@@ -177,7 +177,7 @@ QSpinBox:focus {
  * before the wordmark became legible. */
 #sidebarApp,
 #sidebarApp > QWidget {
-    background-color: #5B3BE0;
+    background-color: #FF6FAE;
 }
 
 #sidebarApp {
@@ -230,7 +230,7 @@ QScrollBar:horizontal {
 
 QScrollBar::handle:vertical,
 QScrollBar::handle:horizontal {
-    background-color: #9B86FF;
+    background-color: #FF6FAE;
     border-radius: 6px;
     min-height: 32px;
     min-width: 32px;
@@ -238,7 +238,7 @@ QScrollBar::handle:horizontal {
 
 QScrollBar::handle:vertical:hover,
 QScrollBar::handle:horizontal:hover {
-    background-color: #5B3BE0;
+    background-color: #FF6FAE;
 }
 
 QScrollBar::add-line,
@@ -256,5 +256,5 @@ QScrollBar::sub-page {
  * the ground to find. selectionForeground is the same white the step labels use. */
 #sidebarApp QScrollBar::handle:vertical,
 #sidebarApp QScrollBar::handle:horizontal {
-    background-color: #FFFFFF;
+    background-color: #221B3A;
 }

@@ -74,6 +74,6 @@ terminal-font: "Inter Regular 28"
   height = 6
   show_text = false
   bg_color = "#3A3058"
-  fg_color = "#7452F5"
+  fg_color = "#FF6FAE"
   border_color = "#3A3058"
 }

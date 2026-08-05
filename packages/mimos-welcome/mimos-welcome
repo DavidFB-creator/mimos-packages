@@ -3,8 +3,8 @@ set -Eeuo pipefail
 
 window='/usr/share/mimos/welcome/Window.qml'
 release_file='/etc/mimos-release'
-wallpaper='/usr/share/backgrounds/mimos/primer-abrazo.png'
 live_marker='/usr/lib/mimos/live-environment'
+live_launcher='/usr/bin/mimos-welcome-live'
 state_dir="${XDG_STATE_HOME:-${HOME}/.local/state}/mimos"
 config_dir="${XDG_CONFIG_HOME:-${HOME}/.config}/mimos"
 config_file="${config_dir}/centro.conf"
@@ -32,14 +32,31 @@ case "${1:-}" in
     ;;
 esac
 
-if [[ ! -f "${window}" ]]; then
-  show_error 'No se encuentra la interfaz de Centro de MimOS.'
-  exit 1
-fi
-
 if [[ -f "${live_marker}" && ! -L "${live_marker}" ]] && \
   [[ "$(stat -c '%u:%g:%a' "${live_marker}")" == '0:0:644' ]]; then
   runtime_context='live'
+fi
+
+# In a Live session the Live-only application owns the welcome experience
+# (ADR-093). The menu entry delegates so one "Centro de MimOS" does the right
+# thing in both worlds; on autostart the Live package's own entry is the one
+# that runs, so this exits rather than opening a second window. The installed
+# interface never renders in a Live session: fail closed if the Live
+# application is missing rather than falling through.
+if [[ "${runtime_context}" == 'live' ]]; then
+  if [[ "${autostart}" == true ]]; then
+    exit 0
+  fi
+  if [[ -x "${live_launcher}" ]]; then
+    exec "${live_launcher}"
+  fi
+  show_error 'La sesión Live no tiene disponible su Centro de MimOS.'
+  exit 1
+fi
+
+if [[ ! -f "${window}" ]]; then
+  show_error 'No se encuentra la interfaz de Centro de MimOS.'
+  exit 1
 fi
 
 version_id='development'
@@ -62,84 +79,95 @@ if [[ "${autostart}" == true ]]; then
   fi
 fi
 
-# The brand wallpaper must not depend on the user closing this window.
-#
-# The previous version called plasma-apply-wallpaperimage once before the
-# window opened and once after it closed. On autostart the first call lands
-# while Plasma is still restoring its containment and fails, and the second
-# never runs while the window stays open, so the Live session showed the stock
-# Plasma wallpaper for as long as Centro de MimOS was on screen. Both calls
-# ended in `|| true`, so nothing reported it.
-#
-# This retries in the background with a bounded budget and gives up quietly.
-# It never blocks the interface and never fails the session.
-apply_wallpaper() {
-  local attempt
-  local plasma_config="${XDG_CONFIG_HOME:-${HOME}/.config}/plasma-org.kde.plasma.desktop-appletsrc"
-  if ! command -v plasma-apply-wallpaperimage >/dev/null 2>&1; then
-    return 0
+# The window follows the desktop theme without gaining any file capability:
+# the launcher reads the session's ColorScheme and passes the side as an
+# argument (ADR-093). Reading only; the QML never touches the file.
+detect_appearance() {
+  local kdeglobals="${XDG_CONFIG_HOME:-${HOME}/.config}/kdeglobals"
+  local scheme=''
+  if [[ -f "${kdeglobals}" ]]; then
+    scheme="$(sed -n 's/^ColorScheme=//p' "${kdeglobals}" | head -n 1)"
   fi
-  if [[ ! -f "${wallpaper}" ]]; then
-    return 0
-  fi
-  for ((attempt = 0; attempt < 20; attempt++)); do
-    # Plasma may return success before its containment exists. Success from the
-    # helper is therefore not evidence that the desktop accepted the change.
-    # Retry until Plasma's own configuration records the exact packaged file.
-    plasma-apply-wallpaperimage "${wallpaper}" >/dev/null 2>&1 || true
-    sleep 1
-    if grep -Fq "Image=file://${wallpaper}" "${plasma_config}" 2>/dev/null; then
-      return 0
-    fi
-  done
-  return 0
+  case "${scheme}" in
+    *[Oo]scur*|*[Nn]octurn*|*[Dd]ark*|*[Bb]reeze[Dd]ark*)
+      printf 'oscuro'
+      ;;
+    *)
+      printf 'claro'
+      ;;
+  esac
 }
 
-if command -v qml6 >/dev/null 2>&1; then
-  qml_runner='qml6'
-elif [[ -x /usr/lib/qt6/bin/qml ]]; then
-  qml_runner='/usr/lib/qt6/bin/qml'
-else
-  show_error 'El entorno Qt/QML necesario no está disponible.'
+# The compiled runner owns the window's identity: the generic qml6 tool
+# declares desktopFileName org.qt-project.qml and its own Qr icon over the
+# Wayland toplevel-icon protocol, which no desktop file or KWin rule could
+# override (ADR-093).
+runner='/usr/lib/mimos/centro-mimos'
+if [[ ! -x "${runner}" ]]; then
+  show_error 'El entorno de Centro de MimOS no está disponible.'
   exit 1
 fi
 
-# Runs alongside the window rather than around it, so the wallpaper appears
-# whether or not the user ever opens or closes Centro de MimOS.
-apply_wallpaper &
-wallpaper_pid=$!
-
 export QT_QUICK_CONTROLS_STYLE='Basic'
 
-set +e
-"${qml_runner}" "${window}" -- "--mimos-context=${runtime_context}"
-status=$?
-set -e
+# Statuses 11 and 12 apply a Global Theme and relaunch, so the window reopens
+# already repainted on the new side; 13 hands over to Discover. The exits are
+# the whole action channel: the QML has no process capability, mirroring the
+# Live installer's status-10 pattern (ADR-093).
+final_status=0
+while true; do
+  appearance="$(detect_appearance)"
+  set +e
+  "${runner}" '--mimos-context=installed' "--mimos-appearance=${appearance}"
+  status=$?
+  set -e
+
+  case "${status}" in
+    0)
+      break
+      ;;
+    10)
+      show_error 'El instalador solo está disponible desde el entorno Live.'
+      final_status=1
+      break
+      ;;
+    11)
+      if command -v plasma-apply-lookandfeel >/dev/null 2>&1; then
+        plasma-apply-lookandfeel -a org.mimos.claro.desktop \
+          >/dev/null 2>&1 || show_error 'No se pudo aplicar MimOS Claro.'
+      else
+        show_error 'La herramienta de temas de Plasma no está disponible.'
+      fi
+      continue
+      ;;
+    12)
+      if command -v plasma-apply-lookandfeel >/dev/null 2>&1; then
+        plasma-apply-lookandfeel -a org.mimos.oscuro.desktop \
+          >/dev/null 2>&1 || show_error 'No se pudo aplicar MimOS Oscuro.'
+      else
+        show_error 'La herramienta de temas de Plasma no está disponible.'
+      fi
+      continue
+      ;;
+    13)
+      if command -v plasma-discover >/dev/null 2>&1; then
+        plasma-discover >/dev/null 2>&1 &
+      else
+        show_error 'Discover no está disponible en este sistema.'
+        final_status=1
+      fi
+      break
+      ;;
+    *)
+      printf 'Centro de MimOS exited with status %s.\n' "${status}" >&2
+      final_status="${status}"
+      break
+      ;;
+  esac
+done
 
 if [[ "${autostart}" == true ]]; then
   touch -- "${marker}"
 fi
 
-wait "${wallpaper_pid}" 2>/dev/null || true
-
-case "${status}" in
-  0)
-    exit 0
-    ;;
-  10)
-    if [[ "${runtime_context}" != 'live' ]]; then
-      show_error 'El instalador solo está disponible desde el entorno Live.'
-      exit 1
-    fi
-    if [[ -x /usr/bin/mimos-installer ]]; then
-      /usr/bin/mimos-installer >/dev/null 2>&1 &
-      exit 0
-    fi
-    show_error 'MimOS Installer todavía no está disponible.'
-    exit 1
-    ;;
-  *)
-    printf 'Centro de MimOS exited with status %s.\n' "${status}" >&2
-    exit "${status}"
-    ;;
-esac
+exit "${final_status}"

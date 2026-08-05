@@ -1,0 +1,13 @@
+{
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "XI14"
+            }
+        ],
+        "Id": "ArrumacoOscuro",
+        "License": "MIT",
+        "Name": "Arrumaco (oscuro)",
+        "Name[es]": "Arrumaco (oscuro)"
+    }
+}

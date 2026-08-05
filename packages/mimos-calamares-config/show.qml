@@ -9,10 +9,10 @@ Presentation {
     // Every value is a role from the mimos-claro theme or a canonical colour;
     // make check re-derives each one from palette.json and fails on drift.
     // Besito is decorative only here: as text on these grounds it fails AA.
-    readonly property color slideTop: "#F5F1FE"     // roles.viewBackgroundAlternate
-    readonly property color slideBottom: "#EDE7FA"  // roles.windowBackgroundAlternate
+    readonly property color slideTop: "#FFEFF6"     // roles.viewBackgroundAlternate
+    readonly property color slideBottom: "#FFD3E5"  // roles.windowBackgroundAlternate
     readonly property color ink: "#221B3A"          // roles.windowForeground
-    readonly property color inkSoft: "#565070"      // roles.inactiveForeground
+    readonly property color inkSoft: "#7A5670"      // roles.inactiveForeground
     readonly property color accent: "#FF6FAE"       // canonical.besito
     // <<< generated palette tokens <<<
 

@@ -1,0 +1,18 @@
+{
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "XI14"
+            }
+        ],
+        "Category": "",
+        "Description": "Daytime scheme on soft Besito pinks with Noche text; Besito carries the selection and titlebars.",
+        "EnabledByDefault": true,
+        "Id": "mimos-claro",
+        "License": "MIT",
+        "Name": "MimOS Claro",
+        "Version": "0.5.0-beta.1",
+        "Website": "https://mimoslinux.org"
+    },
+    "X-Plasma-API": "5.0"
+}

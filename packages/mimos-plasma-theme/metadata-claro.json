@@ -1,0 +1,17 @@
+{
+    "KPackageStructure": "Plasma/LookAndFeel",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "XI14"
+            }
+        ],
+        "Description": "El escritorio de MimOS en claro: Nube de fondo, Noche para el texto y Abrazo en los acentos.",
+        "Description[en]": "The MimOS desktop in light: Nube ground, Noche text and Abrazo accents.",
+        "Id": "org.mimos.claro.desktop",
+        "License": "MIT",
+        "Name": "MimOS Claro",
+        "Website": "https://mimoslinux.org"
+    },
+    "X-Plasma-APIVersion": "2"
+}

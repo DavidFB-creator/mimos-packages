@@ -1,18 +1,26 @@
 # Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
 
 pkgname=mimos-welcome
-pkgver=0.4.0.beta.1
+pkgver=0.5.0.beta.1
 pkgrel=1
 pkgdesc='Centro de MimOS welcome and privacy application'
-arch=('any')
+# Compiled since the runner exists: the generic qml6 tool declares its own
+# window identity (org.qt-project.qml, the Qr icon) and KWin honours the
+# window over any desktop file, so the identity must be owned in C++.
+arch=('x86_64')
+# No debug split: the host makepkg.conf would otherwise emit a -debug
+# package and the ephemeral repository's package count is exact.
+options=('!debug')
 url='https://github.com/DavidFB-creator/MimOS'
 license=('MIT')
-depends=('bash' 'qt6-declarative')
+depends=('bash' 'qt6-declarative' 'mimos-branding')
+makedepends=('gcc' 'pkgconf')
 optdepends=(
   'kdialog: show graphical error messages'
-  'mimos-installer: launch MimOS Installer'
   'mimos-release: version-aware autostart'
-  'plasma-workspace: apply the MimOS wallpaper'
+  'mimos-welcome-live: the Live-session Centro this launcher delegates to'
+  'plasma-workspace: apply the MimOS Global Themes'
+  'discover: install applications from Centro de MimOS'
 )
 source=(
   'mimos-welcome'
@@ -21,18 +29,28 @@ source=(
   'Window.qml'
   'mimos-welcome.desktop'
   'mimos-welcome-autostart.desktop'
+  'centro-main.cpp'
   'LICENSE'
 )
-sha256sums=('cac6b2573214d9de53b6ec72ca35e62c2e1e9c778122c99e33f8c2727b89d858'
+sha256sums=('81aec1834666c6f235732423ff7f31a43c74dde160e999984160382421f2cb50'
             '7770a8046c166b04fbfd7d6fe4b1abd58ae71d0459456e18906a7b1ba3faf952'
-            '23e9e40b4fe232e5a5dc200b75bd6c7a5bb7d5b06f8513390d207c052f038c3e'
-            '4e3b3aa9f1587f76cdd736ab2b7b611628221e4a69ceecee4044c6b13d7dbf35'
+            '6f5ecf1e0c6654daf941aebcc8226b38d2516d483c07d96ccba4e4b044515dd3'
+            '39262739a86345fa459047a30f5cb039bd6cb3d69460014c522c9e7b6cf1c3cf'
             '78f118314a87d92961826cd87c84cfd12b029b99ed36e9404f4ab892aa172398'
             '78c2283d05869013f84bca6e89433ec9312bd30978293cbb49650afcaa59770c'
+            'a8db9308c68d03f83f14ffbcc1dc3c4ef84eeba684d7963ad388f1c19bb44972'
             '97d7ba0977ea88730c942625f66849bbef6536c3c6e103a39a4bb05b9fd3d9cf')
+
+build() {
+  g++ -std=c++17 -fPIC ${CXXFLAGS} centro-main.cpp \
+    -DCENTRO_WINDOW_QML='"/usr/share/mimos/welcome/Window.qml"' \
+    $(pkg-config --cflags --libs Qt6Qml Qt6Gui Qt6Core) \
+    ${LDFLAGS} -o centro-mimos
+}
 
 package() {
   install -Dm755 mimos-welcome "${pkgdir}/usr/bin/mimos-welcome"
+  install -Dm755 centro-mimos "${pkgdir}/usr/lib/mimos/centro-mimos"
   # The manual diagnostic bundle: collect, redact, show everything, and only
   # then write a local archive. Deliberately a plain CLI with no network
   # capability; Centro de MimOS's support switches still only store defaults

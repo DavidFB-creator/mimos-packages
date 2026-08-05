@@ -1,0 +1,59 @@
+# Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
+
+pkgname=mimos-welcome-live
+pkgver=0.5.0.beta.1
+pkgrel=1
+pkgdesc='Centro de MimOS for the Live session: welcome, install and community'
+# Compiled since the runner exists: the generic qml6 tool declares its own
+# window identity (org.qt-project.qml, the Qr icon) and KWin honours the
+# window over any desktop file, so the identity must be owned in C++.
+arch=('x86_64')
+# No debug split: the host makepkg.conf would otherwise emit a -debug
+# package and the ephemeral repository's package count is exact.
+options=('!debug')
+url='https://github.com/DavidFB-creator/MimOS'
+license=('MIT')
+depends=('bash' 'qt6-declarative' 'mimos-branding')
+makedepends=('gcc' 'pkgconf')
+optdepends=(
+  'kdialog: show graphical error messages'
+  'mimos-installer: launch MimOS Installer'
+  'mimos-release: version-aware autostart'
+  'plasma-workspace: apply the MimOS wallpaper'
+)
+source=(
+  'mimos-welcome-live'
+  'Main.qml'
+  'Window.qml'
+  'mimos-welcome-live-autostart.desktop'
+  'centro-main.cpp'
+  'LICENSE'
+)
+sha256sums=('02f9b1e54d1a8743b30d962e1f9db5d043316f32bb3b2f9f38311bc53189612f'
+            'ad7fa9ad1bdd5a5a7c69c9a06c5851442f331826cbd2badeaa8ed6555b1eea3e'
+            '33f1cfcea2125afa94c9bd1178f0031f55912e328f94fd4a0e02fca17794f010'
+            '9f500c6a1d1e05a0dc8b792e11fc3b888a49e7a6de80ee46893ae7c6c7f1209b'
+            'a8db9308c68d03f83f14ffbcc1dc3c4ef84eeba684d7963ad388f1c19bb44972'
+            '97d7ba0977ea88730c942625f66849bbef6536c3c6e103a39a4bb05b9fd3d9cf')
+
+build() {
+  g++ -std=c++17 -fPIC ${CXXFLAGS} centro-main.cpp \
+    -DCENTRO_WINDOW_QML='"/usr/share/mimos/welcome-live/Window.qml"' \
+    $(pkg-config --cflags --libs Qt6Qml Qt6Gui Qt6Core) \
+    ${LDFLAGS} -o centro-mimos-live
+}
+
+package() {
+  install -Dm755 mimos-welcome-live "${pkgdir}/usr/bin/mimos-welcome-live"
+  install -Dm755 centro-mimos-live \
+    "${pkgdir}/usr/lib/mimos/centro-mimos-live"
+  install -Dm644 Main.qml "${pkgdir}/usr/share/mimos/welcome-live/Main.qml"
+  install -Dm644 Window.qml \
+    "${pkgdir}/usr/share/mimos/welcome-live/Window.qml"
+  # No menu entry on purpose: mimos-welcome's entry delegates here in a Live
+  # session, so the menu carries exactly one "Centro de MimOS" (ADR-093).
+  install -Dm644 mimos-welcome-live-autostart.desktop \
+    "${pkgdir}/etc/xdg/autostart/mimos-welcome-live.desktop"
+  install -Dm644 LICENSE \
+    "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}
