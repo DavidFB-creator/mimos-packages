@@ -1,6 +1,6 @@
 pkgbase = mimos-welcome
 	pkgdesc = Centro de MimOS welcome and privacy application
-	pkgver = 0.5.0.beta.1
+	pkgver = 0.5.0.beta.2
 	pkgrel = 1
 	url = https://github.com/DavidFB-creator/MimOS
 	arch = x86_64

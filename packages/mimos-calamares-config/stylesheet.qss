@@ -163,6 +163,42 @@ QSpinBox {
     background-color: #FFEFF6;
 }
 
+/* Data views -- the partition table above all. Without these rules the QSS
+ * stops at the table's edge and everything inside is stock Breeze: a white
+ * body, a white header row and a blue selection, which is most of the pixels
+ * on the partitions page. The 0.5.0-beta.1 manual-partitioning capture shows
+ * exactly that. Typed as QAbstractItemView so the combo popups and the
+ * summary lists inherit the same ground; the selection is the Besito-with-
+ * Noche pair the rest of the system uses (ADR-092). */
+QAbstractItemView {
+    color: #221B3A;
+    background-color: #FFEFF6;
+    alternate-background-color: #FFD3E5;
+    border: 1px solid #7A5670;
+    border-radius: 6px;
+    selection-color: #221B3A;
+    selection-background-color: #FF6FAE;
+}
+
+QHeaderView::section {
+    color: #221B3A;
+    background-color: #FFD3E5;
+    border: none;
+    padding: 4px 8px;
+    font-weight: 600;
+}
+
+/* The sidebar's step list is itself a QAbstractItemView (Calamares'
+ * ProgressTreeView), so the rule above reached it and framed the violet step
+ * column with a hairline border -- visible in the first preview of this
+ * stylesheet and pointed out by David before anything shipped. branding.desc
+ * owns every colour in that list; the stylesheet's only job there is to stay
+ * out of the way. */
+#sidebarApp QAbstractItemView {
+    background: transparent;
+    border: none;
+}
+
 QLineEdit:focus,
 QComboBox:focus,
 QSpinBox:focus {
@@ -172,12 +208,19 @@ QSpinBox:focus {
 /* The container, not just the menu. branding.desc paints the step list, but
  * this box sits behind the logo -- leaving it a different colour is what put a
  * dark band above a purple sidebar. */
+/* focusDecoration, deliberately the same violet branding.desc uses for
+ * SidebarBackground. This rule used to say selectionBackground, which WAS that
+ * violet -- until ADR-092 moved the selection to canonical Besito and the
+ * container silently followed it to hot pink while the step list stayed
+ * violet: a pink frame around purple steps that nobody chose. The 0.5.0-beta.1
+ * captures show that clash; the 0.4 image validated the all-violet sidebar
+ * with this same dark-surface lockup. */
 /* Wide enough for the horizontal lockup to read. At the default ~180px the
  * 979x400 master scaled down to a squashed thumbnail; the heart lost its shape
  * before the wordmark became legible. */
 #sidebarApp,
 #sidebarApp > QWidget {
-    background-color: #FF6FAE;
+    background-color: #5B3BE0;
 }
 
 #sidebarApp {
@@ -252,9 +295,12 @@ QScrollBar::sub-page {
     background: transparent;
 }
 
-/* On the sidebar the handle sits on Abrazo, where hoverDecoration is too close to
- * the ground to find. selectionForeground is the same white the step labels use. */
+/* On the sidebar the handle sits on the violet ground, where hoverDecoration is
+ * too close to find. tooltipForeground is the same near-white the step labels
+ * use (branding.desc SidebarText); selectionForeground stopped being that white
+ * when ADR-092 made the selection Besito-with-Noche, so naming it here would
+ * paint a near-black handle on a dark violet column. */
 #sidebarApp QScrollBar::handle:vertical,
 #sidebarApp QScrollBar::handle:horizontal {
-    background-color: #221B3A;
+    background-color: #F8F4FF;
 }
