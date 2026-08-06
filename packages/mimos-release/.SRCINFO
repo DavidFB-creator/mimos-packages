@@ -1,6 +1,6 @@
 pkgbase = mimos-release
 	pkgdesc = Release identity for MimOS
-	pkgver = 0.5.0.beta.2
+	pkgver = 0.5.0.beta.3
 	pkgrel = 1
 	url = https://github.com/DavidFB-creator/MimOS
 	install = mimos-release.install
@@ -11,9 +11,9 @@ pkgbase = mimos-release
 	source = mimos-mirrorlist
 	source = mimos-release.install
 	source = LICENSE
-	sha256sums = ef095dc935ba2336f46d3b8c17aa78286b2d56ea8494aa216a7ef919c020503f
+	sha256sums = 0d9a06c50947d60d64da7fdfd8c17eb4ac0e66ab81d1bf30f210cdbb313e1a29
 	sha256sums = 324741c65ad2bdafe4d9c45f15ea24e57c6e48ae31bd3f89e08c7e5df482f8ae
-	sha256sums = a33d37fc8dd7428197a09cbce640f438c0eab88908e663e2103c0074666274ca
+	sha256sums = e9fe9cb577d4f2a07660db3f1e25f3dac81d4d0aae856c201d39f92889f60db5
 	sha256sums = 97d7ba0977ea88730c942625f66849bbef6536c3c6e103a39a4bb05b9fd3d9cf
 
 pkgname = mimos-release

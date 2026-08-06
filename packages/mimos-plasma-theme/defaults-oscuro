@@ -5,7 +5,7 @@
 widgetStyle=Breeze
 
 [kdeglobals][General]
-ColorScheme=MimOS Oscuro
+ColorScheme=mimos-oscuro
 
 [kdeglobals][Icons]
 Theme=mimos-escritorio

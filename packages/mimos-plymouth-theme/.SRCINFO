@@ -1,0 +1,19 @@
+pkgbase = mimos-plymouth-theme
+	pkgdesc = MimOS boot splash for Plymouth: MIMI over the Noche gradient
+	pkgver = 0.5.0.beta.3
+	pkgrel = 1
+	url = https://github.com/DavidFB-creator/MimOS
+	install = mimos-plymouth-theme.install
+	arch = any
+	license = MIT
+	depends = plymouth
+	source = mimos.plymouth
+	source = mimos.script
+	source = mimi-boot.png
+	source = LICENSE
+	sha256sums = 4d8dba64df61cea009e86f31fc4b35f9a539adf509733a509e20176662eb4428
+	sha256sums = 26b7827af0c93e13690c2f638237e33ac47d675f0b05ea449d95611db80bfa1d
+	sha256sums = ac472d8ec8d8ebfff29a05def30b22aaddcd5b06c84bd0a53afecd15ab0242d2
+	sha256sums = 97d7ba0977ea88730c942625f66849bbef6536c3c6e103a39a4bb05b9fd3d9cf
+
+pkgname = mimos-plymouth-theme

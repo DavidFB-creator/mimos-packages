@@ -1,0 +1,33 @@
+# Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
+
+pkgname=mimos-plymouth-theme
+pkgver=0.5.0.beta.3
+pkgrel=1
+pkgdesc='MimOS boot splash for Plymouth: MIMI over the Noche gradient'
+arch=('any')
+url='https://github.com/DavidFB-creator/MimOS'
+license=('MIT')
+# plymouth draws the theme; the artwork is self-contained (MIMI is a
+# committed rasterisation, not a symlink into mimos-branding, because the
+# initramfs copies the theme directory and cannot follow links out of it).
+depends=('plymouth')
+install=mimos-plymouth-theme.install
+source=(
+  'mimos.plymouth'
+  'mimos.script'
+  'mimi-boot.png'
+  'LICENSE'
+)
+sha256sums=('4d8dba64df61cea009e86f31fc4b35f9a539adf509733a509e20176662eb4428'
+            '26b7827af0c93e13690c2f638237e33ac47d675f0b05ea449d95611db80bfa1d'
+            'ac472d8ec8d8ebfff29a05def30b22aaddcd5b06c84bd0a53afecd15ab0242d2'
+            '97d7ba0977ea88730c942625f66849bbef6536c3c6e103a39a4bb05b9fd3d9cf')
+
+package() {
+  local theme_dir="${pkgdir}/usr/share/plymouth/themes/mimos"
+  install -Dm644 mimos.plymouth "${theme_dir}/mimos.plymouth"
+  install -Dm644 mimos.script "${theme_dir}/mimos.script"
+  install -Dm644 mimi-boot.png "${theme_dir}/mimi-boot.png"
+  install -Dm644 LICENSE \
+    "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}

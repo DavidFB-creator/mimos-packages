@@ -1,7 +1,7 @@
 # Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
 
 pkgname=mimos-welcome
-pkgver=0.5.0.beta.2
+pkgver=0.5.0.beta.3
 pkgrel=1
 pkgdesc='Centro de MimOS welcome and privacy application'
 # Compiled since the runner exists: the generic qml6 tool declares its own
@@ -32,7 +32,7 @@ source=(
   'centro-main.cpp'
   'LICENSE'
 )
-sha256sums=('81aec1834666c6f235732423ff7f31a43c74dde160e999984160382421f2cb50'
+sha256sums=('aec4cb873d29ddd57d3de0a4f50db0b0539a15e6e99f57644b568f7e19c01e40'
             '7770a8046c166b04fbfd7d6fe4b1abd58ae71d0459456e18906a7b1ba3faf952'
             '6f5ecf1e0c6654daf941aebcc8226b38d2516d483c07d96ccba4e4b044515dd3'
             '39262739a86345fa459047a30f5cb039bd6cb3d69460014c522c9e7b6cf1c3cf'

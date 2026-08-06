@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Wire the MimOS package channel into pacman.conf.
 #
 # Owning /etc/pacman.conf was the first choice and was abandoned on evidence:
@@ -117,9 +118,23 @@ _mimos_configure_grub() {
       "${mimos_grub_default}"
   elif grep -Fq "${mimos_grub_marker_begin}" "${mimos_grub_default}" 2>/dev/null
   then
-    # Already current: do nothing, so an upgrade cannot append a second copy and
-    # a user who edited the block keeps their edit.
-    return 0
+    if ! grep -Fqx 'GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet splash"' \
+      "${mimos_grub_default}" 2>/dev/null; then
+      # Already current: do nothing, so an upgrade cannot append a second copy
+      # and a user who edited the block keeps their edit.
+      return 0
+    fi
+    # One unpublished 0.5.0-beta.3 candidate wrote a cmdline line into this
+    # block, and it broke encrypted targets: Calamares' grubcfg merges its
+    # cryptdevice= into the FIRST assignment it finds and copies later lines
+    # verbatim, so the block's line — last in the file, shell semantics —
+    # overrode the merged one and the initramfs could not mount the root.
+    # Caught by the encrypted scenario against exact bytes; no published
+    # image ever carried it. Strip and rewrite without the line.
+    _mimos_strip_grub_block \
+      "${mimos_grub_marker_begin}" "${mimos_grub_marker_end}" || return 0
+    printf '  removing the cmdline line from the MimOS GRUB block in %s\n' \
+      "${mimos_grub_default}"
   fi
 
   cat >> "${mimos_grub_default}" <<EOF
@@ -131,6 +146,13 @@ ${mimos_grub_marker_begin}
 GRUB_DISABLE_OS_PROBER=false
 # The boot menu of an installed MimOS said "Arch Linux" until this was set.
 GRUB_DISTRIBUTOR="MimOS"
+# Deliberately NO GRUB_CMDLINE_LINUX_DEFAULT here. Calamares' grubcfg module
+# adds splash itself when it detects plymouth in the target, merging it into
+# the file's FIRST assignment of that variable — and any assignment this
+# block appended would sit later in the file and override the merged one,
+# which on an encrypted system deletes cryptdevice= and leaves the initramfs
+# unable to mount the root. Measured against exact composed bytes; see
+# ADR-095.
 ${mimos_grub_marker_end}
 EOF
   printf '  GRUB will look for other systems and name this one (%s)\n' \

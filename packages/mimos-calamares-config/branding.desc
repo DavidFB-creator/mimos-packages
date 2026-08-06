@@ -11,9 +11,9 @@ navigation: widget
 strings:
   productName: MimOS
   shortProductName: MimOS
-  version: 0.5.0-beta.2
+  version: 0.5.0-beta.3
   shortVersion: 0.5
-  versionedName: 'MimOS 0.5 "Mimito" Beta 2'
+  versionedName: 'MimOS 0.5 "Mimito" Beta 3'
   shortVersionedName: MimOS 0.5
   bootloaderEntryName: MimOS
   productUrl: ''

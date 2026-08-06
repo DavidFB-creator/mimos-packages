@@ -97,11 +97,19 @@ apply_wallpaper() {
 # default, and the launcher reads the session's ColorScheme so a user who
 # switches to Oscuro gets a matching window (ADR-093).
 detect_appearance() {
-  local kdeglobals="${XDG_CONFIG_HOME:-${HOME}/.config}/kdeglobals"
-  local scheme=''
-  if [[ -f "${kdeglobals}" ]]; then
-    scheme="$(sed -n 's/^ColorScheme=//p' "${kdeglobals}" | head -n 1)"
-  fi
+  local config_home="${XDG_CONFIG_HOME:-${HOME}/.config}"
+  local scheme='' candidate
+  # KConfig cascade order: the user's kdeglobals wins, and the look-and-feel
+  # apply writes its scheme into kdedefaults/kdeglobals while REMOVING the
+  # entry from the main file — measured on the 0.5.0-beta.2 bytes, where
+  # reading only the main file reopened the Centro in claro right after the
+  # user switched to oscuro.
+  for candidate in "${config_home}/kdeglobals" \
+    "${config_home}/kdedefaults/kdeglobals"; do
+    [[ -f "${candidate}" ]] || continue
+    scheme="$(sed -n 's/^ColorScheme=//p' "${candidate}" | head -n 1)"
+    [[ -n "${scheme}" ]] && break
+  done
   case "${scheme}" in
     *[Oo]scur*|*[Nn]octurn*|*[Dd]ark*|*[Bb]reeze[Dd]ark*)
       printf 'oscuro'

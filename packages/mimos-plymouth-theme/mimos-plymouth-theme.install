@@ -1,0 +1,35 @@
+# shellcheck shell=bash
+# The default theme lives in /etc/plymouth/plymouthd.conf, a file the
+# plymouth package owns, so this package selects itself through
+# plymouth-set-default-theme — the tool that file belongs to — rather than
+# shipping a copy of another package's configuration. No -R: the image
+# build has no plymouth hook in its initramfs, and the installed target's
+# initramfs is generated after packages land (Calamares initcpiocfg adds
+# the plymouth hook by itself when it detects the binary).
+
+_mimos_select_theme() {
+  if command -v plymouth-set-default-theme >/dev/null 2>&1; then
+    plymouth-set-default-theme mimos || {
+      printf 'warning: could not select the mimos Plymouth theme\n' >&2
+      return 0
+    }
+    printf '  Plymouth will draw the MimOS boot splash\n'
+  fi
+}
+
+post_install() {
+  _mimos_select_theme
+}
+
+post_upgrade() {
+  _mimos_select_theme
+}
+
+pre_remove() {
+  # -R would rebuild the initramfs from a scriptlet, which this project
+  # never does; resetting to the shipped default leaves a consistent
+  # configuration and the next initramfs rebuild picks it up.
+  if command -v plymouth-set-default-theme >/dev/null 2>&1; then
+    plymouth-set-default-theme --reset || true
+  fi
+}

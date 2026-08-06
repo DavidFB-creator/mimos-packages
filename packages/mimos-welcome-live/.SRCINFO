@@ -1,6 +1,6 @@
 pkgbase = mimos-welcome-live
 	pkgdesc = Centro de MimOS for the Live session: welcome, install and community
-	pkgver = 0.5.0.beta.2
+	pkgver = 0.5.0.beta.3
 	pkgrel = 1
 	url = https://github.com/DavidFB-creator/MimOS
 	arch = x86_64
@@ -21,7 +21,7 @@ pkgbase = mimos-welcome-live
 	source = mimos-welcome-live-autostart.desktop
 	source = centro-main.cpp
 	source = LICENSE
-	sha256sums = 02f9b1e54d1a8743b30d962e1f9db5d043316f32bb3b2f9f38311bc53189612f
+	sha256sums = 44410985ab3c05533929d1ade3baa89832a819dc8e56257642942a0ae63f3ef2
 	sha256sums = ad7fa9ad1bdd5a5a7c69c9a06c5851442f331826cbd2badeaa8ed6555b1eea3e
 	sha256sums = 33f1cfcea2125afa94c9bd1178f0031f55912e328f94fd4a0e02fca17794f010
 	sha256sums = 9f500c6a1d1e05a0dc8b792e11fc3b888a49e7a6de80ee46893ae7c6c7f1209b

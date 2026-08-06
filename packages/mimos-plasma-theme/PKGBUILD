@@ -1,7 +1,7 @@
 # Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
 
 pkgname=mimos-plasma-theme
-pkgver=0.5.0.beta.2
+pkgver=0.5.0.beta.3
 pkgrel=1
 pkgdesc='MimOS Claro and MimOS Oscuro Plasma Global Themes with the MIMI splash'
 arch=('any')
@@ -16,6 +16,8 @@ source=(
   'metadata-oscuro.json'
   'defaults-claro'
   'defaults-oscuro'
+  'lookandfeel-claro-colors'
+  'lookandfeel-oscuro-colors'
   'splash-claro.qml'
   'splash-oscuro.qml'
   'desktoptheme-claro-colors'
@@ -29,14 +31,16 @@ source=(
 )
 sha256sums=('c64ce39587fdd00fcf3740ac706dd6e3e2e2f9efe341c32f0a5508d1c70fe879'
             '6b9a9b32f608c44f560664c9dc9d65db83f2aba77051d5bdea1a507af6db6482'
-            'fe7ba2ae3bfbe9a366a38920932232041ed7883815df526d5792177098981168'
-            'b79d7410c3d995a22e42715a68533d0c5056ed510c2650082ccb3ca8daa6b48c'
+            '90ca556558d13c662560785b14d10d160475702ee0f47ac1779513d9e6288b95'
+            '9211af50724cce9a65345b1d1259f9f273ee412b278914c132508943bc67caee'
+            'e4694cc6465134df3d7256157dadd891c7819084bff4113b6e0b4c1b3713dda0'
+            'cfcb83398486bf65ed4d1392ac40830ecb99f11d082eede842ec8561e5efe8ea'
             '04b9f32a5b2596cd7f11bd62ffa6bd047df8603fcfc8352f59093d7cd2ac1638'
             'db34c53c0f08202bc19ba5deb8354ab73b48ab9910a80efdd9b9c6bad7fda889'
             '6dde0a3acf98981ba505950dd608605a487d6c46a991fdc42e70e8712543b9a5'
-            '126ac1408b9e166f0e311712b93164c00b752b1589263dc9039088d50d3557f9'
+            'b9a91535f1e9ec1b55365c2d1fabbed5afa08cec158b0c76aaee305dad25973e'
             '197176328994327f22662e93a104df5dfc42c110d5db37d191249f81d8008100'
-            '35f06d03667b492881b95dab02f2d6514754fed470dff0a611100e0367b3cf56'
+            '93d1ba8e28c838510660b67606eecd28b05ab1143195b835373798eab643363a'
             'c4f48df31768ad576925151d2f2ccbaca91f4b3709f1aae6848b644e8cedde4a'
             'e3fe67bf014a64022461b1f774a2b90d3f24a03672f5282a759aa4fe0bc45015'
             '8f3ea114a646483afdc446d235b311cda2d11efab4b394302f203ca6968c8b34'
@@ -54,6 +58,12 @@ package() {
       "${lnf_root}/${lnf_id}/metadata.json"
     install -Dm644 "defaults-${variant}" \
       "${lnf_root}/${lnf_id}/contents/defaults"
+    # The scheme inside the package, byte-identical to mimos-branding's
+    # (the generator refuses drift). Measured on the 0.5.0-beta.2 bytes:
+    # without this file the look-and-feel apply skips the colours even
+    # when the defaults name resolves, and with it the switch works.
+    install -Dm644 "lookandfeel-${variant}-colors" \
+      "${lnf_root}/${lnf_id}/contents/colors"
     install -Dm644 "splash-${variant}.qml" \
       "${splash_dir}/Splash.qml"
     # A real session capture of the theme, so the Quick Settings strip and

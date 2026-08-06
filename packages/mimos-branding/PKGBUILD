@@ -1,7 +1,7 @@
 # Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
 
 pkgname=mimos-branding
-pkgver=0.5.0.beta.2
+pkgver=0.5.0.beta.3
 pkgrel=1
 pkgdesc='Runtime visual identity assets for MimOS'
 arch=('any')
@@ -88,7 +88,7 @@ sha256sums=('c4eba059e0aec667b32e76e73b24c493e02cd87f962dfd133d50da134d510cd0'
             'ead085637962480d1317c3d044d3a01ac7fdb9a0c3a8dec4941574310d7c1040'
             '470e5729b35f6044c0a691ea90aeab5792fcb1f76d3561ad1db8a13170a76ba5'
             'f83db83900ef01e14a9e3b26d8aa0becc378b128b7829bbfa44ed4422a31be3b'
-            '3fde297082741c1401605b4492b1d0ccc67d32682c362a9b9b76e2c8bd9e5b0d'
+            'ad7542cf3ab50a9fbe4af58128bbb9e57afd3c7daa60a46aca2a3bdd38ae5216'
             '67fd3d0f31f568871054d368387bfd8505163ea627b2bcbef1dba18a5ce99aef'
             '18032d2c9656c0961551efceb7cc7a78ab17269d89b54c3d2fcd72f3003aa84d'
             'e4694cc6465134df3d7256157dadd891c7819084bff4113b6e0b4c1b3713dda0'
