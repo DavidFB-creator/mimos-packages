@@ -1,7 +1,7 @@
 # Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
 
 pkgname=mimos-live-environment
-pkgver=0.5.0.beta.3
+pkgver=0.5.0.beta.4
 pkgrel=1
 pkgdesc='Removable Live-session state for MimOS installation media'
 arch=('any')

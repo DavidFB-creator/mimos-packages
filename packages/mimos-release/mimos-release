@@ -1,10 +1,10 @@
 NAME="MimOS"
-VERSION="0.5 Mimito Beta 3"
-VERSION_ID="0.5.0-beta.3"
+VERSION="0.5 Mimito Beta 4"
+VERSION_ID="0.5.0-beta.4"
 VERSION_CODENAME=mimito
 ID=mimos
 ID_LIKE=arch
-PRETTY_NAME="MimOS 0.5 (Mimito) Beta 2"
+PRETTY_NAME="MimOS 0.5 (Mimito) Beta 4"
 VARIANT="Live system"
 VARIANT_ID=live
 HOME_URL="https://github.com/DavidFB-creator/MimOS"

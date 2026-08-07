@@ -1,7 +1,7 @@
 # Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
 
 pkgname=mimos-plasma-theme
-pkgver=0.5.0.beta.3
+pkgver=0.5.0.beta.4
 pkgrel=1
 pkgdesc='MimOS Claro and MimOS Oscuro Plasma Global Themes with the MIMI splash'
 arch=('any')
@@ -33,14 +33,14 @@ sha256sums=('c64ce39587fdd00fcf3740ac706dd6e3e2e2f9efe341c32f0a5508d1c70fe879'
             '6b9a9b32f608c44f560664c9dc9d65db83f2aba77051d5bdea1a507af6db6482'
             '90ca556558d13c662560785b14d10d160475702ee0f47ac1779513d9e6288b95'
             '9211af50724cce9a65345b1d1259f9f273ee412b278914c132508943bc67caee'
-            'e4694cc6465134df3d7256157dadd891c7819084bff4113b6e0b4c1b3713dda0'
+            '9fa2d3fe9ec2eeb967e07ef52388d63b623f0c9d0e8d703dfb62fe4a1786068c'
             'cfcb83398486bf65ed4d1392ac40830ecb99f11d082eede842ec8561e5efe8ea'
             '04b9f32a5b2596cd7f11bd62ffa6bd047df8603fcfc8352f59093d7cd2ac1638'
             'db34c53c0f08202bc19ba5deb8354ab73b48ab9910a80efdd9b9c6bad7fda889'
-            '6dde0a3acf98981ba505950dd608605a487d6c46a991fdc42e70e8712543b9a5'
-            'b9a91535f1e9ec1b55365c2d1fabbed5afa08cec158b0c76aaee305dad25973e'
+            '1360a3e4eff94b0d176f3194efccabda17db35f99563a1afa0fbc1a788250899'
+            '48dc48a1867cc87e7578beaa6fba8b5afdf80bb5a87b3cce3cbec24c74d006b6'
             '197176328994327f22662e93a104df5dfc42c110d5db37d191249f81d8008100'
-            '93d1ba8e28c838510660b67606eecd28b05ab1143195b835373798eab643363a'
+            'c6f131bd83410a8669a22c98081c678d21a2fbd20797302932031e44d9719fc8'
             'c4f48df31768ad576925151d2f2ccbaca91f4b3709f1aae6848b644e8cedde4a'
             'e3fe67bf014a64022461b1f774a2b90d3f24a03672f5282a759aa4fe0bc45015'
             '8f3ea114a646483afdc446d235b311cda2d11efab4b394302f203ca6968c8b34'

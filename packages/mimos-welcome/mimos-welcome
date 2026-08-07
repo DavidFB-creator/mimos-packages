@@ -89,12 +89,28 @@ fi
 # changes the wallpaper too). A missing tool or image is not worth an
 # error dialog on top of an otherwise-applied theme; the theme switch
 # already reported its own outcome.
+#
+# A wallpaper the user chose is theirs (David, 2026-08-07): the switch only
+# swaps between the Arrumaco pair. If the desktop currently shows anything
+# that is not an Arrumaco, this function must not touch it. No entry at all
+# means the containment default is still in place, which is ours to move.
 apply_theme_wallpaper() {
   local variant="$1"
   local wallpaper_dir="${mimos_test_wallpaper_dir:-/usr/share/backgrounds/mimos}"
   local image="${wallpaper_dir}/arrumaco-${variant}.png"
   command -v plasma-apply-wallpaperimage >/dev/null 2>&1 || return 0
   [[ -r "${image}" ]] || return 0
+  local config_home="${XDG_CONFIG_HOME:-${HOME}/.config}"
+  local appletsrc="${config_home}/plasma-org.kde.plasma.desktop-appletsrc"
+  local current
+  # A first login has no appletsrc yet; a missing file must read as "no
+  # choice made", not kill the launcher under pipefail.
+  current="$(sed -n 's/^Image=//p' "${appletsrc}" 2>/dev/null | head -n 1 || true)"
+  case "${current}" in
+    ''|"file://${wallpaper_dir}/arrumaco-claro.png"|\
+    "file://${wallpaper_dir}/arrumaco-oscuro.png") ;;
+    *) return 0 ;;
+  esac
   plasma-apply-wallpaperimage "${image}" >/dev/null 2>&1 || true
 }
 

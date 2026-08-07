@@ -1,6 +1,6 @@
 pkgbase = mimos-welcome-live
 	pkgdesc = Centro de MimOS for the Live session: welcome, install and community
-	pkgver = 0.5.0.beta.3
+	pkgver = 0.5.0.beta.4
 	pkgrel = 1
 	url = https://github.com/DavidFB-creator/MimOS
 	arch = x86_64

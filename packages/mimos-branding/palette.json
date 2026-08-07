@@ -35,7 +35,7 @@
     "mimos-claro": {
       "name": "MimOS Claro",
       "appearance": "light",
-      "description": "Daytime scheme on soft Besito pinks with Noche text; Besito carries the selection and titlebars.",
+      "description": "Daytime scheme on soft Besito pinks with Noche text; deep Besito carries the selection, canonical Besito the titlebars.",
       "roles": {
         "windowBackground": "#FFE9F3",
         "windowBackgroundAlternate": "#FFD3E5",
@@ -47,6 +47,8 @@
         "buttonForeground": "#221B3A",
         "selectionBackground": "#FF6FAE",
         "selectionForeground": "#221B3A",
+        "plasmoidSelectionBackground": "#7D1842",
+        "plasmoidSelectionForeground": "#F8F4FF",
         "tooltipBackground": "#221B3A",
         "tooltipForeground": "#F8F4FF",
         "headerBackground": "#FFD3E5",
@@ -65,7 +67,10 @@
         "inactiveTitleForeground": "#7A5670"
       },
       "derivations": {
-        "selectionBackground": "Canonical Besito with Noche text (6.33:1). Chosen by David on 2026-08-04 over the deepened #C22E71 after seeing both rendered: Breeze folders wear the selection colour, and dark magenta folders lost to light pink ones. The 3:1 indicator pair this fails is a recorded exemption; see contrastRequirements.nonTextPairsComment.",
+        "selectionBackground": "Canonical Besito with Noche text (6.33:1), RESTORED on 2026-08-07 after a live trial on David's laptop. The selection role paints three things at once — progress bars, selected rows and Breeze folders — and the day's two deepenings (#B82565, then #7D1842) made the bars legible while turning Dolphin's rows and folders wine, which David rejected on sight. The split is the answer: applications keep Besito (rows and folders pink), and the plasmoid selection below carries the wine for the panel popups where the invisible-bars defect actually lived. Application progress bars on white views stay Besito — accepted, the popups were the reported defect.",
+        "selectionForeground": "Noche on Besito is 6.33:1 and passes AA.",
+        "plasmoidSelectionBackground": "Wine Besito #7D1842 for the desktop theme only — the panel popups (battery, brightness) paint their bars from the plasmoid scheme, not the application scheme, so the wine lives exactly where canonical Besito was invisible (2.24:1). 8.75:1 on windowBackground. Chosen by David on 2026-08-07 from three rendered rounds on his own laptop; the split itself was verified there by editing the installed desktop theme live.",
+        "plasmoidSelectionForeground": "Nube on the wine is 9.31:1.",
         "positive": "Calma is a 1.9:1 pair on white and cannot carry text at all; darkened to #136B5B, a teal of the same hue that reaches AA on both light surfaces.",
         "negative": "Besito is decorative and fails as light-surface text; deepened to #B0123F, a red-pink of the same family.",
         "neutral": "Amber #7A5200 has no canonical entry; chosen because no canonical colour reaches AA as a warning on both the window and view surfaces.",
@@ -94,6 +99,8 @@
         "buttonForeground": "#F8F4FF",
         "selectionBackground": "#FF6FAE",
         "selectionForeground": "#221B3A",
+        "plasmoidSelectionBackground": "#FF6FAE",
+        "plasmoidSelectionForeground": "#221B3A",
         "tooltipBackground": "#2C2444",
         "tooltipForeground": "#F8F4FF",
         "headerBackground": "#2C2444",
@@ -139,6 +146,8 @@
         "buttonForeground": "#EFE3DA",
         "selectionBackground": "#6E5A9E",
         "selectionForeground": "#FDF6F0",
+        "plasmoidSelectionBackground": "#6E5A9E",
+        "plasmoidSelectionForeground": "#FDF6F0",
         "tooltipBackground": "#251E2D",
         "tooltipForeground": "#EFE3DA",
         "headerBackground": "#251E2D",
@@ -200,6 +209,11 @@
       [
         "selectionForeground",
         "selectionBackground",
+        4.5
+      ],
+      [
+        "plasmoidSelectionForeground",
+        "plasmoidSelectionBackground",
         4.5
       ],
       [
@@ -283,9 +297,14 @@
         "focusDecoration",
         "viewBackground",
         3.0
+      ],
+      [
+        "plasmoidSelectionBackground",
+        "windowBackground",
+        3.0
       ]
     ],
-    "nonTextPairsComment": "selectionBackground/windowBackground carried a 3.0 pair until 2026-08-04. It is deliberately exempt now: David chose canonical Besito as the selection (2.24:1 on the pink window ground) because Breeze folder icons take the selection colour and the deepened #C22E71 alternative painted every folder dark magenta. Two measured facts support the exemption: KDE's own Breeze ships its selection at 2.36:1 against its window ground, and a selected row is identified by its text pair as well, which stays gated at 4.5 and measures 6.33:1 (Noche on Besito). This exempts exactly one pair; focus decoration keeps both 3.0 gates."
+    "nonTextPairsComment": "The application selectionBackground/windowBackground pair remains exempt (claro Besito, 2.24:1) with TWO recorded reasons now: the 2026-08-04 folder rendering, and 2026-08-07's live trial where David rejected both deepened selections on sight in Dolphin — wine rows and wine folders. What IS gated is the plasmoid selection against the window ground, because the invisible-bars defect the first physical session found lived in the panel popups, which paint from the desktop theme's scheme: claro 8.75:1 (wine #7D1842), oscuro 6.33:1, nocturnos 3.05:1 (a thin margin, noted deliberately). The plasmoid pair may not be exempted; an application selection that turns illegible in popups must be solved by splitting the roles, exactly as this was."
   },
   "logoSurfaces": {
     "mimos-logo-horizontal.svg": {

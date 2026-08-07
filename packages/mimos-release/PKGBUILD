@@ -1,16 +1,18 @@
 # Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
 
 pkgname=mimos-release
-pkgver=0.5.0.beta.3
+pkgver=0.5.0.beta.4
 pkgrel=1
 pkgdesc='Release identity for MimOS'
 arch=('any')
 url='https://github.com/DavidFB-creator/MimOS'
 license=('MIT')
-source=('mimos-release' 'mimos-mirrorlist' 'mimos-release.install' 'LICENSE')
-sha256sums=('0d9a06c50947d60d64da7fdfd8c17eb4ac0e66ab81d1bf30f210cdbb313e1a29'
+source=('mimos-release' 'mimos-mirrorlist' 'mimos-release.install'
+        'mimos-remove-unneeded-broadcom-wl' 'LICENSE')
+sha256sums=('3ca1cbf4fd3b88807e493b39e1c102a91f05a0991100d4f2795e70e446f07081'
             '324741c65ad2bdafe4d9c45f15ea24e57c6e48ae31bd3f89e08c7e5df482f8ae'
             'e9fe9cb577d4f2a07660db3f1e25f3dac81d4d0aae856c201d39f92889f60db5'
+            '56ed0532501f5d37e4de26236f83d9a5036f3c208d6d6782d16de9f6b3199c61'
             '97d7ba0977ea88730c942625f66849bbef6536c3c6e103a39a4bb05b9fd3d9cf')
 # The mirrorlist is configuration: a user who edits it must not have it
 # overwritten by the next update, and pacman must leave a .pacnew instead.
@@ -27,5 +29,11 @@ package() {
   # the Live matrix's `pacman -Syu`. See packages/mimos-keyring/KEY.md.
   install -Dm644 mimos-mirrorlist \
     "${pkgdir}/etc/pacman.d/mimos-mirrorlist"
+  # Calamares runs this in the target after `packages`; it also serves an
+  # existing installation by hand. It removes the broadcom-wl blob only when
+  # no Broadcom wireless PCI device exists, because the blob's class-wide
+  # alias loads it on every machine and taints the kernel. See ADR-097.
+  install -Dm755 mimos-remove-unneeded-broadcom-wl \
+    "${pkgdir}/usr/lib/mimos/mimos-remove-unneeded-broadcom-wl"
   install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }

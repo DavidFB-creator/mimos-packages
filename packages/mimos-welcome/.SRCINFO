@@ -1,6 +1,6 @@
 pkgbase = mimos-welcome
 	pkgdesc = Centro de MimOS welcome and privacy application
-	pkgver = 0.5.0.beta.3
+	pkgver = 0.5.0.beta.4
 	pkgrel = 1
 	url = https://github.com/DavidFB-creator/MimOS
 	arch = x86_64
@@ -24,7 +24,7 @@ pkgbase = mimos-welcome
 	source = mimos-welcome-autostart.desktop
 	source = centro-main.cpp
 	source = LICENSE
-	sha256sums = aec4cb873d29ddd57d3de0a4f50db0b0539a15e6e99f57644b568f7e19c01e40
+	sha256sums = 97eae4ba9f95dc32bf0e9d758df187bf645388660442fdb2248e7c08666136e3
 	sha256sums = 7770a8046c166b04fbfd7d6fe4b1abd58ae71d0459456e18906a7b1ba3faf952
 	sha256sums = 6f5ecf1e0c6654daf941aebcc8226b38d2516d483c07d96ccba4e4b044515dd3
 	sha256sums = 39262739a86345fa459047a30f5cb039bd6cb3d69460014c522c9e7b6cf1c3cf

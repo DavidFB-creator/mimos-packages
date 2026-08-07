@@ -1,6 +1,6 @@
 pkgbase = mimos-live-environment
 	pkgdesc = Removable Live-session state for MimOS installation media
-	pkgver = 0.5.0.beta.3
+	pkgver = 0.5.0.beta.4
 	pkgrel = 1
 	url = https://github.com/DavidFB-creator/MimOS
 	install = mimos-live-environment.install

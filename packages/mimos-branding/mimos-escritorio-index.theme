@@ -2,6 +2,7 @@
 Name=MimOS Escritorio
 Comment=Iconos de aplicación de MimOS sobre Breeze
 Inherits=breeze
+FollowsColorScheme=true
 Directories=small/apps,scalable/apps,scalable/places
 
 [small/apps]

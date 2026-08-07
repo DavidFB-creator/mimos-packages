@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# Removes the proprietary broadcom-wl driver when no Broadcom wireless
+# hardware exists on this machine.
+#
+# Why this exists: Archiso's releng profile ships broadcom-wl so Broadcom
+# laptops get Wi-Fi in the Live session, and Calamares copies the whole
+# system, so every installed MimOS inherited it. The blob declares a single
+# PCI alias -- pci:v*d*sv*sd*bc02sc80i*, "any vendor, any device, class
+# 02.80" -- so udev loads it on EVERY machine with any wireless card. On
+# hardware it cannot drive it sits at zero users while tainting the kernel
+# and breaking the return-thunk mitigations ("Unpatched return thunk in
+# use"). Measured on David's laptop, the first physical boot of 0.5 bytes:
+# Intel AX210, wl loaded, kernel WARNING at every boot. See ADR-097.
+#
+# Run by Calamares in the target after `packages` (so a Broadcom user keeps
+# their Wi-Fi driver and nobody else carries it), and runnable by hand on an
+# existing installation:  sudo /usr/lib/mimos/mimos-remove-unneeded-broadcom-wl
+set -Eeuo pipefail
+
+pci_devices="${mimos_test_sys_pci:-/sys/bus/pci/devices}"
+
+# Broadcom is PCI vendor 0x14e4; wl drives class 0x0280 (network controller,
+# wireless). Vendor alone is deliberately not enough: a Broadcom *ethernet*
+# chip (tg3) must not keep the wireless blob installed.
+broadcom_wireless=0
+for device in "${pci_devices}"/*; do
+  [[ -r "${device}/vendor" && -r "${device}/class" ]] || continue
+  [[ "$(<"${device}/vendor")" == '0x14e4' ]] || continue
+  case "$(<"${device}/class")" in
+    0x0280*) broadcom_wireless=1 ;;
+  esac
+done
+
+if [[ "${broadcom_wireless}" -eq 1 ]]; then
+  printf 'Broadcom wireless hardware present; keeping broadcom-wl.\n'
+  exit 0
+fi
+
+if ! pacman -Q broadcom-wl >/dev/null 2>&1; then
+  printf 'broadcom-wl is not installed; nothing to do.\n'
+  exit 0
+fi
+
+printf 'No Broadcom wireless hardware; removing broadcom-wl.\n'
+pacman -R --noconfirm broadcom-wl

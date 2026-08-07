@@ -6,12 +6,12 @@
             }
         ],
         "Category": "",
-        "Description": "Daytime scheme on soft Besito pinks with Noche text; Besito carries the selection and titlebars.",
+        "Description": "Daytime scheme on soft Besito pinks with Noche text; deep Besito carries the selection, canonical Besito the titlebars.",
         "EnabledByDefault": true,
         "Id": "mimos-claro",
         "License": "MIT",
         "Name": "MimOS Claro",
-        "Version": "0.5.0-beta.3",
+        "Version": "0.5.0-beta.4",
         "Website": "https://mimoslinux.org"
     },
     "X-Plasma-API": "5.0"
