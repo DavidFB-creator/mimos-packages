@@ -1,0 +1,130 @@
+#!/usr/bin/env bash
+# Gives a new account the touchpad behaviour MimOS considers sane on a laptop:
+# natural scrolling on, and no disabling while typing.
+#
+# **This cannot be a file in /etc/skel, which is why it exists.** KDE stores
+# libinput settings under a section keyed by the device itself --
+# `[Libinput][<vendor>][<product>][<device name>]` -- so a shipped kcminputrc
+# would only ever apply to the one laptop it was copied from, and silently do
+# nothing everywhere else. The section has to be written on the machine, after
+# the machine can be asked what its touchpad is.
+#
+# Three details were measured on real hardware rather than assumed, and each
+# one would have produced a file that looks right and changes nothing:
+#
+#   * the vendor and product in the key are DECIMAL, while /sys reports them
+#     in hex. 093a/200a becomes 2362/8202.
+#   * the device name in the key is the kernel's `name` attribute verbatim,
+#     spaces and colons included: "ASUP1200:00 093A:200A Touchpad".
+#   * the same physical hardware also exposes a *Mouse* device, with its own
+#     section and deliberately different settings. Matching on the vendor, or
+#     on anything looser than "this is a touchpad", would change a pointing
+#     device the user never asked about.
+#
+# It runs once per account and never overrides a value the user already set:
+# a person who turns natural scrolling off must find it off tomorrow. See
+# ADR-105.
+set -Eeuo pipefail
+
+config="${mimos_test_kcminputrc:-${XDG_CONFIG_HOME:-${HOME}/.config}/kcminputrc}"
+marker="${mimos_test_marker:-${XDG_STATE_HOME:-${HOME}/.local/state}/mimos/tactil-preparado}"
+devices="${mimos_test_sys_input:-/sys/class/input}"
+
+[[ -e "${marker}" ]] && exit 0
+
+# A test override wins over the real tool, and that ordering is the fix for a
+# false pass. The other way round, this helper picked up whichever
+# kwriteconfig6 happened to be installed, so the behavioural test measured the
+# real tool on a developer machine and its own stub in CI -- two different
+# programs, one of them never exercised where it mattered. The test passed
+# locally and failed on the runner, which is the good outcome of a bad
+# instrument.
+writer="${mimos_test_writer:-}"
+if [[ -z "${writer}" ]] && command -v kwriteconfig6 > /dev/null 2>&1; then
+  writer='kwriteconfig6'
+fi
+if [[ -z "${writer}" ]]; then
+  printf 'kwriteconfig6 is not available; leaving the touchpad alone.\n' >&2
+  exit 0
+fi
+
+# Hex in /sys, decimal in the key. Leading zeros must go or the shell reads
+# the value as octal -- 0093 would be a syntax error, and a silent one in the
+# wrong hands.
+a_decimal() {
+  printf '%d' "$((16#${1#0x}))"
+}
+
+encontrado=0
+for device in "${devices}"/event*/device; do
+  [[ -r "${device}/name" ]] || continue
+
+  # The authoritative question is "does the kernel classify this as a
+  # touchpad", not "is Touchpad in its name". INPUT_PROP_POINTER (bit 0) plus
+  # INPUT_PROP_BUTTONPAD is how libinput decides; the properties file is the
+  # same source. A name match alone would catch a keyboard called "Touchpad
+  # Keys" and miss a touchpad that is not called one.
+  propiedades="$(cat "${device}/properties" 2>/dev/null || printf '0')"
+  nombre="$(cat "${device}/name" 2>/dev/null || true)"
+  [[ -n "${nombre}" ]] || continue
+  if (( (0x${propiedades#0x} & 0x4) == 0 )); then
+    # Not a buttonpad. Fall back to the name, because some touchpads do not
+    # set the property and a laptop with no touchpad settings at all is a
+    # worse outcome than a slightly loose match.
+    case "${nombre}" in
+      *Touchpad*|*touchpad*|*TouchPad*|*Trackpad*) ;;
+      *) continue ;;
+    esac
+  fi
+
+  vendor="$(cat "${device}/id/vendor" 2>/dev/null || true)"
+  product="$(cat "${device}/id/product" 2>/dev/null || true)"
+  [[ -n "${vendor}" && -n "${product}" ]] || continue
+
+  vendor_decimal="$(a_decimal "${vendor}")"
+  product_decimal="$(a_decimal "${product}")"
+  # An array, and every expansion quoted. Device names contain spaces --
+  # "ASUP1200:00 093A:200A Touchpad" is a perfectly ordinary one -- so an
+  # unquoted expansion here splits the name into three arguments and
+  # kwriteconfig6 cheerfully writes `NaturalScroll=093A:200A` into a group
+  # named after the first word. Watched happen on real hardware; nothing
+  # about the result looks wrong until you read it.
+  argumentos=(
+    --file "${config}"
+    --group Libinput
+    --group "${vendor_decimal}"
+    --group "${product_decimal}"
+    --group "${nombre}"
+  )
+
+  # Never overwrite a decision the person already made. `kreadconfig6` would
+  # be the natural partner here, but reading the file directly keeps this
+  # testable without a KDE installation and answers the same question.
+  ya_tiene() {
+    local clave="$1"
+    grep -Fq "${clave}=" <<< "$(
+      awk -v v="[Libinput][${vendor_decimal}][${product_decimal}][${nombre}]" '
+        $0 == v { dentro = 1; next }
+        /^\[/ { dentro = 0 }
+        dentro { print }
+      ' "${config}" 2>/dev/null
+    )"
+  }
+
+  ya_tiene NaturalScroll ||
+    "${writer}" "${argumentos[@]}" --key NaturalScroll true
+  ya_tiene DisableWhileTyping ||
+    "${writer}" "${argumentos[@]}" --key DisableWhileTyping false
+
+  printf 'Touchpad prepared: %s\n' "${nombre}"
+  encontrado=1
+done
+
+if (( encontrado == 0 )); then
+  printf 'No touchpad on this machine; nothing to prepare.\n'
+fi
+
+# Written whether or not a touchpad was found: a desktop computer must not
+# rescan its input devices at every single login for the rest of its life.
+install -d -m 0700 -- "$(dirname -- "${marker}")"
+: > "${marker}"

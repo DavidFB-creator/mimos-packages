@@ -1,8 +1,8 @@
 # Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
 
 pkgname=mimos-branding
-pkgver=0.5.0.beta.4
-pkgrel=1
+pkgver=0.6.0.beta.1
+pkgrel=2
 pkgdesc='Runtime visual identity assets for MimOS'
 arch=('any')
 url='https://github.com/DavidFB-creator/MimOS'
@@ -34,13 +34,24 @@ source=(
   'login-abrazo.svg'
   'login-abrazo.png'
   'fastfetch-config.jsonc'
+  'fastfetch-config-plain.jsonc'
   'mimos-fastfetch-heart.txt'
   'palette.json'
   'mimos-claro.colors'
   'mimos-oscuro.colors'
   'mimos-nocturnos.colors'
   'kdeglobals'
+  'ksmserverrc'
   'speechd.conf'
+  'zshrc'
+  'starship.toml'
+  'mimos-preparar-tactil'
+  'mimos-preparar-tactil-autostart.desktop'
+  'mimos-preparar-bateria'
+  'mimos-preparar-bateria-autostart.desktop'
+  'ghostty-theme-claro'
+  'ghostty-theme-oscuro'
+  'ghostty-config'
   'sddm-theme.conf.user'
   '20-mimos-theme.conf'
   'system-hibernate.svg'
@@ -88,14 +99,25 @@ sha256sums=('c4eba059e0aec667b32e76e73b24c493e02cd87f962dfd133d50da134d510cd0'
             'ead085637962480d1317c3d044d3a01ac7fdb9a0c3a8dec4941574310d7c1040'
             '470e5729b35f6044c0a691ea90aeab5792fcb1f76d3561ad1db8a13170a76ba5'
             'f83db83900ef01e14a9e3b26d8aa0becc378b128b7829bbfa44ed4422a31be3b'
-            '75a5de63f084c4a8b3448ff059be9dc76dadd63e1c54e4084605a7a923102f84'
-            '67fd3d0f31f568871054d368387bfd8505163ea627b2bcbef1dba18a5ce99aef'
-            '5440634e4b8c5fd94ea36bc00b3154fe81dff51bf13e1533f8aedab78cbfeb2f'
+            '61b07cf867da39ed25c77532b2e913e59c0a7296bab29fdc28bdc03d3515faa4'
+            '4a52714fbcc6dafb3fcc794a658915256ac33d1f27117812ce689c31e596b3d5'
+            'f90d7f36a095707343e4f94d8560c98e2ed1c77c163a9807d1d1c913b33f0fb0'
+            '5d9775f2ad9a1cb8435c7960c9030d26ff03637c5997958a0e0f872b15731a09'
             '9fa2d3fe9ec2eeb967e07ef52388d63b623f0c9d0e8d703dfb62fe4a1786068c'
             'cfcb83398486bf65ed4d1392ac40830ecb99f11d082eede842ec8561e5efe8ea'
             'ff248cfb1eaa2b29fe04d646ee37597593b318815b9e43eb0be9f3496ed96ce1'
-            '96e9b05e6f16a13248c6b50107c4afda76bb744989e0212d6754cc886f689c29'
+            'c10aa173207569a37226f50d0013998cf7ec4c2325d62d4255a3fdd18451370e'
+            '8eb74d238bf5f2dbf28d6b1952a036176b63d5590d79f2a04c10e7c68a9acac6'
             '33a2721f8e59d1b7a95b145db2e3683e82043c952d34c113baabaf4364664c82'
+            'a3aca64c8e14a98f3738e1720597c67a18adf5f41bb6452e2622205cb5866b87'
+            'a37f7879551ef97e7230e74b648703cc6ae2275cedc605e950c1c415a62e95e2'
+            '0e5b59248f538b815f7d43537d6f737ca2d21eafce839ebf41fd444b95034e47'
+            '5cef60cb8a6a8e199d75497c3983c0f3c824a206df76416268d70bb37ab2e750'
+            '2db2e18c8af68bdf88592d4a3d291a6a23076cf08a89f1169dcd3bfbc4f19410'
+            '51efe6ce11c6c32bb7f11901a1309f97102866bb03ad89fca2feeda75a7651f3'
+            '1ded8083925538b4b51e019990904020be96dfeab2574cd0c4d5d17bd9a539db'
+            'f4453ecab442b97a60577209c813f62ad9537df270d33d60ac9c60be23b4cf1c'
+            'c4f8cc9fd17085d2e5cc2237ddabe2130817e9ac24f895157625d740190bfdf0'
             '8b5513b88b58e76f196f233a97fe80a64b4383cdd94bae6429a3125c46bff2f7'
             '8e7908d5f6ea54dd896e79d0bf8b9737df305213f2cd251e63b1e15dd2ba39f3'
             '8a8f1f755c2be1dfd80c911f300c3c4795968914cf25817e47d5842dfea00031'
@@ -176,6 +198,17 @@ package() {
     "${pkgdir}/usr/share/backgrounds/mimos/login-abrazo.png"
   install -Dm644 fastfetch-config.jsonc \
     "${pkgdir}/etc/xdg/fastfetch/config.jsonc"
+  # And both variants where the shell greeting looks for them, by absolute
+  # path. The greeting picks the Nerd Font configuration inside Ghostty and
+  # the plain one anywhere else, and it is written to stay quiet rather than
+  # error when a configuration is missing -- so with neither of these
+  # installed it returned silently at every login and nobody saw a greeting
+  # at all. The Live check did not notice: it invokes /etc/xdg by hand, which
+  # is a path no user's shell ever takes.
+  install -Dm644 fastfetch-config.jsonc \
+    "${pkgdir}/usr/share/mimos/branding/fastfetch-config.jsonc"
+  install -Dm644 fastfetch-config-plain.jsonc \
+    "${pkgdir}/usr/share/mimos/branding/fastfetch-config-plain.jsonc"
   install -Dm644 mimos-fastfetch-heart.txt \
     "${pkgdir}/usr/share/mimos/branding/mimos-fastfetch-heart.txt"
 
@@ -193,8 +226,46 @@ package() {
   # but nothing told the synthesiser, so it read Spanish text with an English
   # accent. This is a skel default rather than a system file so a user can
   # override it without editing anything root owns.
+  # The session defaults David chose on his own machine: no confirmation
+  # between deciding to shut down and shutting down, and a session that
+  # starts empty rather than reopening yesterday's windows. See ADR-108.
+  install -Dm644 ksmserverrc "${pkgdir}/etc/skel/.config/ksmserverrc"
   install -Dm644 speechd.conf \
     "${pkgdir}/etc/skel/.config/speech-dispatcher/speechd.conf"
+
+  # And to the shell, as `.zshrc.local` rather than `.zshrc`.
+  #
+  # grml-zsh-config owns /etc/skel/.zshrc, and two packages cannot own one
+  # file: the first composition of 0.6 died on exactly that, in pacman,
+  # after everything else had built. `.zshrc.local` is grml's own documented
+  # extension point and it is still a skel file, so it is still copied into a
+  # new account's home and still belongs to that person afterwards.
+  #
+  # **The ordering was measured, and the first reading of it was wrong.**
+  # grml sources the local file from `zrclocal()`, and the definition sits at
+  # line 486 of a 3,600-line file -- which reads exactly like an early hook,
+  # and would mean grml's `prompt grml` at line 2339 ran afterwards and threw
+  # starship away. The only call to `zrclocal` is at line 3607, second to
+  # last. So the file really is read at the very end, after the prompt, which
+  # is what the whole shell configuration depends on. See ADR-113.
+  install -Dm644 zshrc "${pkgdir}/etc/skel/.zshrc.local"
+  # The prompt starship draws. The .zshrc above runs `starship init zsh`, and
+  # starship reads ~/.config/starship.toml -- so without this file every
+  # MimOS prompt was starship's default one, correct-looking and not ours.
+  # It shipped in the repository, was validated by the branding contract, and
+  # was installed by nobody. See ADR-112.
+  install -Dm644 starship.toml "${pkgdir}/etc/skel/.config/starship.toml"
+
+  # Ghostty is the terminal MimOS opens. Its themes go system-wide beside
+  # the ones it ships, so every account finds them and a user who replaces
+  # their config can still name them; only the config itself is a skel
+  # default. Ghostty was measured following the desktop's light/dark
+  # preference in a real session, which is why the config selects both.
+  install -Dm644 ghostty-theme-claro \
+    "${pkgdir}/usr/share/ghostty/themes/MimOS Claro"
+  install -Dm644 ghostty-theme-oscuro \
+    "${pkgdir}/usr/share/ghostty/themes/MimOS Oscuro"
+  install -Dm644 ghostty-config "${pkgdir}/etc/skel/.config/ghostty/config"
   install -Dm644 palette.json \
     "${pkgdir}/usr/share/mimos/branding/palette.json"
 
@@ -245,6 +316,14 @@ package() {
     "${pkgdir}/usr/share/icons/hicolor/scalable/apps/mimos-centro.svg"
   install -Dm644 app-mimos-instalador.svg \
     "${pkgdir}/usr/share/icons/hicolor/scalable/apps/mimos-instalador.svg"
+  # The distribution logo, named by LOGO=mimos in /etc/os-release. KDE's
+  # "About this system" page and other freedesktop consumers resolve that as
+  # an icon name, so it must exist in hicolor -- and in pixmaps, which the
+  # tools that predate the icon spec still read. MIMI is the mark; see
+  # ADR-098.
+  install -Dm644 mimi.svg \
+    "${pkgdir}/usr/share/icons/hicolor/scalable/apps/mimos.svg"
+  install -Dm644 mimi.svg "${pkgdir}/usr/share/pixmaps/mimos.svg"
   # Every start-here name Breeze itself ships, coloured and symbolic, all
   # resolve to the coloured MIMI: Kickoff's default asks for the -symbolic
   # name, and a mono heart there put a white outline where David wants the
@@ -277,6 +356,26 @@ package() {
     "${pkgdir}/usr/share/mimos/branding/mimi-face.png"
   install -Dm755 mimos-install-default-face \
     "${pkgdir}/usr/bin/mimos-install-default-face"
+
+  # The laptop touchpad, set up on the machine rather than shipped as a file.
+  # KDE keys libinput settings by vendor, product and device name, so a
+  # kcminputrc in /etc/skel would only ever apply to the laptop it was copied
+  # from. Runs once per account and never overrides a choice the person made.
+  # See ADR-105.
+  install -Dm755 mimos-preparar-tactil \
+    "${pkgdir}/usr/lib/mimos/mimos-preparar-tactil"
+  install -Dm644 mimos-preparar-tactil-autostart.desktop \
+    "${pkgdir}/etc/xdg/autostart/mimos-preparar-tactil.desktop"
+
+  # The battery percentage, for the same reason and at a different moment.
+  # The Look-and-Feel layout brings the battery out of the tray, but the
+  # percentage lives in the battery applet's own configuration and that
+  # applet does not exist yet while the layout runs. This one waits for the
+  # session. See ADR-110.
+  install -Dm755 mimos-preparar-bateria \
+    "${pkgdir}/usr/lib/mimos/mimos-preparar-bateria"
+  install -Dm644 mimos-preparar-bateria-autostart.desktop \
+    "${pkgdir}/etc/xdg/autostart/mimos-preparar-bateria.desktop"
 
   install -Dm644 LICENSE \
     "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"

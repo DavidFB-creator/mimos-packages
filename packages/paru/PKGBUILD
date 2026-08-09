@@ -1,0 +1,122 @@
+# Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
+#
+# paru is a reviewed in-tree recipe, built from upstream's own signed source.
+# It is NOT taken from the AUR: MimOS never resolves software from the AUR
+# automatically, and that constraint is unchanged. What changed on 2026-08-08
+# is that MimOS now *offers* its users access to the AUR, which is David's
+# product decision and is recorded in ADR-103 rather than assumed here.
+#
+# Trust anchor, measured rather than remembered: the v2.1.0 tag is signed by
+# F850562FCDA369F80D33000AE48D0A8326DE47C5, and that key sits in the pacman
+# keyring at [full] trust because it ships in archlinux-keyring -- Morgan
+# Adamiec is an Arch developer. So the signature is checked against Arch's own
+# web of trust, not against a key served by the same host as the code. That is
+# the property the Calamares recipe has and the reason a plain tarball with a
+# sha256sum was rejected here: a hash pins what we downloaded, not who wrote it.
+#
+# The verification is done here rather than by makepkg's `validpgpkeys`, and
+# that is not a stylistic choice: makepkg checks signatures against the
+# *building user's* keyring, and this key lives in pacman's. The first attempt
+# used `?signed` and failed with "unknown public key E48D0A8326DE47C5" --
+# measured, not predicted. Fixing it by importing the key into a developer's
+# personal keyring would have made the build depend on one machine's history.
+#
+# So prepare() builds an isolated keyring from archlinux-keyring itself. The
+# anchor is therefore Arch's shipped keyring rather than a copy of the key
+# vendored into this repository, which is one hop stronger than the Calamares
+# recipe manages -- there, upstream is not an Arch developer and no such
+# anchor exists.
+
+pkgname=paru
+pkgver=2.1.0
+pkgrel=2
+pkgdesc='AUR helper, shipped by MimOS so its users can reach the AUR deliberately'
+arch=('x86_64')
+# Every other compiled package here says this; paru was the one that did not,
+# and it was never noticed because paru had never been composed into an image.
+# Arch's makepkg.conf enables debug packages by default, so the build produced
+# paru-debug beside paru -- a package nothing in MimOS installs, carrying the
+# detached symbols of a Rust binary, in an ephemeral repository whose contents
+# are counted. The count is what caught it: fifteen packages where the project
+# list names fourteen.
+options=('!debug')
+url='https://github.com/Morganamilo/paru'
+license=('GPL-3.0-or-later')
+# libalpm.so is deliberately unversioned: makepkg replaces it with the exact
+# soname present at build time (16 today). Writing a number here is how a
+# package survives an ABI break by claiming to work and then not running.
+depends=('git' 'pacman' 'libalpm.so')
+makedepends=('cargo' 'gettext' 'archlinux-keyring')
+optdepends=(
+  'bat: colour in printed PKGBUILDs'
+  'devtools: build in a clean chroot'
+)
+backup=('etc/paru.conf')
+source=("${pkgname}::git+https://github.com/Morganamilo/paru.git#tag=v${pkgver}")
+sha256sums=('19898d4f2ccea34f3ebc2dba3761b41026a2a9453cfec1ad856c7cb36d3b7d2f')
+
+prepare() {
+  local expected='F850562FCDA369F80D33000AE48D0A8326DE47C5'
+  local keyring="${srcdir}/paru-gnupg"
+  local status
+
+  # Arch ships its keyring ASCII-armoured, so it is imported rather than used
+  # with --keyring: pointing --keyring at it fails with "invalid packet
+  # (ctb=2d)", 0x2d being the leading '-' of the armour header. Measured while
+  # getting this wrong.
+  rm -rf -- "${keyring}"
+  install -dm700 "${keyring}"
+  GNUPGHOME="${keyring}" gpg --batch --quiet \
+    --import /usr/share/pacman/keyrings/archlinux.gpg
+
+  # The tag, not the tarball. A GitHub archive with a sha256sum pins what was
+  # downloaded and says nothing about who wrote it; the tag carries Morgan
+  # Adamiec's signature. VALIDSIG is matched rather than gpg's exit status,
+  # because a good signature from the wrong key exits zero.
+  status="$(
+    GNUPGHOME="${keyring}" git -C "${pkgname}" verify-tag --raw \
+      "v${pkgver}" 2>&1
+  )"
+  if ! grep -Eq "^\[GNUPG:\] VALIDSIG ${expected} " <<< "${status}"; then
+    printf 'The paru tag is not signed by the pinned Arch developer key.\n' >&2
+    return 1
+  fi
+  rm -rf -- "${keyring}"
+
+  cd "${pkgname}"
+  # Upstream's own step, kept: it re-resolves the alpm bindings against the
+  # pacman this image actually carries, so paru links the libalpm that exists
+  # rather than the one the lockfile was written against.
+  cargo update alpm alpm-utils
+  cargo fetch --locked --target "$(rustc -vV | sed -n 's|host: ||p')"
+}
+
+build() {
+  cd "${pkgname}"
+  cargo build --frozen --release --target-dir target
+  ./scripts/mkmo locale/
+}
+
+package() {
+  cd "${pkgname}"
+  install -Dm755 target/release/paru "${pkgdir}/usr/bin/paru"
+  install -Dm644 paru.conf "${pkgdir}/etc/paru.conf"
+  install -Dm644 man/paru.8 "${pkgdir}/usr/share/man/man8/paru.8"
+  install -Dm644 man/paru.conf.5 "${pkgdir}/usr/share/man/man5/paru.conf.5"
+  # Named by shell, not by tool: upstream ships completions/{bash,fish,zsh}.
+  # The first version of this recipe guessed `paru.bash` and the build caught
+  # it -- which is the reason this package is built here before it is believed.
+  install -Dm644 completions/bash \
+    "${pkgdir}/usr/share/bash-completion/completions/paru"
+  install -Dm644 completions/fish \
+    "${pkgdir}/usr/share/fish/vendor_completions.d/paru.fish"
+  install -Dm644 completions/zsh \
+    "${pkgdir}/usr/share/zsh/site-functions/_paru"
+  install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+
+  # mkmo already writes locale/<lang>/LC_MESSAGES/paru.mo, so the tree is
+  # copied rather than rebuilt from a guess about its shape. Spanish is among
+  # them, which matters for a Spanish-first system.
+  install -dm755 "${pkgdir}/usr/share/locale"
+  cp -a locale/. "${pkgdir}/usr/share/locale/"
+}

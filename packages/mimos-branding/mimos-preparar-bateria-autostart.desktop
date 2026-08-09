@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Preparar la batería de MimOS
+Comment=Muestra el porcentaje de batería la primera vez que inicias sesión
+Exec=/usr/lib/mimos/mimos-preparar-bateria
+Icon=battery
+OnlyShowIn=KDE;
+NoDisplay=true
+X-KDE-autostart-phase=2

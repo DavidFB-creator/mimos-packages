@@ -144,3 +144,7 @@ Theme=mimos-escritorio
 LookAndFeelPackage=org.mimos.claro.desktop
 DefaultLightLookAndFeel=org.mimos.claro.desktop
 DefaultDarkLookAndFeel=org.mimos.oscuro.desktop
+
+[General]
+TerminalApplication=ghostty
+TerminalService=com.mitchellh.ghostty.desktop

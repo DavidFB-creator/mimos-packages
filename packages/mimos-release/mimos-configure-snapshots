@@ -1,0 +1,154 @@
+#!/usr/bin/env bash
+# Configures snapshots on a freshly installed MimOS and takes the first one.
+#
+# What the user gets from this: every pacman transaction is bracketed by a
+# pair of snapshots (snap-pac), every snapshot appears in the GRUB menu
+# (grub-btrfs), and a system that an update broke can be booted as it was and
+# put back with `mimos-restaurar`. See ADR-102.
+#
+# Run by Calamares in the target, after `services-systemd` and before
+# `grubcfg`, so the first snapshot already contains the user account and the
+# enabled services, and the first grub.cfg the installation writes already
+# lists it. Also runnable by hand on an existing installation:
+#   sudo /usr/lib/mimos/mimos-configure-snapshots
+#
+# Deliberately NOT `snapper create-config`. That command creates the
+# .snapshots subvolume itself and refuses when one already exists -- and ours
+# always does, because Calamares' mount module creates /@snapshots from
+# mount.conf before anything in the target runs. The documented way around it
+# is to delete and recreate the subvolume around the call, which means
+# destroying a mounted subvolume inside an installer. Writing the
+# configuration from snapper's own shipped template is deterministic, needs no
+# unmounting, and still tracks upstream because the template is upstream's.
+set -Eeuo pipefail
+
+target_root="${mimos_test_root:-}"
+snapper_template="${target_root}/usr/share/snapper/config-templates/default"
+snapper_config="${target_root}/etc/snapper/configs/root"
+snapper_conf_d="${target_root}/etc/conf.d/snapper"
+grub_btrfs_config="${target_root}/etc/default/grub-btrfs/config"
+grub_defaults="${target_root}/etc/default/grub"
+snapshots_dir="${target_root}/.snapshots"
+
+if [[ ! -r "${snapper_template}" ]]; then
+  printf 'snapper is not installed; skipping snapshot configuration.\n'
+  exit 0
+fi
+
+# The subvolume Calamares created. Without it there is nowhere to put a
+# snapshot, and refusing loudly beats writing a configuration that points at a
+# plain directory on the root filesystem -- which would silently fill the disk
+# with copies that a rollback cannot use.
+if [[ ! -d "${snapshots_dir}" ]]; then
+  printf 'No %s directory; refusing to configure snapshots.\n' "${snapshots_dir}" >&2
+  exit 1
+fi
+# snapper's own permissions for it: readable only by root, because a snapshot
+# is a complete copy of the system including every file the owner cannot read.
+chmod 0750 "${snapshots_dir}"
+
+# --- snapper -----------------------------------------------------------
+#
+# The template with MimOS's answers substituted. Each value is a decision:
+#
+#   TIMELINE_CREATE=no    Hourly snapshots forever are how a 256 GB laptop
+#                         fills up. The failure MimOS promises to survive is
+#                         "an update broke my system", and snap-pac covers
+#                         exactly that by snapshotting each transaction. A
+#                         user who wants timeline snapshots turns this on;
+#                         one who never thinks about it does not lose their
+#                         disk to a feature they did not ask for.
+#   NUMBER_LIMIT=20       Ten pacman transactions of history (each leaves a
+#                         pre and a post snapshot), on top of the space and
+#                         free limits the template already carries.
+#   NUMBER_MIN_AGE=1800   Half an hour, so a snapshot taken minutes ago is
+#                         never the one cleanup removes.
+#
+# ALLOW_USERS stays empty on purpose. Handing a normal account rights over the
+# snapshot configuration means SYNC_ACL on a directory holding a copy of every
+# file on the system; snapshots are administered with sudo instead.
+install -d -m 0755 "${target_root}/etc/snapper/configs"
+sed -e 's|^TIMELINE_CREATE=.*|TIMELINE_CREATE="no"|' \
+    -e 's|^NUMBER_LIMIT=.*|NUMBER_LIMIT="20"|' \
+    -e 's|^NUMBER_LIMIT_IMPORTANT=.*|NUMBER_LIMIT_IMPORTANT="10"|' \
+    -e 's|^NUMBER_MIN_AGE=.*|NUMBER_MIN_AGE="1800"|' \
+    "${snapper_template}" > "${snapper_config}"
+chmod 0640 "${snapper_config}"
+
+# Nothing reads a config that is not listed here: snapper-cleanup and the
+# other units iterate SNAPPER_CONFIGS. Without this line the configuration
+# would exist, snapshots would accumulate, and none would ever be cleaned up.
+if [[ -w "${snapper_conf_d}" ]]; then
+  sed -i 's|^SNAPPER_CONFIGS=.*|SNAPPER_CONFIGS="root"|' "${snapper_conf_d}"
+fi
+
+# --- grub-btrfs --------------------------------------------------------
+#
+# Its daemon already watches /.snapshots by default -- read from the shipped
+# unit, not assumed -- so only the presentation and the encryption flag are
+# set here.
+if [[ -w "${grub_btrfs_config}" ]]; then
+  _set_grub_btrfs() {
+    local key="$1" value="$2"
+    if grep -qE "^#?[[:space:]]*${key}=" "${grub_btrfs_config}"; then
+      sed -i "s|^#\?[[:space:]]*${key}=.*|${key}=${value}|" "${grub_btrfs_config}"
+    else
+      printf '%s=%s\n' "${key}" "${value}" >> "${grub_btrfs_config}"
+    fi
+  }
+  _set_grub_btrfs GRUB_BTRFS_SUBMENUNAME '"Instantáneas de MimOS"'
+  _set_grub_btrfs GRUB_BTRFS_TITLE_FORMAT '("date" "description")'
+  _set_grub_btrfs GRUB_BTRFS_LIMIT '20'
+
+  # Derived, never transcribed: an encrypted target needs GRUB to open the
+  # LUKS container before it can read a snapshot, exactly as it does for the
+  # normal entry. grubcfg sets GRUB_ENABLE_CRYPTODISK on the encrypted
+  # installations and only those, so mirroring that file answers the question
+  # for this machine instead of guessing it. Getting this wrong produces a
+  # menu full of snapshot entries that cannot be booted -- a recovery path
+  # that fails at the moment it is needed.
+  if grep -qE '^[[:space:]]*GRUB_ENABLE_CRYPTODISK=["]?y' "${grub_defaults}" 2>/dev/null; then
+    _set_grub_btrfs GRUB_BTRFS_ENABLE_CRYPTODISK 'true'
+    printf 'Encrypted target: snapshot entries will open the LUKS container.\n'
+  fi
+fi
+
+# --- services ----------------------------------------------------------
+#
+# grub-btrfsd rewrites the snapshot menu whenever /.snapshots changes;
+# snapper-cleanup.timer is what enforces NUMBER_LIMIT. Enabling one without
+# the other gives either a stale menu or an unbounded disk.
+if [[ -z "${target_root}" ]]; then
+  systemctl enable grub-btrfsd.service snapper-cleanup.timer
+else
+  printf 'Test mode: skipping systemctl enable.\n'
+fi
+
+# --- the first snapshot ------------------------------------------------
+#
+# The floor. Whatever the user does to this machine afterwards, this is the
+# system as it was handed to them, with their account already in it.
+#
+# --no-dbus because snapperd is not running: this executes inside Calamares'
+# chroot, where there is no system bus to talk to.
+if [[ -z "${target_root}" ]]; then
+  # ASCII, deliberately, and this is the one place in MimOS where that is a
+  # decision rather than an oversight.
+  #
+  # snapper stores a description in its info.xml as XML and escapes anything
+  # outside ASCII into a numeric character reference. grub-btrfs reads that
+  # file back with `awk -F"<|>"` and no entity decoding, because it is a
+  # shell script and not an XML parser. Neither of them is doing anything
+  # wrong on its own; together, an accent written here reaches the boot menu
+  # as `&#xF3;`. Measured on the first composed 0.6 image, which drew
+  # "Instalaci&#xF3;n de MimOS" in the recovery menu -- in Spanish, to a
+  # Spanish reader, at the exact moment their computer is broken.
+  # See ADR-116.
+  snapper --no-dbus -c root create \
+    --description 'MimOS instalado' \
+    --cleanup-algorithm number \
+    --userdata 'important=yes'
+  printf 'First snapshot created.\n'
+fi
+
+printf 'Snapshots configured.\n'

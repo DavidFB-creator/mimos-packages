@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Preparar el táctil de MimOS
+Comment=Ajusta el táctil la primera vez que inicias sesión
+Exec=/usr/lib/mimos/mimos-preparar-tactil
+Icon=input-touchpad
+OnlyShowIn=KDE;
+NoDisplay=true
+X-KDE-autostart-phase=1

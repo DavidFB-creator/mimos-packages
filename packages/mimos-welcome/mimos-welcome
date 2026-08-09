@@ -151,7 +151,7 @@ fi
 export QT_QUICK_CONTROLS_STYLE='Basic'
 
 # Statuses 11 and 12 apply a Global Theme and relaunch, so the window reopens
-# already repainted on the new side; 13 hands over to Discover. The exits are
+# already repainted on the new side; 13 opens paru in a terminal. The exits are
 # the whole action channel: the QML has no process capability, mirroring the
 # Live installer's status-10 pattern (ADR-093).
 final_status=0
@@ -192,10 +192,23 @@ while true; do
       continue
       ;;
     13)
-      if command -v plasma-discover >/dev/null 2>&1; then
-        plasma-discover >/dev/null 2>&1 &
+      # Opens paru in a terminal, not Discover.
+      #
+      # Discover was removed from MimOS on 2026-08-08 with Flatpak (ADR-106),
+      # and without a backend it could install nothing at all -- its optional
+      # dependencies are flatpak, fwupd and packagekit-qt6, and Arch itself
+      # marks the last "not recommended". The card promised a shop that had
+      # nothing to sell. paru reaches the official repositories and the AUR,
+      # which is the whole of what MimOS actually offers.
+      #
+      # In a terminal on purpose: installing software asks for a password and
+      # asks real questions, exactly as updating does (ADR-104).
+      if command -v paru >/dev/null 2>&1 && command -v ghostty >/dev/null 2>&1; then
+        ghostty -e paru >/dev/null 2>&1 &
+      elif command -v paru >/dev/null 2>&1 && command -v konsole >/dev/null 2>&1; then
+        konsole -e paru >/dev/null 2>&1 &
       else
-        show_error 'Discover no está disponible en este sistema.'
+        show_error 'No se ha encontrado paru o una terminal para abrirlo.'
         final_status=1
       fi
       break

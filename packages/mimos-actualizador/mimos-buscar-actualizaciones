@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# Counts pending updates, in the three places MimOS can have them.
+#
+# Prints exactly three integers, one per line: official, AUR, Flatpak. That
+# shape is the contract with the tray, and it is deliberately dumb -- a
+# checker that printed prose would put parsing between the user and the
+# truth.
+#
+# Nothing here needs root and nothing here changes the system. That is the
+# whole point: a notifier that had to be trusted with root, or that ran
+# `pacman -Sy` against the real database, would be a partial-upgrade machine
+# running once an hour on every MimOS installation. See ADR-104.
+set -Eeuo pipefail
+
+official=0
+aur=0
+flatpak=0
+
+# checkupdates syncs into a private database under its own cache and asks
+# there, so the system's databases are untouched and no partial-upgrade state
+# can be created. It exits 2 when there is nothing to do, which is not an
+# error here.
+if command -v checkupdates > /dev/null 2>&1; then
+  official="$(checkupdates 2>/dev/null | grep -c . || true)"
+fi
+
+# paru answers for the AUR without root. -Qua is AUR-only: without the `a` it
+# would also count the repository updates and every number would be reported
+# twice.
+if command -v paru > /dev/null 2>&1; then
+  aur="$(paru -Qua 2>/dev/null | grep -c . || true)"
+fi
+
+# Only if Flatpak is installed at all, which today it is not: MimOS does not
+# ship it, so this stays zero and the tray never mentions it. The step exists
+# because David asked for Flatpaks to be part of the order, and because a
+# user who installs Flatpak should not have to come back and ask us for
+# support. See the ADR for the Discover question this raises.
+if command -v flatpak > /dev/null 2>&1; then
+  flatpak="$(flatpak remote-ls --updates 2>/dev/null | grep -c . || true)"
+fi
+
+printf '%s\n%s\n%s\n' "${official}" "${aur}" "${flatpak}"

@@ -1,0 +1,22 @@
+# MimOS session defaults.
+#
+# Two settings, both chosen by David on his own machine and then made the
+# default rather than left as his personal preference.
+#
+# confirmLogout=false -- no "are you sure?" between deciding to shut down and
+# shutting down. The dialogue protects against an accidental click on a menu
+# entry that is already two clicks deep, and charges everybody a confirmation
+# every single day for it.
+#
+# loginMode=emptySession -- a session starts empty. Restoring yesterday's
+# windows sounds thoughtful and is mostly a surprise: applications reopen with
+# stale state, some of them ask their own questions before the desktop is even
+# drawn, and a machine that was shut down because something misbehaved brings
+# the misbehaving thing straight back.
+#
+# Both live in /etc/skel, so they are the starting point for a new account and
+# not a rule: everything here is in Preferencias del sistema > Sesión de
+# escritorio, and a user who changes it keeps their choice. See ADR-108.
+[General]
+confirmLogout=false
+loginMode=emptySession

@@ -54,9 +54,42 @@ _mimos_restore_installed_boot() {
   rm -f /etc/mkinitcpio.conf.d/archiso.conf || return 1
 }
 
+_mimos_remove_console_autologin() {
+  # Archiso's releng profile logs tty1 in as root with no password, which is
+  # right for a Live image and catastrophic on a disk. The override lives in
+  # the airootfs, and Calamares copies the airootfs to the target, so it
+  # survived every installation MimOS has ever made: pressing Ctrl+Alt+F2 on
+  # an installed machine reached a root shell without being asked for
+  # anything.
+  #
+  # The installed audit was checking that root's *password* is locked, and it
+  # was -- `passwd -S root` says L on every one of those machines. agetty
+  # --autologin does not authenticate, so the lock it was proving was beside
+  # the door that was open. See ADR-115.
+  #
+  # This package already owns every removable passwordless-session artifact;
+  # this is one, and it is the only one that could not be removed by owning a
+  # file, because the file belongs to Archiso rather than to us.
+  local override='/etc/systemd/system/getty@tty1.service.d/autologin.conf'
+  local directory="${override%/*}"
+
+  rm -f "${override}" || return 1
+  # Only if we emptied it. A user or another package may have put something
+  # else there, and this is a transition, not a cleanup crew.
+  rmdir "${directory}" 2>/dev/null || true
+  if [[ -e "${override}" ]]; then
+    printf 'mimos-live-environment: %s survived removal.\n' "${override}" >&2
+    return 1
+  fi
+}
+
 pre_remove() {
   if ! _mimos_restore_installed_boot; then
     printf 'mimos-live-environment: refusing to complete the installed-system transition.\n' >&2
+    return 1
+  fi
+  if ! _mimos_remove_console_autologin; then
+    printf 'mimos-live-environment: refusing to leave a passwordless root console on the installed system.\n' >&2
     return 1
   fi
 }

@@ -169,17 +169,91 @@ _mimos_unconfigure_grub() {
   printf '  MimOS block removed from %s\n' "${mimos_grub_default}"
 }
 
+mimos_os_release='/etc/os-release'
+mimos_release_file='/etc/mimos-release'
+mimos_os_release_upstream='../usr/lib/os-release'
+
+# Make the standard path tell the truth.
+#
+# /etc/os-release is where a Linux system says what it is: KDE's About page,
+# bug reporters, hardware probes and every freedesktop-aware tool read it and
+# nothing reads /etc/mimos-release, which is a name this project invented. On
+# an installed MimOS the standard path pointed at Arch's own file, so the
+# desktop said "Arch Linux" with the Arch logo -- found by David on his own
+# machine on 2026-08-07, the same disease as the motd (ADR-083) and
+# PRETTY_NAME: identity nobody derived and nothing checked.
+#
+# It is a COPY written here, not a packaged file and not a symlink, and both
+# rejections were measured rather than reasoned:
+#
+#   * Packaging /etc/os-release is impossible: the path already exists on the
+#     target, unowned, and pacman refuses to overwrite an unowned file. The
+#     package would simply fail to install.
+#   * Symlinking it to our packaged file looked elegant and would have been
+#     wrong: mkarchiso resolves /etc/os-release with realpath and appends
+#     IMAGE_ID and IMAGE_VERSION to whatever it finds, so composing an image
+#     would write into the package's own file. Every installed system would
+#     then carry a mimos-release whose checksum no longer matches its
+#     package.
+#
+# So the scriptlet writes a copy and rewrites it on every upgrade, which is
+# the pacman.conf precedent: reach into what belongs to somebody else only
+# through the scriptlet, and put it back on removal. The copy cannot drift
+# because nothing but this function ever writes it -- and mkarchiso's two
+# extra keys are additive, correct, and welcome.
+_mimos_claim_os_release() {
+  [[ -r "${mimos_release_file}" ]] || return 0
+
+  # A real file that is not ours belongs to somebody else. Ours is
+  # recognisable by the ID line, which no other distribution writes.
+  if [[ -f "${mimos_os_release}" && ! -L "${mimos_os_release}" ]]; then
+    grep -Fxq 'ID=mimos' "${mimos_os_release}" || {
+      printf '  %s belongs to another distribution; leaving it alone.\n' \
+        "${mimos_os_release}"
+      return 0
+    }
+  elif [[ -L "${mimos_os_release}" ]]; then
+    # Only replace the stock link into /usr/lib. A link somebody else made
+    # points somewhere they chose, and is not ours to redirect.
+    local target
+    target="$(readlink "${mimos_os_release}")"
+    [[ "${target}" == "${mimos_os_release_upstream}" ]] ||
+      [[ "${target}" == "/usr/lib/os-release" ]] || {
+        printf '  %s points elsewhere; leaving it alone.\n' \
+          "${mimos_os_release}"
+        return 0
+      }
+    rm -f -- "${mimos_os_release}"
+  fi
+
+  cp -- "${mimos_release_file}" "${mimos_os_release}"
+  chmod 0644 -- "${mimos_os_release}"
+  printf '  %s now reports MimOS.\n' "${mimos_os_release}"
+}
+
+_mimos_release_os_release() {
+  # Only undo our own file, and restore what Arch ships.
+  [[ -f "${mimos_os_release}" && ! -L "${mimos_os_release}" ]] || return 0
+  grep -Fxq 'ID=mimos' "${mimos_os_release}" || return 0
+  rm -f -- "${mimos_os_release}"
+  ln -sf "${mimos_os_release_upstream}" "${mimos_os_release}"
+  printf '  %s restored to the Arch file.\n' "${mimos_os_release}"
+}
+
 post_install() {
   _mimos_add_channel
   _mimos_configure_grub
+  _mimos_claim_os_release
 }
 
 post_upgrade() {
   _mimos_add_channel
   _mimos_configure_grub
+  _mimos_claim_os_release
 }
 
 pre_remove() {
   _mimos_remove_channel
   _mimos_unconfigure_grub
+  _mimos_release_os_release
 }

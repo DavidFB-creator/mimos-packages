@@ -1,0 +1,118 @@
+#!/usr/bin/env bash
+# The tray updater: watches for updates, shows the icon, and runs the update
+# when asked.
+#
+# The QML has no way to count anything, run anything, or read anything. That
+# is the architecture MimOS already uses for Centro de MimOS (ADR-093), kept
+# here because a tray applet is a *better* place to get it wrong: it runs from
+# login to shutdown on every machine. So this script does all the work and the
+# tray is handed its numbers as arguments; the only thing that travels back is
+# an exit status.
+#
+#   20  the user asked to update now
+#   21  the user asked to check again
+#    0  the user dismissed it
+#
+# The tray is relaunched when the counts change rather than kept in sync,
+# which also gives the notification its correct behaviour for free: a new
+# process appears exactly when something new is available, so the person is
+# told once and not once an hour. See ADR-104.
+set -Eeuo pipefail
+
+readonly runner='/usr/lib/mimos/actualizador-mimos'
+readonly checker='/usr/lib/mimos/mimos-buscar-actualizaciones'
+readonly updater='/usr/bin/mimos-actualizar'
+# An hour. Short enough that a person who leaves the machine on all day is
+# told the same day; long enough that a laptop on battery is not waking its
+# network every few minutes for news it did not ask for.
+readonly intervalo="${mimos_test_intervalo:-3600}"
+
+tray_pid=''
+
+detener_bandeja() {
+  if [[ -n "${tray_pid}" ]] && kill -0 "${tray_pid}" 2>/dev/null; then
+    kill "${tray_pid}" 2>/dev/null || true
+    wait "${tray_pid}" 2>/dev/null || true
+  fi
+  tray_pid=''
+}
+
+trap 'detener_bandeja' EXIT
+
+contar() {
+  # Three lines: official, AUR, Flatpak. A checker that fails must read as
+  # "nothing to report" rather than as "everything is broken" -- a notifier
+  # that panics when the network is down is a notifier people turn off.
+  "${checker}" 2>/dev/null || printf '0\n0\n0\n'
+}
+
+abrir_terminal() {
+  # Visible on purpose: pacman asks questions and asks for a password.
+  # Ghostty is the MimOS terminal (ADR-099); konsole is the fallback for a
+  # session where it was removed, and running the update with no terminal at
+  # all is refused rather than done blindly.
+  if command -v ghostty > /dev/null 2>&1; then
+    ghostty -e "${updater}"
+  elif command -v konsole > /dev/null 2>&1; then
+    konsole -e "${updater}"
+  elif command -v kdialog > /dev/null 2>&1; then
+    kdialog --error 'No hay ninguna terminal para mostrar la actualización.'
+    return 1
+  else
+    printf 'No terminal available to run the update.\n' >&2
+    return 1
+  fi
+}
+
+case "${1:---daemon}" in
+  --daemon) ;;
+  --ahora)
+    exec "${updater}"
+    ;;
+  *)
+    printf 'Uso: mimos-actualizador [--daemon|--ahora]\n' >&2
+    exit 2
+    ;;
+esac
+
+anterior=''
+while true; do
+  mapfile -t cuentas < <(contar)
+  oficiales="${cuentas[0]:-0}"
+  aur="${cuentas[1]:-0}"
+  flatpak="${cuentas[2]:-0}"
+  actual="${oficiales}:${aur}:${flatpak}"
+
+  if [[ "${actual}" != "${anterior}" ]]; then
+    anterior="${actual}"
+    detener_bandeja
+    if (( oficiales + aur + flatpak > 0 )); then
+      "${runner}" --oficiales "${oficiales}" --aur "${aur}" \
+        --flatpak "${flatpak}" &
+      tray_pid=$!
+    fi
+  fi
+
+  # Waiting on the tray rather than sleeping past it: when the person clicks
+  # something, act on it immediately instead of an hour later.
+  if [[ -n "${tray_pid}" ]]; then
+    estado=0
+    wait "${tray_pid}" || estado=$?
+    tray_pid=''
+    case "${estado}" in
+      20)
+        abrir_terminal || true
+        # The counts are stale the moment the update finishes, so forget them
+        # and look again rather than trusting what the tray was showing.
+        anterior=''
+        continue
+        ;;
+      21)
+        anterior=''
+        continue
+        ;;
+    esac
+  fi
+
+  sleep "${intervalo}"
+done

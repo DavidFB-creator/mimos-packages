@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+# Updates MimOS, in David's order: official repositories, then the AUR, then
+# Flatpaks.
+#
+# **The order is a safety property, not a preference.** The official set is
+# what the system's integrity depends on, and it must be applied whole before
+# anything else runs. An AUR package builds against the libraries the official
+# set provides, so building first and upgrading afterwards is how people get a
+# binary linked to a library that no longer exists. And a failing AUR build
+# must never leave the official upgrade half-applied -- so if the first step
+# fails, nothing after it runs.
+#
+# This runs in a visible terminal on purpose. pacman asks real questions --
+# replacements, conflicts, .pacnew files -- and it asks for a password. A
+# graphical updater that hides those questions either answers them for you or
+# hangs, and both are worse than showing the person what is happening to their
+# computer.
+#
+# Snapshots (ADR-102) sit underneath every step here: snap-pac brackets each
+# pacman transaction, so an update that breaks the machine is recoverable from
+# the boot menu. That is what made shipping the AUR defensible at all.
+# See ADR-104.
+set -Eeuo pipefail
+
+titulo() {
+  printf '\n\033[1;38;2;255;111;174m  %s\033[0m\n\n' "$*"
+}
+
+aviso() {
+  printf '\n\033[1;38;2;241;213;138m  %s\033[0m\n\n' "$*"
+}
+
+pausa_final() {
+  printf '\n  Pulsa Intro para cerrar esta ventana.'
+  read -r _ || true
+}
+
+titulo 'Actualizando MimOS'
+printf '  Cada paso deja una instantánea, así que si algo sale mal\n'
+printf '  puedes volver atrás desde el menú de arranque.\n'
+
+# --- 1. official repositories ------------------------------------------
+titulo '1 de 3 · Repositorios oficiales y MimOS'
+if ! sudo pacman -Syu; then
+  aviso 'La actualización oficial no ha terminado bien.'
+  printf '  No se continúa con el AUR ni con Flatpak: instalar sobre una\n'
+  printf '  actualización a medias es peor que no actualizar.\n'
+  pausa_final
+  exit 1
+fi
+
+# --- 2. the AUR --------------------------------------------------------
+titulo '2 de 3 · AUR'
+if ! command -v paru > /dev/null 2>&1; then
+  printf '  paru no está instalado; se omite.\n'
+elif ! paru -Sua; then
+  # Deliberately not fatal. The official system is already updated and
+  # consistent at this point; one AUR package that fails to build is that
+  # package's problem, and stopping here would leave Flatpak unattended for
+  # no gain.
+  aviso 'Algún paquete del AUR no se ha podido actualizar.'
+  printf '  El sistema oficial sí está al día. El AUR es software sin\n'
+  printf '  revisar: que uno falle no rompe tu MimOS.\n'
+fi
+
+# --- 3. Flatpak --------------------------------------------------------
+titulo '3 de 3 · Flatpak'
+if ! command -v flatpak > /dev/null 2>&1; then
+  printf '  Flatpak no está instalado; se omite.\n'
+elif ! flatpak update; then
+  aviso 'Alguna aplicación Flatpak no se ha podido actualizar.'
+fi
+
+titulo 'Listo'
+pausa_final

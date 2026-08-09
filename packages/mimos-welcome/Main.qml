@@ -332,7 +332,7 @@ Item {
                                 objectName: "discoverCard"
                                 glyph: "🛍️"
                                 text: "Instalar aplicaciones"
-                                caption: "Abre Discover, la tienda de aplicaciones de KDE"
+                                caption: "Busca e instala desde los repositorios de Arch y el AUR"
                                 onClicked: root.discoverRequested()
                             }
 
@@ -402,11 +402,11 @@ Item {
                                 },
                                 {
                                     title: "2 · Instala tus aplicaciones",
-                                    body: "«Instalar aplicaciones» abre Discover. Busca, instala y actualiza software con unos clics; también puedes usar pacman desde la terminal."
+                                    body: "«Instalar aplicaciones» abre paru en una terminal, con acceso a los repositorios oficiales de Arch y al AUR. Se hace en terminal a propósito: instalar pide contraseña y hace preguntas, y es mejor verlas."
                                 },
                                 {
                                     title: "3 · Mantenlo actualizado",
-                                    body: "Discover te avisará de las actualizaciones. MimOS es una beta: actualiza con frecuencia y no lo uses todavía para datos importantes."
+                                    body: "MimOS te avisa desde la bandeja del sistema cuando hay actualizaciones, y cada una deja una instantánea por si hay que volver atrás. Es una beta: actualiza a menudo y no la uses todavía para datos importantes."
                                 },
                                 {
                                     title: "4 · Pide ayuda cuando quieras",

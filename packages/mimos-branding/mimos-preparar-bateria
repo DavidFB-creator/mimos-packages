@@ -1,0 +1,144 @@
+#!/usr/bin/env bash
+# Puts the percentage on a laptop's battery icon, once, on a new account.
+#
+# **This is the half of the desktop layout that the layout cannot do**, and
+# the reason is a matter of timing rather than of settings.
+#
+# The Look-and-Feel layout script brings the battery out of the tray's hidden
+# area (`shownItems`), and that works: it is a plain key on the system-tray
+# widget, which exists while the layout runs. The percentage is not. It lives
+# in the *battery applet's* own configuration, under a group named after that
+# applet's numeric id -- and when the layout runs, the tray has not created
+# its applets yet. Measured on David's laptop through the real mechanism
+# (Preferencias → Tema global, which applies with --resetLayout): our
+# `shownItems` landed, the tray's applet ids came out as 596-600 -- created
+# *after* the ids the layout had seen -- and `showPercentage` was written
+# nowhere, because the loop looking for the battery iterated over an empty
+# list and found nothing to write to. No error, no log line, no symptom
+# except a battery icon with no number on it. See ADR-110.
+#
+# So it is done here instead: after the session is up, from outside, through
+# plasmashell's own scripting interface. That last part is not a stylistic
+# choice. plasmashell keeps this file in memory and rewrites it when it
+# exits, so a `kwriteconfig6` behind its back is discarded a few hours later
+# with nothing to show for it.
+#
+# Two smaller things worth keeping, both measured rather than assumed:
+#
+#   * `configGroups` is a LIVE reference, not a copy. Read it into a variable
+#     and then change `currentConfigGroup` inside the loop, and the variable
+#     empties itself: the loop finds nothing and reports success. Hence the
+#     explicit String() copy below.
+#   * the applet only *draws* the number when the battery is not full --
+#     "Show Battery Percentage on Icon When Not Fully Charged" is its own
+#     label, read out of the compiled applet. A machine at 100% shows no
+#     number with the setting correctly applied, so the setting is what gets
+#     checked anywhere this is verified, never the pixels.
+#
+# It runs once per account and never overrides a value the user already set.
+set -Eeuo pipefail
+
+marker="${mimos_test_marker:-${XDG_STATE_HOME:-${HOME}/.local/state}/mimos/bateria-preparada}"
+supplies="${mimos_test_power_supply:-/sys/class/power_supply}"
+attempts="${mimos_test_attempts:-30}"
+delay="${mimos_test_delay:-2}"
+
+[[ -e "${marker}" ]] && exit 0
+
+anotar() {
+  local directorio
+  directorio="$(dirname -- "${marker}")"
+  # Created only when missing. `install -d` on a directory that already
+  # exists also resets its mode, which is somebody else's decision when the
+  # directory is one this helper did not make.
+  [[ -d "${directorio}" ]] || install -d -m 0700 -- "${directorio}"
+  printf '%s\n' "$1" > "${marker}"
+}
+
+# A desktop computer has no battery, so there is nothing to configure and
+# nothing to wait for. Asked of /sys rather than of Plasma, because the
+# answer must arrive before the polling below decides how long to be patient.
+tiene_bateria=0
+for supply in "${supplies}"/*; do
+  [[ -r "${supply}/type" ]] || continue
+  [[ "$(cat "${supply}/type" 2>/dev/null || true)" == 'Battery' ]] || continue
+  tiene_bateria=1
+  break
+done
+if (( tiene_bateria == 0 )); then
+  printf 'No battery on this machine; nothing to prepare.\n'
+  anotar 'sin-bateria'
+  exit 0
+fi
+
+# dbus-send rather than qdbus6: dbus is present on every system that can run
+# Plasma at all, while qdbus6 lives in qt6-tools and would be a dependency
+# added for one call.
+caller="${mimos_test_caller:-dbus-send}"
+if ! command -v "${caller}" > /dev/null 2>&1; then
+  printf 'dbus-send is not available; leaving the battery alone.\n' >&2
+  anotar 'sin-canal'
+  exit 0
+fi
+
+read -r -d '' guion <<'JS' || true
+var estado = "sin-applet";
+for (var i = 0; i < panelIds.length; i++) {
+    var panel = panelById(panelIds[i]);
+    for (var j = 0; j < panel.widgetIds.length; j++) {
+        var bandeja = panel.widgetById(panel.widgetIds[j]);
+        if (bandeja.type !== "org.kde.plasma.systemtray") {
+            continue;
+        }
+        bandeja.currentConfigGroup = ["Applets"];
+        var ids = String(bandeja.configGroups).split(",");
+        for (var k = 0; k < ids.length; k++) {
+            if (ids[k] === "") {
+                continue;
+            }
+            bandeja.currentConfigGroup = ["Applets", ids[k]];
+            if (String(bandeja.readConfig("plugin")) !== "org.kde.plasma.battery") {
+                continue;
+            }
+            bandeja.currentConfigGroup = ["Applets", ids[k], "Configuration", "General"];
+            if (String(bandeja.readConfig("showPercentage")) !== "") {
+                estado = "ya-configurada";
+            } else {
+                bandeja.writeConfig("showPercentage", true);
+                bandeja.reloadConfig();
+                estado = "aplicada";
+            }
+        }
+    }
+}
+print("BATERIA " + estado);
+JS
+
+# The applet appears a few seconds into the session, so this waits for it
+# rather than asking once and giving up. Everything here is bounded: a
+# session where the tray never produces a battery applet must not leave a
+# helper polling for the rest of the login.
+estado='sin-applet'
+for _ in $(seq 1 "${attempts}"); do
+  respuesta="$(
+    "${caller}" --session --print-reply=literal \
+      --dest=org.kde.plasmashell /PlasmaShell \
+      org.kde.PlasmaShell.evaluateScript "string:${guion}" 2>/dev/null || true
+  )"
+  case "${respuesta}" in
+    *'BATERIA aplicada'*) estado='aplicada'; break ;;
+    *'BATERIA ya-configurada'*) estado='ya-configurada'; break ;;
+  esac
+  sleep "${delay}"
+done
+
+case "${estado}" in
+  aplicada) printf 'Battery percentage enabled.\n' ;;
+  ya-configurada) printf 'The battery percentage was already set; left alone.\n' ;;
+  *) printf 'No battery applet appeared in the panel; nothing changed.\n' >&2 ;;
+esac
+
+# Written whatever the outcome, and holding it: the marker is this helper's
+# only evidence that it ran at all, and a machine that retried this at every
+# login for the rest of its life would be worse than one that missed it once.
+anotar "${estado}"

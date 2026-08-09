@@ -1,0 +1,129 @@
+# MimOS default shell configuration, installed as ~/.zshrc.local.
+#
+# It is deliberately short. grml-zsh-config does the heavy lifting (completion,
+# history, keybindings, a sane prompt) and is maintained by people who do this
+# full time; Arch's own installation medium ships it for the same reason.
+# Everything below either adapts grml to MimOS or does what grml leaves alone.
+#
+# **This file must never source /etc/zsh/zshrc.** grml's global zshrc sources
+# *this* file, from `zrclocal` at its second-to-last line, so sourcing it back
+# is a loop. It did, for exactly one image: the line was correct while this
+# was installed as `~/.zshrc` -- zsh reads the global file first and the
+# guard was there for a user who removed the package -- and moving the file
+# to `.zshrc.local` (ADR-113) turned the same line into recursion. Opening a
+# terminal filled the window with
+# `/etc/zsh/zshrc:unfunction:3609: no such hash table element` and no
+# greeting. Nothing caught it: the installed audit checks that this file
+# exists and carries the right lines, which it did. A person opening a
+# terminal caught it, in the first photograph anybody ever took of one.
+# See ADR-119.
+#
+# What replaced the guard: nothing needs to. If grml-zsh-config is missing,
+# this file is never read at all, and the branding contract refuses an image
+# that ships one without the other.
+
+# Sensible history for a desktop system: enough to be useful, shared between
+# terminals, and without storing the duplicates that make it unreadable.
+HISTFILE="${ZDOTDIR:-${HOME}}/.zsh_history"
+HISTSIZE=10000
+SAVEHIST=10000
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_IGNORE_SPACE
+setopt HIST_REDUCE_BLANKS
+setopt SHARE_HISTORY
+
+# Change directory by typing its name, and correct obvious typos in commands
+# but never in arguments -- a "correction" applied to a path is how people
+# lose files.
+setopt AUTO_CD
+setopt CORRECT
+
+# The three things people install Oh My Zsh to get, without Oh My Zsh: it is
+# not in Arch's repositories, it updates itself with git inside a directory
+# pacman would own, and it starts measurably slower than plain zsh with these
+# loaded. Together they are about 250 KiB. See ADR-100.
+#
+# Order matters and is not arbitrary. zsh-syntax-highlighting's own README
+# requires it to be sourced last of the three, because it wraps the line
+# editor's widgets and anything sourced afterwards would wrap it back;
+# history-substring-search binds the arrow keys and must come after it so its
+# bindings win.
+if [[ -r /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
+  source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+fi
+if [[ -r /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
+  source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+fi
+if [[ -r /usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh ]]; then
+  source /usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh
+  bindkey '^[[A' history-substring-search-up
+  bindkey '^[[B' history-substring-search-down
+fi
+
+# The prompt. starship is cross-shell, fast, and reads the MimOS
+# configuration from ~/.config/starship.toml.
+#
+# grml has to be told to let go first. It installs its own precmd hook that
+# redraws its prompt on every line, so starship's assignment was overwritten
+# on the very next draw: the configuration was correct and did nothing
+# visible, which is this project's most familiar failure. Measured in a real
+# terminal window -- `zsh -i -c 'print $PROMPT'` reported starship's value
+# and the window still showed grml's, because a prompt only exists where it
+# is drawn.
+autoload -Uz promptinit && promptinit && prompt off 2>/dev/null
+
+if command -v starship > /dev/null 2>&1; then
+  eval "$(starship init zsh)"
+fi
+
+# Colour for the tools people run all day.
+alias ls='ls --color=auto'
+alias grep='grep --color=auto'
+alias diff='diff --color=auto'
+
+# MimOS's own conveniences, in Spanish, because the system is Spanish-first.
+alias actualizar='sudo pacman -Syu'
+alias buscar='pacman -Ss'
+alias instalar='sudo pacman -S'
+
+# The greeting. MimOS says hello in every terminal, which costs 3 ms --
+# measured against 95 ms for this file itself, so the price is the shell's,
+# not the greeting's.
+#
+# Three guards, each for a real case:
+#   * only when a person is looking. A scripted or piped shell must print
+#     nothing, or it corrupts whatever is reading it.
+#   * only at the outermost level. Opening a shell inside a shell, or
+#     inside a text editor's terminal panel, should not repeat it.
+#   * only where the icons can be drawn. The Nerd Font glyphs are
+#     private-use codepoints and any other terminal renders them as boxes,
+#     so a TTY or konsole gets the plain configuration instead. Ghostty is
+#     identified by TERM_PROGRAM, measured rather than assumed.
+#
+# The logo is dropped below the width where it and the text stop fitting
+# side by side: the heart is 25 columns and the information column needs
+# about fifty more.
+mimos_saludo() {
+  [[ -o interactive ]] || return 0
+  [[ -z "${mimos_saludo_hecho:-}" ]] || return 0
+  [[ -z "${INSIDE_EMACS:-}${VIMRUNTIME:-}" ]] || return 0
+  command -v fastfetch > /dev/null 2>&1 || return 0
+  export mimos_saludo_hecho=1
+
+  local config=/usr/share/mimos/branding/fastfetch-config-plain.jsonc
+  if [[ "${TERM_PROGRAM:-}" == 'ghostty' ]]; then
+    config=/usr/share/mimos/branding/fastfetch-config.jsonc
+  fi
+  [[ -r "${config}" ]] || return 0
+
+  if (( ${COLUMNS:-80} < 78 )); then
+    fastfetch --config "${config}" --logo none
+  else
+    fastfetch --config "${config}"
+  fi
+}
+mimos_saludo
+
+# Anything the user adds here survives package upgrades: this file is theirs
+# from the moment their account is created, copied from /etc/skel and never
+# touched again.

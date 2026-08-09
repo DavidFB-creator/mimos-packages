@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Actualizar MimOS
+GenericName=Actualizaciones del sistema
+Comment=Actualiza los repositorios oficiales, el AUR y Flatpak
+Exec=/usr/bin/mimos-actualizador --ahora
+Icon=system-software-update
+Terminal=false
+Categories=System;
+Keywords=actualizar;actualizaciones;pacman;AUR;flatpak;

@@ -1,0 +1,78 @@
+# Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
+
+pkgname=mimos-actualizador
+pkgver=0.6.0.beta.1
+pkgrel=2
+pkgdesc='MimOS update notifier and ordered updater'
+# Compiled for the same reason Centro de MimOS is (ADR-093): the generic qml6
+# tool declares its own identity, so the notification would arrive from "qml"
+# wearing a Qt logo. A notification about updating the operating system is
+# exactly the shape a person should recognise at a glance.
+arch=('x86_64')
+# No debug split: the ephemeral repository's package count is exact.
+options=('!debug')
+url='https://github.com/DavidFB-creator/MimOS'
+license=('MIT')
+# fakeroot is not pacman-contrib's dependency, it is checkupdates'.
+# checkupdates syncs into a private database with `fakeroot -- pacman -Sy`,
+# so without the binary it dies before it ever reaches the network. MimOS
+# shipped images where the checker therefore always answered zero -- which
+# is exactly what an up-to-date system looks like -- so the tray never drew
+# on any machine. Declared here rather than in the image's package list so
+# it travels with the thing that needs it, onto installed systems too.
+# See ADR-120.
+depends=('bash' 'qt6-declarative' 'pacman-contrib' 'fakeroot')
+makedepends=('gcc' 'pkgconf')
+optdepends=(
+  'paru: update AUR packages'
+  'flatpak: update Flatpak applications'
+  'ghostty: show the update in the MimOS terminal'
+  'konsole: fallback terminal for the update'
+  'snap-pac: snapshot every update so it can be undone'
+)
+source=(
+  'mimos-actualizador'
+  'mimos-actualizar'
+  'mimos-buscar-actualizaciones'
+  'Tray.qml'
+  'actualizador-main.cpp'
+  'mimos-actualizador.desktop'
+  'mimos-actualizador-autostart.desktop'
+  'LICENSE'
+)
+sha256sums=('6783002a9896bac78087f9a38e2f17a17c4a7027580b76968e420ab461a923e9'
+            '2813385dde957686a105e65c973ab324e8c5c94dffbd4f60a3be679c5fcb00b6'
+            'd4dc158796588cc5167274c8a13b65f9e6bc26daf1dde43a389c7c4094346d76'
+            '84fdc5a8f6d4ed72630fdeb8a205905145f50a68db908054bd7ee773767b2a72'
+            'c963bea9098c66c04ef20f5aa7f2706c3ca8095fe742dec68c66853110742457'
+            '4b49958ffa6870b9f29b7c29ace4cc55df7304a1988aa1ca20ce5133189a2dc3'
+            '0e34a96afc075a283cb4c8d135366cb93e1a8bfa7f91b50497c753e44b2f96aa'
+            '97d7ba0977ea88730c942625f66849bbef6536c3c6e103a39a4bb05b9fd3d9cf')
+
+build() {
+  g++ -std=c++17 -fPIC ${CXXFLAGS} actualizador-main.cpp \
+    -DACTUALIZADOR_TRAY_QML='"/usr/share/mimos/actualizador/Tray.qml"' \
+    $(pkg-config --cflags --libs Qt6Qml Qt6Widgets Qt6Gui Qt6Core) \
+    ${LDFLAGS} -o actualizador-mimos
+}
+
+package() {
+  install -Dm755 mimos-actualizador "${pkgdir}/usr/bin/mimos-actualizador"
+  # Public, because a person whose machine is misbehaving should be able to
+  # run the update by hand and watch it.
+  install -Dm755 mimos-actualizar "${pkgdir}/usr/bin/mimos-actualizar"
+  # Private: the tray's own plumbing. It needs no root and changes nothing,
+  # but it is an implementation detail of the notifier rather than a command
+  # anybody should have to learn.
+  install -Dm755 mimos-buscar-actualizaciones \
+    "${pkgdir}/usr/lib/mimos/mimos-buscar-actualizaciones"
+  install -Dm755 actualizador-mimos \
+    "${pkgdir}/usr/lib/mimos/actualizador-mimos"
+  install -Dm644 Tray.qml \
+    "${pkgdir}/usr/share/mimos/actualizador/Tray.qml"
+  install -Dm644 mimos-actualizador.desktop \
+    "${pkgdir}/usr/share/applications/mimos-actualizador.desktop"
+  install -Dm644 mimos-actualizador-autostart.desktop \
+    "${pkgdir}/etc/xdg/autostart/mimos-actualizador.desktop"
+  install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}

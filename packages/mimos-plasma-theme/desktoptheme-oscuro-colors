@@ -121,6 +121,7 @@ ForegroundPositive=112,214,197
 ForegroundVisited=217,160,240
 
 [General]
+AccentColor=255,111,174
 ColorScheme=MimOS Oscuro
 Name=MimOS Oscuro
 shadeSortColumn=true

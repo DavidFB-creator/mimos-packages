@@ -1,7 +1,7 @@
 # Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
 
 pkgname=mimos-welcome
-pkgver=0.5.0.beta.4
+pkgver=0.6.0.beta.1
 pkgrel=1
 pkgdesc='Centro de MimOS welcome and privacy application'
 # Compiled since the runner exists: the generic qml6 tool declares its own
@@ -20,7 +20,7 @@ optdepends=(
   'mimos-release: version-aware autostart'
   'mimos-welcome-live: the Live-session Centro this launcher delegates to'
   'plasma-workspace: apply the MimOS Global Themes'
-  'discover: install applications from Centro de MimOS'
+  'paru: install applications from Centro de MimOS'
 )
 source=(
   'mimos-welcome'
@@ -32,9 +32,9 @@ source=(
   'centro-main.cpp'
   'LICENSE'
 )
-sha256sums=('97eae4ba9f95dc32bf0e9d758df187bf645388660442fdb2248e7c08666136e3'
+sha256sums=('0ba71b4871ed22e3b75616c0d4d72e91ea5640df35b02f98b219d2c90c7b7d41'
             '7770a8046c166b04fbfd7d6fe4b1abd58ae71d0459456e18906a7b1ba3faf952'
-            '6f5ecf1e0c6654daf941aebcc8226b38d2516d483c07d96ccba4e4b044515dd3'
+            '0a3102de51428266d1100cdda5097ef9fabdaa3664c4f1a78d02099140e7978a'
             '39262739a86345fa459047a30f5cb039bd6cb3d69460014c522c9e7b6cf1c3cf'
             '78f118314a87d92961826cd87c84cfd12b029b99ed36e9404f4ab892aa172398'
             '78c2283d05869013f84bca6e89433ec9312bd30978293cbb49650afcaa59770c'

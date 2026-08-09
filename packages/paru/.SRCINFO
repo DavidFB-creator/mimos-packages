@@ -1,0 +1,21 @@
+pkgbase = paru
+	pkgdesc = AUR helper, shipped by MimOS so its users can reach the AUR deliberately
+	pkgver = 2.1.0
+	pkgrel = 2
+	url = https://github.com/Morganamilo/paru
+	arch = x86_64
+	license = GPL-3.0-or-later
+	makedepends = cargo
+	makedepends = gettext
+	makedepends = archlinux-keyring
+	depends = git
+	depends = pacman
+	depends = libalpm.so
+	optdepends = bat: colour in printed PKGBUILDs
+	optdepends = devtools: build in a clean chroot
+	options = !debug
+	backup = etc/paru.conf
+	source = paru::git+https://github.com/Morganamilo/paru.git#tag=v2.1.0
+	sha256sums = 19898d4f2ccea34f3ebc2dba3761b41026a2a9453cfec1ad856c7cb36d3b7d2f
+
+pkgname = paru

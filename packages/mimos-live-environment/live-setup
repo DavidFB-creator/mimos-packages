@@ -10,7 +10,10 @@ if ! id mimos >/dev/null 2>&1; then
   done
 
   group_list="$(IFS=,; printf '%s' "${live_groups[*]}")"
-  useradd -m -c 'MimOS Live' -s /bin/bash -G "${group_list}" mimos
+  # The Live account uses the same shell an installation creates, or the two
+  # sessions would behave differently and only the installed one would be
+  # tested by anyone.
+  useradd -m -c 'MimOS Live' -s /bin/zsh -G "${group_list}" mimos
   passwd -d mimos >/dev/null
 fi
 

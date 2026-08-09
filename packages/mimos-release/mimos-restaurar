@@ -1,0 +1,226 @@
+#!/usr/bin/env bash
+# Restores MimOS to the snapshot you are currently booted from.
+#
+# The shape of this command is forced by our disk layout, and the reason is
+# worth reading before changing anything here.
+#
+# `snapper rollback` -- the obvious command, the one every guide names -- does
+# nothing on MimOS. All it does is change the btrfs *default subvolume*, and
+# our /etc/fstab pins the root mount with `subvol=/@`, which wins over the
+# default every time. The rollback would report success, the reboot would come
+# up in the same broken system, and the user would conclude that snapshots do
+# not work. So restoring here means replacing the /@ subvolume itself: the
+# broken one is moved aside, and a writable copy of the chosen snapshot takes
+# its name.
+#
+# That cannot be done from the system being replaced, because /@ is mounted as
+# its root. It is done from a snapshot booted out of the GRUB menu, where /@
+# is not mounted at all -- which is exactly what the grub-btrfs entries and
+# the grub-btrfs-overlayfs initramfs hook exist to provide. See ADR-102.
+set -Eeuo pipefail
+
+cmdline_file="${mimos_test_cmdline:-/proc/cmdline}"
+test_toplevel="${mimos_test_toplevel:-}"
+no_reboot="${mimos_test_no_reboot:-}"
+# The questions below are the only part of this command a person interacts
+# with, and the test hooks skipped them entirely -- so the answers, and what
+# happens when there are none, were the one thing no test could reach.
+test_prompts="${mimos_test_prompts:-}"
+
+fatal() {
+  printf '\n  %s\n\n' "$*" >&2
+  exit 1
+}
+
+usage() {
+  cat <<'FIN'
+Uso: mimos-restaurar [--listar | --limpiar]
+
+Devuelve MimOS al estado de la instantánea desde la que has arrancado.
+
+  --listar    Muestra las instantáneas disponibles y no cambia nada.
+  --limpiar   Borra los sistemas antiguos que dejó una restauración.
+
+Para restaurar: reinicia, elige «Instantáneas de MimOS» en el menú de
+arranque, arranca la instantánea que quieras recuperar, y ejecuta este
+comando con sudo desde ahí.
+FIN
+}
+
+mode='restaurar'
+case "${1:-}" in
+  -h|--help) usage; exit 0 ;;
+  --listar)
+    exec snapper -c root list
+    ;;
+  --limpiar) mode='limpiar' ;;
+  '') ;;
+  *) usage >&2; exit 2 ;;
+esac
+
+if [[ "$(id -u)" -ne 0 && -z "${test_toplevel}" ]]; then
+  fatal 'Ejecuta este comando con sudo.'
+fi
+
+# --- are we inside a snapshot? -----------------------------------------
+#
+# Asked of the kernel command line rather than of the mounted filesystem,
+# because the overlayfs hook has already replaced the root mount with an
+# overlay by the time anything in userspace runs: `findmnt /` reports the
+# overlay and says nothing about which subvolume is underneath it. GRUB's
+# snapshot entries carry rootflags=subvol=@snapshots/<n>/snapshot, and that is
+# the only place the answer survives.
+read -r cmdline < "${cmdline_file}"
+snapshot_subvol=''
+root_spec=''
+for parameter in ${cmdline}; do
+  case "${parameter}" in
+    rootflags=*)
+      case "${parameter}" in
+        *subvol=*)
+          snapshot_subvol="${parameter#*subvol=}"
+          snapshot_subvol="${snapshot_subvol%%,*}"
+          ;;
+      esac
+      ;;
+    root=*) root_spec="${parameter#root=}" ;;
+  esac
+done
+snapshot_subvol="${snapshot_subvol#/}"
+
+# A normal boot names the root device in /etc/fstab rather than on the command
+# line, because GRUB hands the subvolume over and systemd mounts the rest.
+# --limpiar runs from exactly that kind of system, so it has to ask the
+# running mount instead.
+if [[ -z "${root_spec}" && -z "${test_toplevel}" ]]; then
+  root_spec="$(findmnt -no SOURCE --target / 2>/dev/null || true)"
+  root_spec="${root_spec%%[*}"
+fi
+
+case "${mode}:${snapshot_subvol}" in
+  limpiar:*) ;;
+  restaurar:@snapshots/*/snapshot) ;;
+  *)
+    fatal 'No has arrancado desde una instantánea, así que no hay nada que restaurar.
+
+  Para recuperar el sistema:
+    1. Reinicia el ordenador.
+    2. En el menú de arranque elige «Instantáneas de MimOS».
+    3. Arranca la instantánea anterior al problema.
+    4. Vuelve a ejecutar «sudo mimos-restaurar» desde ahí.
+
+  Puedes ver las instantáneas que tienes con «mimos-restaurar --listar».'
+    ;;
+esac
+
+# --- reach the top of the filesystem -----------------------------------
+#
+# Subvolume id 5 is the btrfs root: the level where /@ and /@snapshots are
+# siblings and both can be manipulated as ordinary subvolumes. Nothing else
+# gives access to /@ while it is not the mounted root.
+if [[ -n "${test_toplevel}" ]]; then
+  toplevel="${test_toplevel}"
+else
+  [[ -n "${root_spec}" ]] || fatal 'No se puede saber en qué disco está MimOS.'
+  toplevel="$(mktemp -d)"
+  trap 'umount "${toplevel}" 2>/dev/null || true; rmdir "${toplevel}" 2>/dev/null || true' EXIT
+  mount -o subvolid=5 "${root_spec}" "${toplevel}" \
+    || fatal "No se ha podido montar ${root_spec}."
+fi
+
+# --- --limpiar ---------------------------------------------------------
+#
+# Every restore leaves the replaced system behind under @roto-<date>, on
+# purpose: the whole point of restoring is that something was lost, and the
+# copy holding it must outlive the reboot. Removing them is therefore a
+# separate, deliberate act, and this is where it lives -- the subvolumes sit
+# at the top of the filesystem and are invisible from inside the running
+# system, so there is no path a user could reasonably guess.
+if [[ "${mode}" == 'limpiar' ]]; then
+  mapfile -t leftovers < <(cd "${toplevel}" && ls -1d @roto-* 2>/dev/null || true)
+  if [[ "${#leftovers[@]}" -eq 0 ]]; then
+    printf '\n  No hay sistemas antiguos que borrar.\n\n'
+    exit 0
+  fi
+  printf '\n  Se van a borrar estos sistemas antiguos, para siempre:\n\n'
+  printf '    %s\n' "${leftovers[@]}"
+  printf '\n'
+  if [[ -z "${test_toplevel}" || -n "${test_prompts}" ]]; then
+    # `|| true` because this runs under `set -e`, and a read that reaches the
+    # end of its input returns 1. Without it a command with nothing on stdin
+    # dies here instead of answering its own question with "no".
+    answer=''
+    read -r -p '  ¿Continuar? Escribe «si» para borrar: ' answer || true
+    case "${answer}" in
+      si|sí|SI|SÍ|Si|Sí) ;;
+      *) printf '\n  No se ha borrado nada.\n\n'; exit 0 ;;
+    esac
+  fi
+  for leftover in "${leftovers[@]}"; do
+    btrfs subvolume delete "${toplevel}/${leftover}"
+  done
+  printf '\n  Espacio liberado.\n\n'
+  exit 0
+fi
+
+[[ -d "${toplevel}/${snapshot_subvol}" ]] \
+  || fatal "La instantánea ${snapshot_subvol} no está donde debería."
+[[ -d "${toplevel}/@" ]] \
+  || fatal 'No hay un subvolumen @ que reemplazar.'
+
+stamp="$(date +%Y%m%d-%H%M%S)"
+broken="@roto-${stamp}"
+
+printf '\n  Vas a devolver MimOS al estado de esta instantánea:\n\n'
+printf '    %s\n\n' "${snapshot_subvol}"
+printf '  El sistema actual no se borra: se guarda como «%s»,\n' "${broken}"
+printf '  por si quieres rescatar algo de él antes de eliminarlo.\n\n'
+
+if [[ -z "${test_toplevel}" || -n "${test_prompts}" ]]; then
+  answer=''
+  read -r -p '  ¿Continuar? Escribe «si» para restaurar: ' answer || true
+  case "${answer}" in
+    si|sí|SI|SÍ|Si|Sí) ;;
+    *) printf '\n  No se ha cambiado nada.\n\n'; exit 0 ;;
+  esac
+fi
+
+# The order matters: move first, create second. A failed move leaves the
+# system exactly as it was, while a failed create after a successful move
+# leaves /@ absent -- so the move is the step allowed to fail, and the create
+# is the one that must not be interrupted.
+mv "${toplevel}/@" "${toplevel}/${broken}" \
+  || fatal 'No se ha podido apartar el sistema actual. No se ha cambiado nada.'
+
+if ! btrfs subvolume snapshot "${toplevel}/${snapshot_subvol}" "${toplevel}/@"; then
+  mv "${toplevel}/${broken}" "${toplevel}/@" 2>/dev/null || true
+  fatal 'No se ha podido crear el sistema restaurado. Se ha deshecho el cambio.'
+fi
+
+printf '\n  Listo. MimOS ha vuelto a esa instantánea.\n\n'
+printf '  El sistema anterior se ha guardado como «%s».\n' "${broken}"
+printf '  Cuando compruebes que todo va bien, libera su espacio con:\n\n'
+printf '    sudo mimos-restaurar --limpiar\n\n'
+
+if [[ -n "${no_reboot}" ||
+  ( -n "${test_toplevel}" && -z "${test_prompts}" ) ]]; then
+  printf '  (No se reinicia: modo de prueba.)\n\n'
+  exit 0
+fi
+
+# Pressing Enter reboots, which is what somebody sitting in front of the
+# machine means by it. Reaching the end of the input does not: a caller with
+# no stdin has not asked for a reboot, and rebooting a computer because its
+# input ended is the worst available reading of silence. Separating the two
+# also stops `set -e` from failing this command after it has already put the
+# system back -- a successful restore reported as an error, which is how a
+# person decides the feature does not work.
+restart=''
+if read -r -p '  ¿Reiniciar ahora? [S/n]: ' restart; then
+  case "${restart}" in
+    n|N|no|NO|No) printf '\n  Reinicia cuando quieras para entrar en el sistema restaurado.\n\n' ;;
+    *) systemctl reboot ;;
+  esac
+else
+  printf '\n  Reinicia cuando quieras para entrar en el sistema restaurado.\n\n'
+fi
