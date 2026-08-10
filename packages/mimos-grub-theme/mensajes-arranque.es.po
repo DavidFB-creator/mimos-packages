@@ -1,0 +1,28 @@
+# MimOS boot messages, Spanish.
+#
+# This is not a translation of GRUB: it is a small catalogue that replaces two
+# of its strings and nothing else. It is compiled into
+# /usr/share/locale/es@mimos/LC_MESSAGES/grub.mo -- a locale name GRUB does not
+# own, so no file conflicts with the grub package -- and reached by the
+# LANGUAGE list in /etc/default/grub.d/10-mimos.cfg. Every string we do not
+# name here falls through to GRUB's own es catalogue.
+#
+# Both msgstr deliberately drop the %s. GRUB passes the kernel's version
+# string, which on Arch is the word `linux`, and "Cargando Linux linux" is what
+# started all this. printf with a surplus argument and no conversion in the
+# format prints the format once -- measured with bash before this file was
+# written -- so dropping it is safe rather than merely tidy. Which kernel is
+# being loaded is already on the menu entry the person just chose.
+msgid ""
+msgstr ""
+"Project-Id-Version: mimos-grub-theme\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Loading Linux %s ..."
+msgstr "Cargando MimOS…"
+
+msgid "Loading initial ramdisk ..."
+msgstr "Preparando el arranque…"

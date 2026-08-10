@@ -22,9 +22,17 @@ the key is a placeholder.
 
 ## If the key is ever lost or compromised
 
-See `docs/vault/KEY_CONTINGENCY.md`. Until its checklist is ticked, the key
-exists in one place and its loss is the only project failure with no recovery
-path.
+See `docs/vault/KEY_CONTINGENCY.md`. Its checklist was ticked on 2026-08-09:
+the key is on two removable media, one of them proved to restore, with the
+passphrase kept apart from both. Until that day its loss was the only project
+failure with no recovery path.
+
+The ceremony took two attempts, and the reason is worth carrying here: a
+`gpg --export-secret-keys` that exits zero tells you nothing about **where**
+the bytes landed. The first went to an internal SSD wearing a drive letter;
+the second to a `/mnt/g` that WSL had never mounted, so it became a directory
+on WSL's own disk. Verify from the operating system that owns the medium, and
+compare hashes across the boundary.
 
 ## What Claude must never do
 

@@ -41,7 +41,7 @@ Devuelve MimOS al estado de la instantánea desde la que has arrancado.
   --listar    Muestra las instantáneas disponibles y no cambia nada.
   --limpiar   Borra los sistemas antiguos que dejó una restauración.
 
-Para restaurar: reinicia, elige «Instantáneas de MimOS» en el menú de
+Para restaurar: reinicia, elige «Recuperar MimOS» en el menú de
 arranque, arranca la instantánea que quieras recuperar, y ejecuta este
 comando con sudo desde ahí.
 FIN
@@ -105,7 +105,7 @@ case "${mode}:${snapshot_subvol}" in
 
   Para recuperar el sistema:
     1. Reinicia el ordenador.
-    2. En el menú de arranque elige «Instantáneas de MimOS».
+    2. En el menú de arranque elige «Recuperar MimOS».
     3. Arranca la instantánea anterior al problema.
     4. Vuelve a ejecutar «sudo mimos-restaurar» desde ahí.
 
@@ -196,6 +196,27 @@ if ! btrfs subvolume snapshot "${toplevel}/${snapshot_subvol}" "${toplevel}/@"; 
   mv "${toplevel}/${broken}" "${toplevel}/@" 2>/dev/null || true
   fatal 'No se ha podido crear el sistema restaurado. Se ha deshecho el cambio.'
 fi
+
+# The restored system inherits a pacman lock that belongs to nothing.
+#
+# snap-pac takes the `pre` snapshot from pacman's PreTransaction hook, which
+# runs after pacman has already created /var/lib/pacman/db.lck -- so every
+# snapshot this menu offers contains that file, and /var/lib/pacman lives
+# inside the subvolume we have just replaced. The restored machine therefore
+# comes up believing a transaction is in progress, and the first thing anyone
+# does after recovering a computer is try to update it.
+#
+# Measured on David's laptop on 2026-08-10, where the surviving lock carried
+# the ctime 14:15:55 -- the exact second of the transaction that had been
+# rolled back hours earlier. Only the installation snapshot, created by
+# snapper outside any transaction, was clean.
+#
+# Removed here rather than at boot because here it is provably safe: this
+# subvolume is not mounted and nothing is running from it, so no pacman can
+# hold that lock. A boot-time cleanup would have to distinguish a stale lock
+# from a live one, which is exactly the judgement that makes such fixes
+# dangerous.
+rm -f -- "${toplevel}/@/var/lib/pacman/db.lck"
 
 printf '\n  Listo. MimOS ha vuelto a esa instantánea.\n\n'
 printf '  El sistema anterior se ha guardado como «%s».\n' "${broken}"

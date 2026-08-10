@@ -1,0 +1,22 @@
+# MimOS boot messages, English.
+#
+# English needs a catalogue for the same reason Spanish does, and it is easy to
+# miss why: GRUB's English strings are the msgids themselves, so there is no en
+# catalogue to fall through to and no translation to override. Without this
+# file an English installation would keep reading "Loading Linux linux ...",
+# which is exactly the line this whole change exists to remove.
+#
+# See mensajes-arranque.es.po for why both msgstr drop the %s.
+msgid ""
+msgstr ""
+"Project-Id-Version: mimos-grub-theme\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Loading Linux %s ..."
+msgstr "Loading MimOS…"
+
+msgid "Loading initial ramdisk ..."
+msgstr "Getting things ready…"

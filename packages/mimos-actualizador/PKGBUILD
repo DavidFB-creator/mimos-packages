@@ -1,8 +1,8 @@
 # Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
 
 pkgname=mimos-actualizador
-pkgver=0.6.0.beta.1
-pkgrel=2
+pkgver=0.7.0.beta.1
+pkgrel=1
 pkgdesc='MimOS update notifier and ordered updater'
 # Compiled for the same reason Centro de MimOS is (ADR-093): the generic qml6
 # tool declares its own identity, so the notification would arrive from "qml"
@@ -21,7 +21,7 @@ license=('MIT')
 # on any machine. Declared here rather than in the image's package list so
 # it travels with the thing that needs it, onto installed systems too.
 # See ADR-120.
-depends=('bash' 'qt6-declarative' 'pacman-contrib' 'fakeroot')
+depends=('bash' 'qt6-declarative' 'pacman-contrib' 'fakeroot' 'archlinux-contrib')
 makedepends=('gcc' 'pkgconf')
 optdepends=(
   'paru: update AUR packages'
@@ -41,7 +41,7 @@ source=(
   'LICENSE'
 )
 sha256sums=('6783002a9896bac78087f9a38e2f17a17c4a7027580b76968e420ab461a923e9'
-            '2813385dde957686a105e65c973ab324e8c5c94dffbd4f60a3be679c5fcb00b6'
+            'a078cba56af9d021291ee7d496edc2d944050192b4457776cf103ce214f86368'
             'd4dc158796588cc5167274c8a13b65f9e6bc26daf1dde43a389c7c4094346d76'
             '84fdc5a8f6d4ed72630fdeb8a205905145f50a68db908054bd7ee773767b2a72'
             'c963bea9098c66c04ef20f5aa7f2706c3ca8095fe742dec68c66853110742457'

@@ -71,5 +71,48 @@ elif ! flatpak update; then
   aviso 'Alguna aplicación Flatpak no se ha podido actualizar.'
 fi
 
+# --- what is still running the old code --------------------------------
+# An update is not finished when pacman exits. A service that was already
+# running keeps its old libraries mapped until it restarts, so a machine can
+# be fully patched and still be running the thing that was just fixed. Nobody
+# is told this by default.
+#
+# The idea and — more to the point — the exclusion list come from arch-update
+# by Robin Candau (GPL-3.0, https://github.com/Antiz96/arch-update), read on
+# 2026-08-10. **The exclusions are the expensive part**: restarting the
+# display manager pulls the desktop out from under the person while they are
+# watching this very window, so every login manager is left out on purpose.
+# `checkservices` itself is Arch's own: extra/archlinux-contrib, verified
+# with `pacman -F` rather than assumed — the first check used `pacman -Ql`,
+# which only answers for installed packages and said it did not exist.
+#
+# MimOS lists and does not offer to restart. This runs in a terminal the
+# person is watching, not a TUI, and a numbered menu that restarts system
+# services is a different kind of program with a different kind of accident.
+# Telling someone exactly what to type is enough.
+if command -v checkservices > /dev/null 2>&1; then
+  gestores_de_sesion=(
+    sddm.service gdm.service plasmalogin.service lightdm.service
+    lxdm.service slim.service xdm.service greetd.service nodm.service
+    ly.service lemurs.service
+  )
+  excluir=()
+  for gestor in "${gestores_de_sesion[@]}"; do
+    excluir+=(-i "${gestor}")
+  done
+
+  servicios="$(sudo checkservices -F -P -R "${excluir[@]}" 2> /dev/null |
+    grep -o "[A-Za-z0-9@._-]*\.service" | sort -u || true)"
+
+  if [[ -n "${servicios}" ]]; then
+    titulo 'Servicios que siguen con la versión antigua'
+    printf '%s\n' "${servicios}" | sed 's/^/    /'
+    printf '\n  Siguen funcionando con el código de antes de actualizar.\n'
+    printf '  Para reiniciarlos:\n\n'
+    printf '    sudo systemctl restart %s\n\n' "${servicios//$'\n'/ }"
+    printf '  Reiniciar el ordenador también sirve, y es lo más sencillo.\n'
+  fi
+fi
+
 titulo 'Listo'
 pausa_final

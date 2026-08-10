@@ -1,0 +1,36 @@
+# Two keyboard shortcuts MimOS gives every account, David's choice.
+#
+# Both are measured against a real Plasma 6 session rather than written from
+# memory, because every field here is a place to be silently wrong:
+#
+#   * The separator between two bindings for one action is a LITERAL
+#     backslash-t, not a tab character. KConfig escapes tabs on write, and
+#     `cat -A` on a real session shows `\t` where a tab would show `^I`.
+#     Getting this wrong loses Alt+F4 instead of adding to it.
+#   * The value is `active,default,friendly name`. Alt+F4 stays in both the
+#     active list and the default, so Meta+W is an addition and not a
+#     replacement -- somebody who learnt Alt+F4 twenty years ago keeps it.
+#   * The launcher lives under a nested group named after the desktop file,
+#     and the action is `_launch`. Both were read out of the running
+#     session: kglobalaccel lists com_mitchellh_ghostty_desktop as a
+#     component and that component's actions as {"_launch", "new-window"}.
+#     The group syntax is whatever kwriteconfig6 itself writes.
+#
+# This works from /etc/skel and would not work as a repair on a live
+# session: kglobalaccel holds its shortcuts in memory and does not re-read
+# this file. A new account has it in place before kglobalaccel ever starts,
+# which is the only case skel is for. Existing users get it by logging out
+# and in.
+
+[kwin]
+Window Close=Meta+W\tAlt+F4,Alt+F4,Close Window
+# Plasma binds Meta+W to the Overview effect, so the line above would land on
+# an occupied combination. Measured, not assumed: a real session carried
+# `Overview=Meta+W,Meta+W`. It is released rather than deleted, and Meta+W
+# stays in the second field -- that field is the *default*, which is what
+# «restore defaults» reads, so a user who wants Overview back can have it.
+# David's call: he does not use it.
+Overview=none,Meta+W,Toggle Overview
+
+[services][com.mitchellh.ghostty.desktop]
+_launch=Meta+Return,none,Ghostty

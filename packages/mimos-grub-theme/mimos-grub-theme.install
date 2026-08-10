@@ -1,71 +1,62 @@
-# Point GRUB at the MimOS boot menu theme.
+# Retire the block earlier versions of this package appended to
+# /etc/default/grub.
 #
-# The theme is only a set of files until /etc/default/grub names it, and that
-# file belongs to the grub package. So this appends a marker-delimited block and
-# never edits a line it did not write -- the same shape as the channel and
-# os-prober blocks in mimos-release, and for the same reason: there is no
-# pristine copy of that file to base ours on.
+# Up to 0.6.0.beta.1-1 the settings lived in a marker-delimited block appended
+# to that file, because there seemed to be nowhere else to put them. There is:
+# grub-mkconfig sources /etc/default/grub.d/*.cfg after the main file, so the
+# package now ships 10-mimos.cfg and owns it outright. Everything the old block
+# set is in that file, plus the console background it never had.
 #
-# How this reaches an installed system: MimOS installs by copying the Live
-# filesystem with unpackfs, so the file this scriptlet edits during the image
-# build is the file the target receives, and Calamares runs grub-mkconfig
-# afterwards.
+# The block has to go all the same. Leaving it would not break anything -- the
+# drop-in is sourced afterwards and wins -- but it would leave two places
+# stating the same settings, one of them unowned and permanently stale, and the
+# next person to change a value would find the wrong one first.
 #
-# GRUB_GFXMODE=auto matters as much as the theme. Without it GRUB may pick a
-# text mode, and in text mode a graphical theme is not drawn at all -- the
-# machine would show the stock menu and nothing would look broken enough to
-# investigate.
+# Only a block we wrote is removed, matched by our own markers, and nothing
+# else in that file is read or rewritten.
 
 mimos_theme_marker_begin='# >>> mimos grub theme >>>'
 mimos_theme_marker_end='# <<< mimos grub theme <<<'
 mimos_theme_default='/etc/default/grub'
-mimos_theme_path='/usr/share/grub/themes/mimos/theme.txt'
 
-_mimos_enable_theme() {
-  [[ -f "${mimos_theme_default}" ]] || return 0
-  if grep -Fq "${mimos_theme_marker_begin}" "${mimos_theme_default}" 2>/dev/null
-  then
-    return 0
-  fi
-
-  cat >> "${mimos_theme_default}" <<EOF
-
-${mimos_theme_marker_begin}
-# Added by mimos-grub-theme. Remove this block, or the package, to opt out.
-GRUB_THEME="${mimos_theme_path}"
-GRUB_GFXMODE=auto
-GRUB_GFXPAYLOAD_LINUX=keep
-${mimos_theme_marker_end}
-EOF
-  printf '  MimOS boot menu theme enabled (%s)\n' "${mimos_theme_default}"
-  printf '  Run grub-mkconfig -o /boot/grub/grub.cfg to apply it.\n'
-}
-
-_mimos_disable_theme() {
+_mimos_retire_legacy_block() {
   [[ -f "${mimos_theme_default}" ]] || return 0
   grep -Fq "${mimos_theme_marker_begin}" "${mimos_theme_default}" 2>/dev/null ||
     return 0
+
   local trimmed
   trimmed="$(mktemp)"
   sed "/^${mimos_theme_marker_begin}\$/,/^${mimos_theme_marker_end}\$/d" \
     "${mimos_theme_default}" > "${trimmed}"
+  # Written through `cat` rather than moved into place: /etc/default/grub
+  # belongs to the grub package, and replacing the inode would take its
+  # ownership and permissions with it.
   cat "${trimmed}" > "${mimos_theme_default}"
   rm -f -- "${trimmed}"
-  printf '  MimOS boot menu theme block removed from %s\n' \
+  printf '  The old MimOS block has been removed from %s;\n' \
     "${mimos_theme_default}"
+  printf '  the settings now live in /etc/default/grub.d/10-mimos.cfg.\n'
+}
+
+_mimos_say_regenerate() {
+  printf '  MimOS boot menu configured (/etc/default/grub.d/10-mimos.cfg).\n'
+  printf '  Run grub-mkconfig -o /boot/grub/grub.cfg to apply it.\n'
 }
 
 post_install() {
-  _mimos_enable_theme
+  _mimos_retire_legacy_block
+  _mimos_say_regenerate
 }
 
 post_upgrade() {
-  _mimos_enable_theme
+  _mimos_retire_legacy_block
+  _mimos_say_regenerate
 }
 
-pre_remove() {
-  # Before the files go, so GRUB is never pointed at a theme that is not there:
-  # a missing theme file leaves the menu unstyled rather than unbootable, but
-  # there is no reason to arrange even that.
-  _mimos_disable_theme
+post_remove() {
+  # The drop-in went with the package, so the menu is already back to stock at
+  # the next grub-mkconfig. Nothing to undo -- say so rather than leaving the
+  # person wondering whether a file was left behind.
+  printf '  The MimOS boot menu settings are gone.\n'
+  printf '  Run grub-mkconfig -o /boot/grub/grub.cfg to rebuild the menu.\n'
 }

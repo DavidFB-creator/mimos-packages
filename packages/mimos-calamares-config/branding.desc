@@ -11,10 +11,10 @@ navigation: widget
 strings:
   productName: MimOS
   shortProductName: MimOS
-  version: 0.6.0-beta.1
-  shortVersion: 0.6
-  versionedName: 'MimOS 0.6 "Arrullo" Beta 1'
-  shortVersionedName: MimOS 0.6
+  version: 0.7.0-beta.1
+  shortVersion: 0.7
+  versionedName: 'MimOS 0.7 "Caricia" Beta 1'
+  shortVersionedName: MimOS 0.7
   bootloaderEntryName: MimOS
   productUrl: ''
   supportUrl: ''

@@ -1,15 +1,19 @@
 # Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
 
 pkgname=mimos-grub-theme
-pkgver=0.6.0.beta.1
+pkgver=0.7.0.beta.1
 pkgrel=1
 pkgdesc='MimOS boot menu theme for GRUB'
 arch=('any')
 url='https://github.com/DavidFB-creator/MimOS'
 license=('MIT')
 # grub is a hard dependency because this package is only meaningful once a GRUB
-# menu exists, and the scriptlet edits /etc/default/grub, which grub owns.
+# menu exists, and because /etc/default/grub.d is only read by grub-mkconfig.
 depends=('grub')
+# gettext for msgfmt: the boot-message catalogues are compiled here rather than
+# committed as .mo, because a .mo is a build artefact of the .po beside it and
+# committing both is how the two drift apart.
+makedepends=('gettext')
 # The artwork is committed rather than generated at package time on purpose.
 # Building it needs rsvg-convert, ImageMagick, grub-mkfont and the real Inter
 # face; requiring all four on the ISO build host to produce files that never
@@ -18,18 +22,14 @@ depends=('grub')
 source=(
   'LICENSE'
   'mimos-grub-theme.install'
+  '10-mimos.cfg'
+  'mensajes-arranque.es.po'
+  'mensajes-arranque.en.po'
   'theme.txt'
   'background.png'
-  'inter-menu.pf2'
-  'menu_c.png'
-  'menu_e.png'
-  'menu_n.png'
-  'menu_ne.png'
-  'menu_nw.png'
-  'menu_s.png'
-  'menu_se.png'
-  'menu_sw.png'
-  'menu_w.png'
+  'menu.pf2'
+  'icon-mimos.png'
+  'icon-windows.png'
   'select_c.png'
   'select_e.png'
   'select_n.png'
@@ -41,28 +41,25 @@ source=(
   'select_w.png'
 )
 sha256sums=('97d7ba0977ea88730c942625f66849bbef6536c3c6e103a39a4bb05b9fd3d9cf'
-            'ec1c8b7a595c6e20cf592f780eaf55bf84439ff06a6980c3fd4d7d19aea91a0f'
-            'c74d15d12963dbc98df744ae3984d28bdd06c22fee60ba28c56359ccc64bd837'
-            'f3279447563e8fbb25d9ca8002b759b337c49c4144a642d83f1b2f89d193d785'
-            'd6cbead87351bab6e8819d3aa659ddbbd4196bac3b4726bbce3cef682b2db46a'
-            '63db562d7fce1d903ab7588292785b6f51cbffb0a9222970fe89ea434eddec04'
-            'd57072c2b87c9a65b32efdaa3aec42ceca322acc0a92a9884164174d93e385b0'
-            '2e5b69ee95de3570980c80d79d3349b3c908e3eb0b9fe7e291585741d5e6ca43'
-            '50f230376e1a5209a5faceedf1c57976cd670764aa5cfaa44c4f3b605db8848e'
-            '50e8b71b862133932d437f41aae91bdccec42ae0cc209210db3ad2aa802cc7f0'
-            'b139693e4e5ef50b2008c8212dd1532b1724a72ceda553fb09e4e159e1fb5209'
-            'b44c6297cc2e197b062981fc4f6b68a2331b2771dc33e830949b0b3894c42a0a'
-            'd1c5dfb5dd5421c57b59b5f589f5adfbe49bb2f5cc7ef61b27ddd9fa7cdcf61d'
-            'f5cf5a770ac764a72d3b5bf39421102fe1a275ec2a95f01283c3ddf5d29320c1'
-            'dbf0b1b9154b0a1f34d3e8dc77454010a9959b08da608d255106a30e69316d99'
-            'a21c3c267a676639ad27fa73d48dd8981fc5f122160006a560cca66d7fe7bc6f'
-            'cd80d693a38c855d476e6fe3281054b5b3f99bfa458d709ee210cd0d3542a909'
-            '99e9de51cf0b451ff198cc32923f502bc6241a55dab77763b02a101e3c77c062'
-            '69f13fdbe0eb9eb0a8be42fc969802013080e4ed51558d8b4d058d8a6c0f51fc'
-            '6cee4b88aad2c943b7b606dc4873e04a1c9e56d77de721fd3c2e0240f1fd90f4'
-            '45621617c9615997fe086cad5f7a1c8ad7699a474d58d54304ae1ad8fdd95fbd'
-            'a7838afa6eb3680df50222fd62dc8a37dfc22867e6792c6b0314bb2d5dc8bab3'
-            '812433128508b109a2caf7308c5f7c2cf0b0e37b758e133a8f6323afc480541a')
+            '6304e8c0c705515b2541dd64b0672dc9b85ebe71f9d81beae696d051261eec4a'
+            '696fbfbbb13aa567c651475a3ae7d63ffdf3230ceab4a87a43fea1c1b870f9e7'
+            '0734139ace442f8b76aaad1ec3c73450c9f48c207e0fcc6d266dc13a8316d55f'
+            '94d6d7623f1086a3f4bb93651a6c3967b659aeadaed5e58552d299c0ec870ac0'
+            '4ff8a52dcd27c12ae6e0012ca574cb92e2705ee5f226f50bb9d4b8f80dfcbbeb'
+            '0888f34b6a6f19692db2685f0eea53f2b557ddd559516e698e673385681c7f3d'
+            '3fc7944128b0713b0aae29e74bac879f957502335cc7adf6f3ca7d2089c986bc'
+            '988728e0098babcfb0dd93cdba137d457c23dc4faadab4c4df486582164fe1e1'
+            '5c03fd619b14b7fe02187b5654ea8d78bc46350715c6ba51bd643cbb44b28c9c'
+            '7dda35dd4acb0dfcd352b221b96d1d1e3996ffe2dd906bbe4fddce18a21e63c2'
+            'fe4d9ac8027b7381c7dde788dbe68cfda850c59bd98fbea10f5cfaa70dd078fc'
+            'ff09e0c3f37b96177e945ec03b4636afe84d7e78ed6788dd7b1d25b27c9e0e36'
+            '639acc715059ee0efa153623ec8291ca9a94626c961ae34e922312d3ebd52dec'
+            'f6eeecd13a8ea08dfa3804519eaead8f28da492b96358ec67249025b72810f2f'
+            'ff09e0c3f37b96177e945ec03b4636afe84d7e78ed6788dd7b1d25b27c9e0e36'
+            'abb44adb67f273462bfb3e909352c93369b17da945a35eca35a653539f54c6dc'
+            '81f13407761c1d9335e50d9534d5e1818028642f2dbef3b729003d522adb96fe'
+            '9da54e895cc4eccd9211958a5346b3378fbb859487eb4d92dc965495f8699a48')
+backup=('etc/default/grub.d/10-mimos.cfg')
 install='mimos-grub-theme.install'
 
 package() {
@@ -70,14 +67,33 @@ package() {
 
   install -Dm644 theme.txt "${dest}/theme.txt"
   install -Dm644 background.png "${dest}/background.png"
-  install -Dm644 inter-menu.pf2 "${dest}/inter-menu.pf2"
+  install -Dm644 menu.pf2 "${dest}/menu.pf2"
 
-  local slice
-  for slice in menu select; do
-    local piece
-    for piece in c e n ne nw s se sw w; do
-      install -Dm644 "${slice}_${piece}.png" "${dest}/${slice}_${piece}.png"
-    done
+  # The per-entry icons. GRUB looks for icons/<class>.png and draws nothing,
+  # silently, when a name misses -- so the directory name is as load-bearing
+  # as the file names.
+  install -Dm644 icon-mimos.png "${dest}/icons/mimos.png"
+  install -Dm644 icon-windows.png "${dest}/icons/windows.png"
+
+  local piece
+  for piece in c e n ne nw s se sw w; do
+    install -Dm644 "select_${piece}.png" "${dest}/select_${piece}.png"
+  done
+
+  # The drop-in, marked backup so a person who edits it does not lose the edit
+  # on the next upgrade -- it is configuration, not artwork.
+  install -Dm644 10-mimos.cfg "${pkgdir}/etc/default/grub.d/10-mimos.cfg"
+
+  # The boot-message catalogues, under a locale name grub does not own. Using
+  # es@mimos rather than es is what keeps this out of the grub package's way:
+  # /usr/share/locale/es/LC_MESSAGES/grub.mo is theirs, and two packages cannot
+  # own one path.
+  local idioma
+  for idioma in es en; do
+    msgfmt --output-file "${srcdir}/grub-${idioma}.mo" \
+      "mensajes-arranque.${idioma}.po"
+    install -Dm644 "${srcdir}/grub-${idioma}.mo" \
+      "${pkgdir}/usr/share/locale/${idioma}@mimos/LC_MESSAGES/grub.mo"
   done
 
   install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"

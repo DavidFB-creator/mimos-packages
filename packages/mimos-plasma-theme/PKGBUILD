@@ -1,7 +1,7 @@
 # Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
 
 pkgname=mimos-plasma-theme
-pkgver=0.6.0.beta.1
+pkgver=0.7.0.beta.1
 pkgrel=1
 pkgdesc='MimOS Claro and MimOS Oscuro Plasma Global Themes with the MIMI splash'
 arch=('any')
@@ -19,8 +19,7 @@ source=(
   'desktop-layout.js'
   'lookandfeel-claro-colors'
   'lookandfeel-oscuro-colors'
-  'splash-claro.qml'
-  'splash-oscuro.qml'
+  'splash.qml'
   'desktoptheme-claro-colors'
   'desktoptheme-claro-metadata.json'
   'desktoptheme-oscuro-colors'
@@ -37,12 +36,11 @@ sha256sums=('c64ce39587fdd00fcf3740ac706dd6e3e2e2f9efe341c32f0a5508d1c70fe879'
             '8cc51a1ea809dc979d0976abe8f7161684ca94615108957c3104718d9aa59f1c'
             '9fa2d3fe9ec2eeb967e07ef52388d63b623f0c9d0e8d703dfb62fe4a1786068c'
             'cfcb83398486bf65ed4d1392ac40830ecb99f11d082eede842ec8561e5efe8ea'
-            '04b9f32a5b2596cd7f11bd62ffa6bd047df8603fcfc8352f59093d7cd2ac1638'
-            'db34c53c0f08202bc19ba5deb8354ab73b48ab9910a80efdd9b9c6bad7fda889'
+            'f845a15ec41d5396f6e1d98b7e26ba092a5b0cf8dd3172cbae0151d93d4d6263'
             '0e47f98077aeafb774c8550bcf7ce3613c160307d5330f3b09406aa06ab9ffd7'
-            '9c67a3966c6ce5ddee15ab47d069ce12ca5d5bde79454dcf821cbc9375d2da21'
+            '838818e73578b409199c9b83885d4b6b42a7f4b134fabcff00c683221fcf7b6e'
             '603920daf8f15d22e362b6f1de3b45e36335bb7475d155a9781af997e381488a'
-            '5bd1c4ec696db7f1e8366999ee56a116ebe76e6d8d59eb08d5969f313c548b7f'
+            '6575429b573845b932040e871f5b930d49203238302781fa07fcae744670ff9e'
             'c4f48df31768ad576925151d2f2ccbaca91f4b3709f1aae6848b644e8cedde4a'
             'e3fe67bf014a64022461b1f774a2b90d3f24a03672f5282a759aa4fe0bc45015'
             '8f3ea114a646483afdc446d235b311cda2d11efab4b394302f203ca6968c8b34'
@@ -72,8 +70,10 @@ package() {
     # percentage. See ADR-107.
     install -Dm644 desktop-layout.js \
       "${lnf_root}/${lnf_id}/contents/layouts/org.kde.plasma.desktop-layout.js"
-    install -Dm644 "splash-${variant}.qml" \
-      "${splash_dir}/Splash.qml"
+    # One splash for both Global Themes: black, MIMI in the middle. The
+    # session start deliberately has no appearance, so there is nothing to
+    # vary per variant. See the header of splash.qml.
+    install -Dm644 splash.qml "${splash_dir}/Splash.qml"
     # A real session capture of the theme, so the Quick Settings strip and
     # the Global Themes page show MimOS rather than a grey placeholder.
     install -Dm644 "preview-${variant}.png" \
@@ -85,11 +85,9 @@ package() {
     install -dm755 "${splash_dir}/images"
     ln -s ../../../../../../mimos/branding/mimi.svg \
       "${splash_dir}/images/mimi.svg"
-    if [[ "${variant}" == claro ]]; then
-      wordmark='mimos-wordmark.svg'
-    else
-      wordmark='mimos-wordmark-dark.svg'
-    fi
+    # The dark-surface master in both variants, because the splash ground is
+    # black in both. A light master sets Mim in Noche, which is 1.16:1 there.
+    wordmark='mimos-wordmark-dark.svg'
     ln -s "../../../../../../mimos/branding/${wordmark}" \
       "${splash_dir}/images/${wordmark}"
   done

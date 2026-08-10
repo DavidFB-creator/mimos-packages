@@ -96,9 +96,37 @@ if [[ -w "${grub_btrfs_config}" ]]; then
       printf '%s=%s\n' "${key}" "${value}" >> "${grub_btrfs_config}"
     fi
   }
-  _set_grub_btrfs GRUB_BTRFS_SUBMENUNAME '"Instantáneas de MimOS"'
+  _set_grub_btrfs GRUB_BTRFS_SUBMENUNAME '"Recuperar MimOS"'
   _set_grub_btrfs GRUB_BTRFS_TITLE_FORMAT '("date" "description")'
   _set_grub_btrfs GRUB_BTRFS_LIMIT '20'
+
+  # Only the state BEFORE each change reaches the boot menu.
+  #
+  # snap-pac brackets every pacman transaction with a pre and a post
+  # snapshot, and both used to appear here. David restored a machine from
+  # this menu on 2026-08-10 and reported afterwards that he had chosen by
+  # the date, because the descriptions meant nothing to him. Read back, the
+  # two rows he was choosing between were:
+  #
+  #   14:15:56  sddm                            <- post: already broken
+  #   14:15:55  pacman -Rdd --noconfirm sddm    <- pre: healthy
+  #
+  # One second apart, neither saying which side of the transaction it is,
+  # and the menu leaves the FIRST one selected -- the one that restores the
+  # damage. He got it right by taking the older timestamp. Somebody pressing
+  # Enter would not.
+  #
+  # Hiding the post snapshots removes the choice rather than explaining it:
+  # every row is now "the machine before something changed", which is the
+  # only thing anybody wants from a recovery menu. It also removes the
+  # descriptions that overflowed the menu card, because those were the post
+  # ones -- their description is the package list.
+  #
+  # Nothing is deleted. snapper keeps both, `mimos-restaurar --listar` shows
+  # both, and the post of one transaction is very nearly the pre of the
+  # next. The `single` snapshot taken at installation stays, which is the
+  # row that takes the machine back to the day it was installed.
+  _set_grub_btrfs GRUB_BTRFS_IGNORE_SNAPSHOT_TYPE '("post")'
 
   # Derived, never transcribed: an encrypted target needs GRUB to open the
   # LUKS container before it can read a snapshot, exactly as it does for the

@@ -1,8 +1,8 @@
 # Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
 
 pkgname=mimos-branding
-pkgver=0.6.0.beta.1
-pkgrel=2
+pkgver=0.7.0.beta.1
+pkgrel=1
 pkgdesc='Runtime visual identity assets for MimOS'
 arch=('any')
 url='https://github.com/DavidFB-creator/MimOS'
@@ -42,6 +42,8 @@ source=(
   'mimos-nocturnos.colors'
   'kdeglobals'
   'ksmserverrc'
+  'ksplashrc'
+  'kglobalshortcutsrc'
   'speechd.conf'
   'zshrc'
   'starship.toml'
@@ -91,10 +93,10 @@ sha256sums=('c4eba059e0aec667b32e76e73b24c493e02cd87f962dfd133d50da134d510cd0'
             'b9cd85e40526e9173706749ce08169dbb26d1b6a3dd66696e73660d5cf99b06b'
             '0cba13fcb92e359d17db2a6cf484ef5fd6ddd58039b65dd9e237fc400bcc703f'
             '00259071377e8814df8063161a03ec7a789c70c66b177d3b08d7d9c5e05fba1a'
-            'af5d116ba58069e118cea6db764a8a24ecda96977bf4bbc0cd6672b389fce383'
-            '6dd15316b609ded4e2fefeeabe0ed15ae908bcb2e5c84fb9581eb8bead505937'
-            '58b285ecffc232b1177dc0504fd69936bda172b88659573b0083fc435b965250'
-            '2aca8e7bc25ac78c8d25c91f66c9743e1ad18c5c82e30a95bd10935d569627cb'
+            '550d116e35625fa050d61b471706a2dbecd45f3dd30a5ed16422b2daadfbd809'
+            '98f09ac785caa6dfbd140b1c17d983ebd331ae75b8699ce8695de1f5196699a1'
+            '7148902ad05d9a90322950b5503bc8ebd6bd9c98a932c4130116082da7c8a5af'
+            '9991c1414aaa3b2ee14ef6d8c8dc73c473aee7599c80ab75050f2d4acf747269'
             'aab74c37a7aa9ffef61c59fd992da77f659545a856f387530b17b2fc502d144a'
             'ead085637962480d1317c3d044d3a01ac7fdb9a0c3a8dec4941574310d7c1040'
             '470e5729b35f6044c0a691ea90aeab5792fcb1f76d3561ad1db8a13170a76ba5'
@@ -108,10 +110,12 @@ sha256sums=('c4eba059e0aec667b32e76e73b24c493e02cd87f962dfd133d50da134d510cd0'
             'ff248cfb1eaa2b29fe04d646ee37597593b318815b9e43eb0be9f3496ed96ce1'
             'c10aa173207569a37226f50d0013998cf7ec4c2325d62d4255a3fdd18451370e'
             '8eb74d238bf5f2dbf28d6b1952a036176b63d5590d79f2a04c10e7c68a9acac6'
+            '21779e72a747e596f6dd7d888eb7160888ee2923236840d696e6d211cfbf46fd'
+            'cc951c1063e50d2e50336f8a8516f889c9ed78c1ff5b8f57bdefa4ee6e13b040'
             '33a2721f8e59d1b7a95b145db2e3683e82043c952d34c113baabaf4364664c82'
             'a3aca64c8e14a98f3738e1720597c67a18adf5f41bb6452e2622205cb5866b87'
             'a37f7879551ef97e7230e74b648703cc6ae2275cedc605e950c1c415a62e95e2'
-            '0e5b59248f538b815f7d43537d6f737ca2d21eafce839ebf41fd444b95034e47'
+            '3761809f077065bde9e4dd1151fbd0e975b096e1258946d8346d00eea34e77d2'
             '5cef60cb8a6a8e199d75497c3983c0f3c824a206df76416268d70bb37ab2e750'
             '2db2e18c8af68bdf88592d4a3d291a6a23076cf08a89f1169dcd3bfbc4f19410'
             '51efe6ce11c6c32bb7f11901a1309f97102866bb03ad89fca2feeda75a7651f3'
@@ -230,6 +234,17 @@ package() {
   # between deciding to shut down and shutting down, and a session that
   # starts empty rather than reopening yesterday's windows. See ADR-108.
   install -Dm644 ksmserverrc "${pkgdir}/etc/skel/.config/ksmserverrc"
+  # startplasma reads ksplashrc and falls back to Breeze; it does not ask the
+  # account's Look-and-Feel package. Without this the MimOS splash exists,
+  # is packaged, is named by both Global Themes -- and never runs on the one
+  # login that has never applied a theme, which is everybody's first.
+  install -Dm644 ksplashrc "${pkgdir}/etc/skel/.config/ksplashrc"
+  # Two shortcuts every account gets: Meta+W closes a window and Meta+Return
+  # opens the terminal. Only from skel -- kglobalaccel keeps its shortcuts in
+  # memory and never re-reads this file, so a new account is the one case
+  # where placing it works. See ADR-131.
+  install -Dm644 kglobalshortcutsrc \
+    "${pkgdir}/etc/skel/.config/kglobalshortcutsrc"
   install -Dm644 speechd.conf \
     "${pkgdir}/etc/skel/.config/speech-dispatcher/speechd.conf"
 

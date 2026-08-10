@@ -1,0 +1,24 @@
+# The screen between the login and the desktop.
+#
+# This file exists because of what `startplasma` actually reads. It looks up
+# `[KSplash] Theme` in ksplashrc and falls back to `org.kde.breeze` -- it does
+# not consult the Look-and-Feel package the account is using. The Global Theme
+# names the splash in its own `defaults` file, but that file is applied when
+# somebody APPLIES the theme, and on a freshly installed machine nobody has:
+# the account is created, the session starts, and the splash is whatever
+# ksplashrc says. Without this line, that is Breeze's.
+#
+# This is the same shape as the wallpaper (ADR-091) and the battery percentage
+# (ADR-110): the value was written in a file that is correct and that nothing
+# on the first-login path reads.
+#
+# Either Look-and-Feel id would be right here, because both ship the same
+# black splash since 2026-08-10 -- and that is worth stating rather than
+# leaving as a coincidence, since it is why switching appearance does not need
+# to touch this file.
+#
+# NOT YET CONFIRMED ON A RUNNING SESSION. The reasoning above comes from
+# reading plasma-workspace, not from watching a machine, so the e2e's
+# post-login block is where it gets settled.
+[KSplash]
+Theme=org.mimos.claro.desktop

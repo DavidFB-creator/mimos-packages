@@ -1,6 +1,6 @@
 pkgbase = mimos-calamares-config
 	pkgdesc = Disconnected Calamares configuration and branding for MimOS
-	pkgver = 0.6.0.beta.1
+	pkgver = 0.7.0.beta.1
 	pkgrel = 1
 	url = https://github.com/DavidFB-creator/MimOS
 	arch = any
@@ -38,7 +38,7 @@ pkgbase = mimos-calamares-config
 	source = finished.conf
 	source = LICENSE
 	sha256sums = 32da54451e19cf9f1daf405b9550291d26a49d17883bb9289b6654e4b0851ac1
-	sha256sums = 3b6237f98925be22ca8065a31e009e07e64bd510e897bd5bdb6664f1b3797d97
+	sha256sums = d974ae610e4937f8dceaededb2f35a2fac102780c8509fab94cd4096aab72b5f
 	sha256sums = 6fb27f2cc98e25789781efa7d1287806e7dd7f98b951592050f88b0b52521e1d
 	sha256sums = ea03a28613edd41277f2cae5aabdb2ecfc2144911e44e6c61d99e86c711ff9fd
 	sha256sums = 31dd620a1344d3d74d4834e2cc9b15eca4fe5c4d694c65c44045725e9379706c

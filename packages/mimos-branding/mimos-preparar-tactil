@@ -55,7 +55,59 @@ a_decimal() {
   printf '%d' "$((16#${1#0x}))"
 }
 
+# Push the two settings into the running KWin, for the device with this
+# exact name. Returns 0 only if KWin confirmed the value it now holds, so the
+# caller can tell "applied" from "attempted" -- which is what the marker below
+# depends on.
+#
+# The tool is looked up rather than assumed: dbus-send is in the base system
+# and qdbus is not, and a helper that silently does nothing because a binary
+# is missing is the failure mode this whole file exists to avoid.
+aplicar_en_sesion() {
+  local objetivo="$1" ruta nombre_kwin
+  local emisor="${mimos_test_dbus:-}"
+  if [[ -z "${emisor}" ]]; then
+    command -v dbus-send > /dev/null 2>&1 || return 1
+    emisor='dbus-send'
+  fi
+
+  local leer=(--session --print-reply --dest=org.kde.KWin)
+  for ruta in $("${emisor}" "${leer[@]}" /org/kde/KWin/InputDevice \
+    org.freedesktop.DBus.Properties.Get string:org.kde.KWin.InputDeviceManager \
+    string:devicesSysNames 2>/dev/null | grep -o 'event[0-9]*'); do
+    nombre_kwin="$("${emisor}" "${leer[@]}" "/org/kde/KWin/InputDevice/${ruta}" \
+      org.freedesktop.DBus.Properties.Get string:org.kde.KWin.InputDevice \
+      string:name 2>/dev/null | sed -n 's/.*string "\(.*\)"$/\1/p' | tail -1)"
+    [[ "${nombre_kwin}" == "${objetivo}" ]] || continue
+
+    # `--print-reply` is what makes these synchronous, and it is load-bearing.
+    # Without it dbus-send returns the moment the message is queued, the
+    # read-back below runs before KWin has processed anything, and the answer
+    # is whatever the value was already. Measured on David's laptop: with the
+    # property already true the check passed and proved nothing; forced to
+    # false first, the same code failed. A verification that cannot fail is
+    # not a verification.
+    "${emisor}" --session --print-reply --dest=org.kde.KWin \
+      "/org/kde/KWin/InputDevice/${ruta}" \
+      org.freedesktop.DBus.Properties.Set string:org.kde.KWin.InputDevice \
+      string:naturalScroll variant:boolean:true > /dev/null 2>&1
+    "${emisor}" --session --print-reply --dest=org.kde.KWin \
+      "/org/kde/KWin/InputDevice/${ruta}" \
+      org.freedesktop.DBus.Properties.Set string:org.kde.KWin.InputDevice \
+      string:disableWhileTyping variant:boolean:false > /dev/null 2>&1
+
+    # Read it back. A Set that KWin ignored returns success just the same,
+    # and this project has been caught by exactly that shape before.
+    "${emisor}" "${leer[@]}" "/org/kde/KWin/InputDevice/${ruta}" \
+      org.freedesktop.DBus.Properties.Get string:org.kde.KWin.InputDevice \
+      string:naturalScroll 2>/dev/null | grep -q 'boolean true' && return 0
+    return 1
+  done
+  return 1
+}
+
 encontrado=0
+aplicado=0
 for device in "${devices}"/event*/device; do
   [[ -r "${device}/name" ]] || continue
 
@@ -116,6 +168,22 @@ for device in "${devices}"/event*/device; do
   ya_tiene DisableWhileTyping ||
     "${writer}" "${argumentos[@]}" --key DisableWhileTyping false
 
+  # Writing the file is not applying it, and on a fresh installation that
+  # distinction is the whole defect. KWin reads kcminputrc when the session
+  # starts; this helper runs from autostart, which is after. So the file is
+  # correct and the touchpad behaves the old way until the person logs in a
+  # second time -- and the only login that matters, the first one after
+  # installing, is the one that always gets it wrong. Measured on David's
+  # laptop on 2026-08-10: with the file already written, KWin reported
+  # naturalScroll=false; after restarting the session it reported true and
+  # the touchpad behaved.
+  #
+  # So tell the running session as well. KWin exposes each device on D-Bus
+  # with writable properties, matched here by the device name we just
+  # configured -- the same string, so a machine with two devices from the
+  # same hardware cannot get them confused.
+  aplicar_en_sesion "${nombre}" && aplicado=1
+
   printf 'Touchpad prepared: %s\n' "${nombre}"
   encontrado=1
 done
@@ -124,7 +192,19 @@ if (( encontrado == 0 )); then
   printf 'No touchpad on this machine; nothing to prepare.\n'
 fi
 
-# Written whether or not a touchpad was found: a desktop computer must not
-# rescan its input devices at every single login for the rest of its life.
-install -d -m 0700 -- "$(dirname -- "${marker}")"
-: > "${marker}"
+# The marker means "this account is done", and it must only be written when
+# that is true. It used to be written unconditionally, which turned any
+# one-off failure into a permanent one: a login where the touchpad had not
+# been enumerated yet, or where the session bus was not up, left a marker
+# behind and the helper never ran again. The person is then stuck with a
+# machine that will not fix itself, and nothing anywhere says why.
+#
+# A machine with no touchpad is genuinely done -- a desktop must not rescan
+# its input devices at every login for the rest of its life. A machine with a
+# touchpad is done only once the setting reached the running session.
+if (( encontrado == 0 )) || (( aplicado == 1 )); then
+  install -d -m 0700 -- "$(dirname -- "${marker}")"
+  : > "${marker}"
+else
+  printf 'The touchpad was configured but the session did not confirm it; will retry next login.\n' >&2
+fi
