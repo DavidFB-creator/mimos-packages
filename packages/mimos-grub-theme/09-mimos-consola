@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# Bind the console background, which grub-mkconfig will not do for us.
+#
+# GRUB draws its console -- the screen between choosing an entry and the
+# kernel taking over -- by filling the text area with the bound background
+# image if one exists, and with a flat colour if not. ADR-125 measured that,
+# and measured the repair: the console pushed to full screen AND an image
+# bound with `background_image`. Either half alone is worse than neither.
+#
+# What ADR-125 got wrong is where the second half comes from. It set
+# GRUB_BACKGROUND in /etc/default/grub.d/10-mimos.cfg and assumed
+# grub-mkconfig would emit both. It will not. 00_header is an if/elif:
+#
+#     if   [ "x$GRUB_THEME" != x ] ...      -> writes `set theme=`
+#     elif [ "x$GRUB_BACKGROUND" != x ] ... -> writes `background_image`
+#
+# A profile with a theme therefore never gets a background line, and MimOS
+# has a theme. The exclusivity belongs to the generator, not to GRUB: at
+# runtime the two coexist, which is what ADR-125's own captures showed.
+#
+# Measured on a real installation before this file existed: `background_image`
+# appeared zero times in a grub.cfg written by Calamares, while `set theme=`
+# was there. The preview instrument had hidden it for a whole release by
+# writing its own grub.cfg with both lines by hand -- the instrument drifting
+# from the product, and the measurement being taken against the instrument.
+#
+# 09 rather than 4x because this must follow 00_header, which is what sets up
+# $root, and precede the menu entries, since background_image is a command
+# and GRUB runs the configuration from top to bottom.
+set -e
+
+# The preamble every generator in this directory carries. The helper below is
+# defined in that library and nowhere else: the first version of this file
+# assumed grub-mkconfig exported it, found it missing, and exited quietly --
+# producing exactly the silent nothing this whole fix exists to remove.
+prefix='/usr'
+exec_prefix='/usr'
+datarootdir='/usr/share'
+pkgdatadir="${datarootdir}/grub"
+. "${pkgdatadir}/grub-mkconfig_lib"
+
+fondo='/usr/share/grub/themes/mimos/background.png'
+
+# Quiet only here, and only for the one case that is not a fault: the theme
+# is not installed. This fragment ships with the theme, but /etc/grub.d can
+# outlive an uninstall.
+[ -r "${fondo}" ] || exit 0
+
+# Anything else is loud. A generator that cannot do its job must say so on
+# stderr, where grub-mkconfig's output is read, rather than leave a menu that
+# looks right and draws a black rectangle.
+if ! command -v make_system_path_relative_to_its_root > /dev/null 2>&1; then
+  echo "MimOS: grub-mkconfig_lib no define make_system_path_relative_to_its_root;" >&2
+  echo "MimOS: la consola de arranque se quedara sin fondo." >&2
+  exit 0
+fi
+
+# The path is built the way 00_header builds the theme's, and deliberately
+# not a way of my own: the helper plus an explicit ($root). On a btrfs
+# installation that yields /@/usr/share/..., and the theme line proves that
+# form reaches the file on a real machine.
+ruta="$(make_system_path_relative_to_its_root "${fondo}")"
+
+printf '%s\n' \
+  '# MimOS: the console background. 00_header skips it when a theme is set.' \
+  "background_image -m stretch (\$root)${ruta}"

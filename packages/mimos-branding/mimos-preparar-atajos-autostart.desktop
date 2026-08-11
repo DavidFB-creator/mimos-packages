@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Preparar los atajos de MimOS
+Comment=Registra el atajo del terminal la primera vez que inicias sesión
+Exec=/usr/lib/mimos/mimos-preparar-atajos
+Icon=preferences-desktop-keyboard
+OnlyShowIn=KDE;
+NoDisplay=true
+X-KDE-autostart-phase=2

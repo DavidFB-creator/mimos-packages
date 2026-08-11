@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+# Tell the running session about the launcher shortcut, because placing the
+# file is not enough.
+#
+# MimOS ships Meta+Return for the terminal in /etc/skel/.config/
+# kglobalshortcutsrc. On the first login of an account, kglobalaccel reads it
+# and reports the binding correctly -- and nobody grabs the key, so the press
+# goes to whatever window has focus. Measured on a physical machine within
+# twenty minutes of installing published 0.7: the config was right, the
+# registration was right, and pressing the key typed an escape sequence into
+# the terminal. From the second start of KWin onwards it works, which is why
+# no scenario had ever seen it.
+#
+# Meta+W is unaffected: that one is a KWin action and KWin owns its own.
+# Only the `[services]` half needs this.
+#
+# The sequence below is not a guess. Three were tried and failed -- doRegister
+# alone, setForeignShortcutKeys alone, and setForeignShortcutKeys with a
+# malformed argument, which aborted KWin outright because KGlobalAccelD runs
+# inside the compositor and libdbus turns a demarshalling error into an abort.
+# It was then read off the session bus with dbus-monitor while the Settings
+# app reassigned the shortcut by hand, which is the one path known to work:
+#
+#     doRegister(actionId)
+#     setShortcutKeys(actionId, [([key, 0, 0, 0],)], 2)
+#
+# The four integers are what a QKeySequence carries -- Qt keeps four slots and
+# the demarshaller reads all four -- and giving it one is what killed the
+# compositor. See ADR-134.
+set -Eeuo pipefail
+
+marcador="${mimos_test_marcador:-${XDG_STATE_HOME:-${HOME}/.local/state}/mimos/atajos-preparados}"
+[[ -e "${marcador}" ]] && exit 0
+
+# Meta+Return as Qt encodes it, with the arithmetic written down rather than
+# left as a magic number:
+#
+#   Meta    0x10000000   268435456
+#   Return  0x01000004    16777220
+#                        ---------
+#                        285212676
+readonly META_RETURN=285212676
+readonly ACCION="['com.mitchellh.ghostty.desktop','_launch','Ghostty','Ghostty']"
+readonly COMPONENTE=/component/com_mitchellh_ghostty_desktop
+
+anotar() {
+  install -d -m 0700 -- "$(dirname -- "${marcador}")"
+  printf '%s\n' "$1" > "${marcador}"
+  exit 0
+}
+
+command -v gdbus > /dev/null 2>&1 || anotar 'sin-gdbus'
+command -v qdbus6 > /dev/null 2>&1 || anotar 'sin-qdbus'
+
+llamar() {
+  gdbus call --session --dest org.kde.kglobalaccel \
+    --object-path /kglobalaccel --method "org.kde.KGlobalAccel.$1" "${@:2}"
+}
+
+# The service is D-Bus activated and the session may still be assembling when
+# autostart fires. Bounded, and a session that never answers is recorded
+# rather than retried for ever.
+listo=0
+for _ in $(seq 1 30); do
+  if llamar allComponents > /dev/null 2>&1; then
+    listo=1
+    break
+  fi
+  sleep 1
+done
+(( listo == 1 )) || anotar 'sin-sesion'
+
+llamar doRegister "${ACCION}" > /dev/null 2>&1 || anotar 'registro-rechazado'
+llamar setShortcutKeys "${ACCION}" "[([${META_RETURN}, 0, 0, 0],)]" 2 \
+  > /dev/null 2>&1 || anotar 'asignacion-rechazada'
+
+# Read it back from the session rather than trusting the call's exit status.
+# A helper that writes and does not look is the shape this whole file exists
+# to correct, and ADR-123 already paid for that lesson once: its first version
+# sent a D-Bus set without waiting for the reply and passed only because the
+# value was already right.
+vuelta="$(
+  qdbus6 --literal org.kde.kglobalaccel "${COMPONENTE}" \
+    org.kde.kglobalaccel.Component.allShortcutInfos 2>/dev/null || true
+)"
+if [[ "${vuelta}" != *"${META_RETURN}"* ]]; then
+  anotar 'no-confirmado'
+fi
+
+anotar 'aplicado'

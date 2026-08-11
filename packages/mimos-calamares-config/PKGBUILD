@@ -1,7 +1,7 @@
 # Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
 
 pkgname=mimos-calamares-config
-pkgver=0.7.0.beta.1
+pkgver=0.7.0.beta.2
 pkgrel=1
 pkgdesc='Disconnected Calamares configuration and branding for MimOS'
 arch=('any')
@@ -40,7 +40,7 @@ source=(
   'LICENSE'
 )
 sha256sums=('32da54451e19cf9f1daf405b9550291d26a49d17883bb9289b6654e4b0851ac1'
-            'd974ae610e4937f8dceaededb2f35a2fac102780c8509fab94cd4096aab72b5f'
+            '6d818ea849962db56639ffe51e31a5d3eece856689ef378a8a88ae41be8b4886'
             '6fb27f2cc98e25789781efa7d1287806e7dd7f98b951592050f88b0b52521e1d'
             'ea03a28613edd41277f2cae5aabdb2ecfc2144911e44e6c61d99e86c711ff9fd'
             '31dd620a1344d3d74d4834e2cc9b15eca4fe5c4d694c65c44045725e9379706c'

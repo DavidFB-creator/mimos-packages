@@ -1,7 +1,7 @@
 # Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
 
 pkgname=mimos-branding
-pkgver=0.7.0.beta.1
+pkgver=0.7.0.beta.2
 pkgrel=1
 pkgdesc='Runtime visual identity assets for MimOS'
 arch=('any')
@@ -47,6 +47,8 @@ source=(
   'speechd.conf'
   'zshrc'
   'starship.toml'
+  'mimos-preparar-atajos'
+  'mimos-preparar-atajos-autostart.desktop'
   'mimos-preparar-tactil'
   'mimos-preparar-tactil-autostart.desktop'
   'mimos-preparar-bateria'
@@ -115,7 +117,9 @@ sha256sums=('c4eba059e0aec667b32e76e73b24c493e02cd87f962dfd133d50da134d510cd0'
             '33a2721f8e59d1b7a95b145db2e3683e82043c952d34c113baabaf4364664c82'
             'a3aca64c8e14a98f3738e1720597c67a18adf5f41bb6452e2622205cb5866b87'
             'a37f7879551ef97e7230e74b648703cc6ae2275cedc605e950c1c415a62e95e2'
-            '3761809f077065bde9e4dd1151fbd0e975b096e1258946d8346d00eea34e77d2'
+            'ef3aba8e3b3ca32d9b2ecf370d9f7605b1cd493c71182521780ddfaffe6b99b8'
+            '2529b239c22bab0383458bce2edf2a6c64db9128dd15fcd88920b3c14231a8e0'
+            '7aefd2450c534be27876061f3e6fcf7d1195b91da6e727efaa5c46556aea5657'
             '5cef60cb8a6a8e199d75497c3983c0f3c824a206df76416268d70bb37ab2e750'
             '2db2e18c8af68bdf88592d4a3d291a6a23076cf08a89f1169dcd3bfbc4f19410'
             '51efe6ce11c6c32bb7f11901a1309f97102866bb03ad89fca2feeda75a7651f3'
@@ -377,6 +381,12 @@ package() {
   # kcminputrc in /etc/skel would only ever apply to the laptop it was copied
   # from. Runs once per account and never overrides a choice the person made.
   # See ADR-105.
+  # Phase 2, not 1: it talks to kglobalaccel, which the compositor hosts,
+  # so it must not race the session coming up. See ADR-134.
+  install -Dm755 mimos-preparar-atajos \
+    "${pkgdir}/usr/lib/mimos/mimos-preparar-atajos"
+  install -Dm644 mimos-preparar-atajos-autostart.desktop \
+    "${pkgdir}/etc/xdg/autostart/mimos-preparar-atajos.desktop"
   install -Dm755 mimos-preparar-tactil \
     "${pkgdir}/usr/lib/mimos/mimos-preparar-tactil"
   install -Dm644 mimos-preparar-tactil-autostart.desktop \

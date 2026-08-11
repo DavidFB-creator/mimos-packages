@@ -202,9 +202,24 @@ fi
 # A machine with no touchpad is genuinely done -- a desktop must not rescan
 # its input devices at every login for the rest of its life. A machine with a
 # touchpad is done only once the setting reached the running session.
-if (( encontrado == 0 )) || (( aplicado == 1 )); then
-  install -d -m 0700 -- "$(dirname -- "${marker}")"
-  : > "${marker}"
+#
+# And it says WHICH of those two it was. An empty file cannot tell "the
+# setting reached KWin" from "there was no touchpad here", so the e2e's only
+# possible assertion was `test -e`, and the VM has no touchpad -- meaning
+# ADR-123's whole fix, telling the live session over D-Bus, had no runtime
+# gate at all. The battery helper already got this right: its marker holds
+# `sin-bateria` and the e2e demands that exact word. Same shape here.
+anotar() {
+  local directorio
+  directorio="$(dirname -- "${marker}")"
+  [[ -d "${directorio}" ]] || install -d -m 0700 -- "${directorio}"
+  printf '%s\n' "$1" > "${marker}"
+}
+
+if (( encontrado == 0 )); then
+  anotar 'sin-tactil'
+elif (( aplicado == 1 )); then
+  anotar 'aplicado'
 else
   printf 'The touchpad was configured but the session did not confirm it; will retry next login.\n' >&2
 fi

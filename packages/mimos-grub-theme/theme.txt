@@ -42,7 +42,15 @@ terminal-top: "0"
 terminal-width: "100%"
 terminal-height: "100%"
 terminal-border: "0"
-terminal-font: "Baloo 2 Regular 28"
+# Monospaced, and not the brand's face, because gfxterm is a character-cell
+# terminal: it places every glyph in a box of the same width. A proportional
+# face there spaces the narrow letters wrong -- MimOS rendered as "Mi mOS" on
+# a real machine, which is how this was found. Unifont is what GRUB already
+# loads for its own console, so this costs no new artifact.
+#
+# The menu keeps Baloo 2. That is where the brand belongs and where GRUB
+# draws free text rather than a grid.
+terminal-font: "Unifont Regular 16"
 
 + boot_menu {
   left = 26%

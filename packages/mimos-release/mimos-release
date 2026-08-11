@@ -1,10 +1,10 @@
 NAME="MimOS"
-VERSION="0.7 Caricia Beta 1"
-VERSION_ID="0.7.0-beta.1"
+VERSION="0.7 Caricia Beta 2"
+VERSION_ID="0.7.0-beta.2"
 VERSION_CODENAME=caricia
 ID=mimos
 ID_LIKE=arch
-PRETTY_NAME="MimOS 0.7 (Caricia) Beta 1"
+PRETTY_NAME="MimOS 0.7 (Caricia) Beta 2"
 ANSI_COLOR="1;38;2;255;111;174"
 LOGO=mimos
 HOME_URL="https://mimoslinux.org/"
