@@ -83,6 +83,63 @@ _mimos_remove_console_autologin() {
   fi
 }
 
+_mimos_remove_live_resolved_config() {
+  # Archiso ships /etc/systemd/resolved.conf.d/archiso.conf with
+  # MulticastDNS=yes, right for a Live medium that wants zero-config
+  # networking. It lives in the airootfs, Calamares copies it to the disk,
+  # and drop-ins apply in filename order -- so on every installed MimOS it
+  # sorted last and silently overrode whatever resolved configuration the
+  # system thought it had, the packaged /usr/lib one included. Measured with
+  # systemd-analyze cat-config in the ADR-140 lab: a correct drop-in plus a
+  # restart changed nothing while this file stood. Same family as the Live
+  # units above: a Live artifact surviving onto the disk.
+  local resto='/etc/systemd/resolved.conf.d/archiso.conf'
+  rm -f "${resto}" || return 1
+  if [[ -e "${resto}" ]]; then
+    printf 'mimos-live-environment: %s survived removal.\n' "${resto}" >&2
+    return 1
+  fi
+}
+
+_mimos_remove_live_only_units() {
+  # Three Archiso units that are right for a Live image and wrong on a disk.
+  # Same shape as the root console above and found the same way: not by
+  # reading a file, but by printing the installed system's enabled units and
+  # looking at the list. See ADR-137.
+  #
+  #   choose-mirror         rewrites the mirrorlist from a `mirror=` boot
+  #                         parameter, which no installed machine has.
+  #   livecd-alsa-unmuter   unmutes the card once, for a session that has
+  #                         nobody to do it.
+  #   livecd-talk           starts espeakup when `accessibility` is on the
+  #                         Live command line. This one is not merely surface:
+  #                         it is behaviour, and the installed system has
+  #                         Orca for that job.
+  #
+  # They live in the airootfs, which Calamares copies to the target, so they
+  # survived every installation MimOS has ever made -- exactly the route the
+  # root console took.
+  #
+  # The hypervisor guest agents in the same list stay on purpose. vboxservice,
+  # vmtoolsd, vmware-vmblock-fuse and the hv_* pair serve somebody who
+  # installs MimOS inside a virtual machine, which is the same reason
+  # qemu-guest-agent is kept and asserted. On real hardware their devices do
+  # not exist and they do not start.
+  local unit path
+  for unit in choose-mirror livecd-alsa-unmuter livecd-talk; do
+    for path in \
+      "/etc/systemd/system/${unit}.service" \
+      "/etc/systemd/system/multi-user.target.wants/${unit}.service" \
+      "/etc/systemd/system/sound.target.wants/${unit}.service"; do
+      rm -f "${path}" || return 1
+      if [[ -e "${path}" || -L "${path}" ]]; then
+        printf 'mimos-live-environment: %s survived removal.\n' "${path}" >&2
+        return 1
+      fi
+    done
+  done
+}
+
 pre_remove() {
   if ! _mimos_restore_installed_boot; then
     printf 'mimos-live-environment: refusing to complete the installed-system transition.\n' >&2
@@ -90,6 +147,16 @@ pre_remove() {
   fi
   if ! _mimos_remove_console_autologin; then
     printf 'mimos-live-environment: refusing to leave a passwordless root console on the installed system.\n' >&2
+    return 1
+  fi
+
+  if ! _mimos_remove_live_only_units; then
+    printf 'mimos-live-environment: refusing to leave Live-only units enabled on the installed system.\n' >&2
+    return 1
+  fi
+
+  if ! _mimos_remove_live_resolved_config; then
+    printf 'mimos-live-environment: refusing to leave the Live resolved configuration on the installed system.\n' >&2
     return 1
   fi
 }

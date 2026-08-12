@@ -1,0 +1,56 @@
+#!/bin/bash
+# mimos — la puerta de entrada amable a los comandos de MimOS.
+#
+# No hace nada por sí mismo: delega en los comandos que ya existen y que
+# siguen funcionando por su nombre completo. Existe porque «mimos ayuda» es
+# más fácil de recordar que tres nombres con guión, y porque un sistema que
+# se llama MimOS puede permitirse que su terminal salude por su nombre.
+#
+# Cada subcomando comprueba que su destino existe antes de delegar: la
+# sesión Live no lleva el actualizador, y un mensaje que explica eso es
+# mejor que un «command not found» de bash.
+set -euo pipefail
+
+ayuda() {
+  cat <<'AYUDA'
+mimos — tu ordenador también merece unos mimos
+
+  mimos actualizar    Actualiza el sistema entero, en orden seguro
+  mimos restaurar     Vuelve a una instantánea anterior del sistema
+  mimos diagnostico   Prepara un informe local, anonimizado, que nunca
+                      se envía solo (acepta sus propias opciones)
+  mimos ayuda         Esta ayuda
+
+Cada uno también existe por su nombre completo: mimos-actualizar,
+mimos-restaurar y mimos-diagnostico. La guía completa está en
+https://mimoslinux.org/cuidados/ y la comunidad en el Discord de MimOS.
+AYUDA
+}
+
+delegar() {
+  local destino="$1"
+  shift
+  if ! command -v "${destino}" > /dev/null 2>&1; then
+    printf 'mimos: «%s» no está en este sistema.\n' "${destino}" >&2
+    printf 'En la sesión Live algunos comandos no existen todavía; en un MimOS instalado deberían estar todos.\n' >&2
+    exit 1
+  fi
+  exec "${destino}" "$@"
+}
+
+orden="${1:-ayuda}"
+[[ $# -gt 0 ]] && shift
+
+case "${orden}" in
+  actualizar)  delegar mimos-actualizar "$@" ;;
+  restaurar)   delegar mimos-restaurar "$@" ;;
+  diagnostico) delegar mimos-diagnostico "$@" ;;
+  ayuda|--ayuda|-h|--help)
+    ayuda
+    ;;
+  *)
+    printf 'mimos: no conozco «%s».\n\n' "${orden}" >&2
+    ayuda >&2
+    exit 1
+    ;;
+esac

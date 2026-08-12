@@ -1,7 +1,7 @@
 # Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
 
 pkgname=mimos-branding
-pkgver=0.7.0.beta.2
+pkgver=0.8.0.beta.1
 pkgrel=1
 pkgdesc='Runtime visual identity assets for MimOS'
 arch=('any')

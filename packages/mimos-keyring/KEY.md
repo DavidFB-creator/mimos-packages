@@ -20,6 +20,15 @@ because the absence is visible and the false one is not.
 `tests/shell/tst_keyring_staging.sh` still fails if the package is listed while
 the key is a placeholder.
 
+## Expiry and rotation
+
+The key was created without an expiry date, recorded then as a deliberate
+open item. The closing policy is written:
+`docs/vault/KEY_ROTATION.md` — two-year expiry renewed yearly through a
+`mimos-keyring` release, full rotation only with cause, and the reminder
+that a renewal that never reaches the backup media leaves backups that
+restore a key about to expire. Pending David's execution.
+
 ## If the key is ever lost or compromised
 
 See `docs/vault/KEY_CONTINGENCY.md`. Its checklist was ticked on 2026-08-09:
@@ -147,6 +156,24 @@ The sequence matters, and getting it wrong locks users out of updates.
    git archive <release-commit> packages LICENSE | tar -x -C <clone-of-mimos-packages>
    # commit, tag vX.Y.Z, push both
    ```
+
+9. **Sign the ISO itself, from 0.8 on.** The SHA-256 beside the download
+   proves the bytes arrived whole and nothing about who made them: the hash
+   travels on the same server as the image. The detached signature verifies
+   against the key every MimOS image already carries. In the WSL where the
+   secret key lives:
+
+   ```bash
+   ./scripts/sign-iso.sh out/mimos-<version>-x86_64.iso
+   ```
+
+   It is fail-closed like the package signing: it refuses before doing
+   anything if the secret key is absent, and it verifies its own output in a
+   throwaway keyring holding only `mimos.gpg`, requiring `VALIDSIG` with the
+   exact fingerprint — a signature the published keyring cannot verify is
+   deleted, not published. Upload the `.sig` beside the ISO and `SHA256SUMS`,
+   and verify it on the served bytes like everything else. Covered by
+   `tests/shell/tst_sign_iso.sh` with a throwaway key, never this one.
 
 Step 6 after 5 is not optional: the Live matrix runs `pacman -Syu`, so a
 configured repository that does not exist fails the acceptance run.
