@@ -3,7 +3,7 @@
 # packages/mimos-branding/palette.json. Do not edit by hand;
 # edit the palette and regenerate, or make check will fail.
 
-background = #FFFFFF
+background = #FFE9F3
 foreground = #221B3A
 cursor-color = #5B3BE0
 selection-background = #FF6FAE

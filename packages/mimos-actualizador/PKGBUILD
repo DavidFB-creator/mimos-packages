@@ -1,7 +1,7 @@
 # Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
 
 pkgname=mimos-actualizador
-pkgver=0.8.0.beta.1
+pkgver=0.8.0.beta.2
 pkgrel=1
 pkgdesc='MimOS update notifier and ordered updater'
 # Compiled for the same reason Centro de MimOS is (ADR-093): the generic qml6

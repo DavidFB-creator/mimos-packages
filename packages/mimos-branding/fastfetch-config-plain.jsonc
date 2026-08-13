@@ -62,6 +62,10 @@
       "key": "CPU"
     },
     {
+      "type": "gpu",
+      "key": "Gráfica"
+    },
+    {
       "type": "memory",
       "key": "Memoria"
     },
