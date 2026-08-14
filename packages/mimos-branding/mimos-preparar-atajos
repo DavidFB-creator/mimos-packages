@@ -1,32 +1,40 @@
 #!/usr/bin/env bash
 # Tell the running session about the launcher shortcut, because placing the
-# file is not enough.
+# file is not enough — and registering it is not enough either.
 #
 # MimOS ships Meta+Return for the terminal in /etc/skel/.config/
-# kglobalshortcutsrc. On the first login of an account, kglobalaccel reads it
-# and reports the binding correctly -- and nobody grabs the key, so the press
-# goes to whatever window has focus. Measured on a physical machine within
-# twenty minutes of installing published 0.7: the config was right, the
-# registration was right, and pressing the key typed an escape sequence into
-# the terminal. From the second start of KWin onwards it works, which is why
-# no scenario had ever seen it.
+# kglobalshortcutsrc. kglobalaccel reads it and reports the binding
+# correctly — and nobody grabs the key, so the press goes to whatever window
+# has focus. ADR-134 measured that on a physical 0.7 and repaired it with
+# doRegister + setShortcutKeys, read off dbus-monitor while the Settings app
+# reassigned the shortcut by hand.
 #
-# Meta+W is unaffected: that one is a KWin action and KWin owns its own.
-# Only the `[services]` half needs this.
+# That repair was refuted on the first physical 0.8.0-beta.2 install
+# (ADR-145). The marker said `aplicado`, the read-back saw the key, and the
+# press did nothing — in the first session AND after a relogin, because
+# kglobalaccel's model and the compositor's grab are different facts, and
+# doRegister + setShortcutKeys only updates the model when the caller is not
+# the component itself. A longer dbus-monitor capture of the one path known
+# to work showed the Settings app makes exactly ONE call for a service
+# action, and it is the one ADR-134 dismissed:
 #
-# The sequence below is not a guess. Three were tried and failed -- doRegister
-# alone, setForeignShortcutKeys alone, and setForeignShortcutKeys with a
-# malformed argument, which aborted KWin outright because KGlobalAccelD runs
-# inside the compositor and libdbus turns a demarshalling error into an abort.
-# It was then read off the session bus with dbus-monitor while the Settings
-# app reassigned the shortcut by hand, which is the one path known to work:
+#     setForeignShortcutKeys(actionId, [([key, 0, 0, 0],)])
 #
-#     doRegister(actionId)
-#     setShortcutKeys(actionId, [([key, 0, 0, 0],)], 2)
+# "Foreign" is the point: a service action has no live process to claim its
+# own shortcut, so the grab is installed on behalf of someone else. The 0.7
+# attempt at this method failed because it was called with a third flags
+# argument the signature does not have — KGlobalAccelD runs inside the
+# compositor and libdbus turns a demarshalling error into an abort, which is
+# also why the argument shape below is pinned by tests.
 #
-# The four integers are what a QKeySequence carries -- Qt keeps four slots and
-# the demarshaller reads all four -- and giving it one is what killed the
-# compositor. See ADR-134.
+# Measured in both directions against the exact 0.8.0-beta.2 bytes in QEMU,
+# with a REAL key press through the monitor: the pristine session launches
+# nothing (the defect reproduced under automation for the first time), and
+# after this single call the same press launches the terminal.
+#
+# The four integers are what a QKeySequence carries — Qt keeps four slots and
+# the demarshaller reads all four; giving it one is what killed the
+# compositor in 0.7.
 set -Eeuo pipefail
 
 marcador="${mimos_test_marcador:-${XDG_STATE_HOME:-${HOME}/.local/state}/mimos/atajos-preparados}"
@@ -70,15 +78,17 @@ for _ in $(seq 1 30); do
 done
 (( listo == 1 )) || anotar 'sin-sesion'
 
-llamar doRegister "${ACCION}" > /dev/null 2>&1 || anotar 'registro-rechazado'
-llamar setShortcutKeys "${ACCION}" "[([${META_RETURN}, 0, 0, 0],)]" 2 \
+# The one call the Settings app makes, exactly as captured: two arguments,
+# no flags. Adding a flags argument is the mistake that aborted KWin in 0.7.
+llamar setForeignShortcutKeys "${ACCION}" "[([${META_RETURN}, 0, 0, 0],)]" \
   > /dev/null 2>&1 || anotar 'asignacion-rechazada'
 
-# Read it back from the session rather than trusting the call's exit status.
-# A helper that writes and does not look is the shape this whole file exists
-# to correct, and ADR-123 already paid for that lesson once: its first version
-# sent a D-Bus set without waiting for the reply and passed only because the
-# value was already right.
+# Read it back from the session rather than trusting the call's exit status —
+# knowing its limit: this asks kglobalaccel's model, which cannot see the
+# compositor's grab (ADR-145 is the proof: it answered yes on a machine where
+# the key did nothing). It still catches a call the session rejected
+# outright. The gate that can fail on a missing grab lives in the e2e: a real
+# Meta+Return through the QEMU monitor, followed by pgrep.
 vuelta="$(
   qdbus6 --literal org.kde.kglobalaccel "${COMPONENTE}" \
     org.kde.kglobalaccel.Component.allShortcutInfos 2>/dev/null || true

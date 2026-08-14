@@ -1,6 +1,6 @@
 pkgbase = mimos-actualizador
 	pkgdesc = MimOS update notifier and ordered updater
-	pkgver = 0.8.0.beta.2
+	pkgver = 0.8.0.beta.3
 	pkgrel = 1
 	url = https://github.com/DavidFB-creator/MimOS
 	arch = x86_64

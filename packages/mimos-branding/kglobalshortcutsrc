@@ -7,9 +7,15 @@
 #     backslash-t, not a tab character. KConfig escapes tabs on write, and
 #     `cat -A` on a real session shows `\t` where a tab would show `^I`.
 #     Getting this wrong loses Alt+F4 instead of adding to it.
-#   * The value is `active,default,friendly name`. Alt+F4 stays in both the
-#     active list and the default, so Meta+W is an addition and not a
-#     replacement -- somebody who learnt Alt+F4 twenty years ago keeps it.
+#   * The value in [kwin] is `active,default,friendly name`. Alt+F4 stays in
+#     both the active list and the default, so Meta+W is an addition and not
+#     a replacement -- somebody who learnt Alt+F4 twenty years ago keeps it.
+#   * The value under [services] is DIFFERENT: `keys,friendly name`, two
+#     fields, no default column. Measured on the first physical beta.2
+#     install (ADR-145): this file shipped the three-field form there, and
+#     kglobalaccel's own rewrite collapsed it to two on session exit — the
+#     third field simply vanished, which is how a format written from the
+#     [kwin] pattern went silently wrong in the section next to it.
 #   * The launcher lives under a nested group named after the desktop file,
 #     and the action is `_launch`. Both were read out of the running
 #     session: kglobalaccel lists com_mitchellh_ghostty_desktop as a
@@ -33,4 +39,4 @@ Window Close=Meta+W\tAlt+F4,Alt+F4,Close Window
 Overview=none,Meta+W,Toggle Overview
 
 [services][com.mitchellh.ghostty.desktop]
-_launch=Meta+Return,none,Ghostty
+_launch=Meta+Return,Ghostty
