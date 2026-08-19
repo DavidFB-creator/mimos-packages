@@ -1,7 +1,7 @@
 # Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
 
 pkgname=mimos-welcome
-pkgver=0.8.0.beta.3
+pkgver=0.8.0.beta.4
 pkgrel=1
 pkgdesc='Centro de MimOS welcome and privacy application'
 # Compiled since the runner exists: the generic qml6 tool declares its own

@@ -52,7 +52,13 @@ readonly ACCION="['com.mitchellh.ghostty.desktop','_launch','Ghostty','Ghostty']
 readonly COMPONENTE=/component/com_mitchellh_ghostty_desktop
 
 anotar() {
-  install -d -m 0700 -- "$(dirname -- "${marcador}")"
+  local directorio
+  directorio="$(dirname -- "${marcador}")"
+  # Created only when missing. `install -d` on a directory that already
+  # exists also resets its mode, which is somebody else's decision when the
+  # directory is one this helper did not make. Same rule as the battery and
+  # touchpad helpers.
+  [[ -d "${directorio}" ]] || install -d -m 0700 -- "${directorio}"
   printf '%s\n' "$1" > "${marcador}"
   exit 0
 }
@@ -65,9 +71,20 @@ llamar() {
     --object-path /kglobalaccel --method "org.kde.KGlobalAccel.$1" "${@:2}"
 }
 
+leer_modelo() {
+  qdbus6 --literal org.kde.kglobalaccel "${COMPONENTE}" \
+    org.kde.kglobalaccel.Component.allShortcutInfos 2>/dev/null || true
+}
+
 # The service is D-Bus activated and the session may still be assembling when
-# autostart fires. Bounded, and a session that never answers is recorded
-# rather than retried for ever.
+# autostart fires. Bounded — and a session that never answers writes NO
+# marker, so the next login retries. The marker used to be written here, which
+# is ADR-123's second defect in another file: one slow first login — exactly
+# the login this helper exists for — recorded `sin-sesion` and the machine
+# never fixed itself. The touchpad helper already refuses to claim done on a
+# transient failure; same rule here. A session where the bus truly never
+# comes up retries a bounded 30-second probe per login, which is the cheap
+# side of that trade.
 listo=0
 for _ in $(seq 1 30); do
   if llamar allComponents > /dev/null 2>&1; then
@@ -76,7 +93,22 @@ for _ in $(seq 1 30); do
   fi
   sleep 1
 done
-(( listo == 1 )) || anotar 'sin-sesion'
+if (( listo == 0 )); then
+  printf 'The session bus never answered; will retry next login.\n' >&2
+  exit 0
+fi
+
+# Never override a choice the person already made — the rule the battery and
+# touchpad helpers state, and this one lacked. The model is asked BEFORE
+# assigning: on a pristine account it reports Meta+Return, because the skel
+# file registers the binding (measured on the beta.2 bytes — registered,
+# read back green, and still dead, which is the whole of ADR-145). Only that
+# case needs the grab installed. Anything else — the user reassigned it, the
+# user removed it, the component is not there because Ghostty is gone — is a
+# state this helper must not touch.
+if [[ "$(leer_modelo)" != *"${META_RETURN}"* ]]; then
+  anotar 'respetado'
+fi
 
 # The one call the Settings app makes, exactly as captured: two arguments,
 # no flags. Adding a flags argument is the mistake that aborted KWin in 0.7.
@@ -89,11 +121,7 @@ llamar setForeignShortcutKeys "${ACCION}" "[([${META_RETURN}, 0, 0, 0],)]" \
 # the key did nothing). It still catches a call the session rejected
 # outright. The gate that can fail on a missing grab lives in the e2e: a real
 # Meta+Return through the QEMU monitor, followed by pgrep.
-vuelta="$(
-  qdbus6 --literal org.kde.kglobalaccel "${COMPONENTE}" \
-    org.kde.kglobalaccel.Component.allShortcutInfos 2>/dev/null || true
-)"
-if [[ "${vuelta}" != *"${META_RETURN}"* ]]; then
+if [[ "$(leer_modelo)" != *"${META_RETURN}"* ]]; then
   anotar 'no-confirmado'
 fi
 

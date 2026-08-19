@@ -51,6 +51,12 @@ mode='restaurar'
 case "${1:-}" in
   -h|--help) usage; exit 0 ;;
   --listar)
+    # snapper needs root to answer (its D-Bus service refuses a plain user by
+    # default), so ask for sudo in MimOS's own words instead of letting
+    # snapper print an error about IO or permissions that explains nothing.
+    if [[ "$(id -u)" -ne 0 && -z "${test_toplevel}" ]]; then
+      fatal 'Ejecuta este comando con sudo: sudo mimos-restaurar --listar'
+    fi
     exec snapper -c root list
     ;;
   --limpiar) mode='limpiar' ;;
@@ -109,7 +115,7 @@ case "${mode}:${snapshot_subvol}" in
     3. Arranca la instantánea anterior al problema.
     4. Vuelve a ejecutar «sudo mimos-restaurar» desde ahí.
 
-  Puedes ver las instantáneas que tienes con «mimos-restaurar --listar».'
+  Puedes ver las instantáneas que tienes con «sudo mimos-restaurar --listar».'
     ;;
 esac
 
