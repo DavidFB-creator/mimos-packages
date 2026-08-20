@@ -1,22 +1,33 @@
 #!/bin/bash
-# Give the first human account MIMI as its login avatar.
+# Give the first human account MIMI as its login avatar -- as the FALLBACK,
+# never over the person's own choice (ADR-148, task #66).
 #
-# SDDM 0.21 resolves a user's avatar in this order: FacesDir/<name>.face.icon,
-# then ~/.face.icon, then AccountsService. The home route cannot work here:
-# Arch creates homes mode 0700 and the greeter runs as `sddm`, which cannot
-# read them. A global default cannot work either, because SDDM prefers the
-# theme's own faces/.face.icon -- Breeze's grey placeholder -- over the
-# FacesDir default whenever it exists, and it always exists. Naming the
-# account's own face file is the one path that wins everywhere, and it needs
-# the account to exist first, which is why Calamares runs this after `users`.
+# SDDM 0.21 resolves a user's avatar in this order, read from
+# UserModel.cpp at v0.21.0 (lines 144-149), not remembered:
+# FacesDir/<name>.face.icon, then ~/.face.icon, then AccountsService
+# (/var/lib/AccountsService/icons/<name>), and the theme's placeholder
+# only when all three miss. The FacesDir route this helper used until 0.8
+# WINS over everything -- including the photo the person picks in
+# Preferencias, which lands in AccountsService (their ~/.face.icon is
+# invisible to the greeter: Arch homes are 0700 and sddm cannot stat
+# through them). So shipping MIMI there meant nobody's chosen face ever
+# reached the login screen.
+#
+# Seeding AccountsService instead gives the right order for free: the
+# person's later choice REPLACES this very file through the
+# accountsservice daemon, and MIMI shows only while no choice exists.
+# Calamares runs this after `users`, in the chroot, where the daemon is
+# not running -- which is fine, because AccountsService state is plain
+# files read on demand.
 set -euo pipefail
 
-faces_dir='/usr/share/sddm/faces'
+as_icons='/var/lib/AccountsService/icons'
+as_users='/var/lib/AccountsService/users'
 face_source='/usr/share/mimos/branding/mimi-face.png'
 
-# The first human account is UID 1000: the one Calamares creates on a target,
-# or the Live account on the ISO. Asking /etc/passwd needs no NSS services,
-# which an installer chroot does not have running.
+# The first human account is UID 1000: the one Calamares creates on a target.
+# Asking /etc/passwd needs no NSS services, which an installer chroot does
+# not have running.
 user_name="$(awk -F: '$3 == 1000 { print $1; exit }' /etc/passwd)"
 
 if [[ -z "${user_name}" ]]; then
@@ -24,10 +35,19 @@ if [[ -z "${user_name}" ]]; then
   exit 0
 fi
 
-target="${faces_dir}/${user_name}.face.icon"
+target="${as_icons}/${user_name}"
 if [[ -e "${target}" ]]; then
-  # A face already named for this account is a choice; never overwrite it.
+  # An icon already there is a choice; never overwrite it.
   exit 0
 fi
 
 install -Dm644 "${face_source}" "${target}"
+# The .ini half of AccountsService, so the KCM shows the same face the
+# greeter does. Created only when absent; accountsservice rewrites it the
+# first time the user changes anything.
+if [[ ! -e "${as_users}/${user_name}" ]]; then
+  install -d -m 0755 "${as_users}"
+  printf '[User]
+Icon=%s
+' "${target}" > "${as_users}/${user_name}"
+fi

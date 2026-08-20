@@ -37,8 +37,20 @@
 # compositor in 0.7.
 set -Eeuo pipefail
 
-marcador="${mimos_test_marcador:-${XDG_STATE_HOME:-${HOME}/.local/state}/mimos/atajos-preparados}"
+# The marker carries a GENERATION in its name (ADR-147). Machines installed
+# before ADR-146 hold `atajos-preparados` written by helpers whose repair
+# was refuted (ADR-134's model-only calls) or whose transient failures were
+# recorded as permanent — and the helper runs once per account, so no
+# package upgrade could reach them. Renaming the marker is the migration:
+# on the first login after upgrading, the legacy marker is removed once and
+# the ADR-146 helper runs again. That re-run is SAFE only because of the
+# `respetado` guard below — a binding the user changed or removed is
+# recognised and never overwritten, and re-asserting Meta+Return over the
+# skel default is the exact call the Settings app makes.
+marcador="${mimos_test_marcador:-${XDG_STATE_HOME:-${HOME}/.local/state}/mimos/atajos-preparados-2}"
+legado="$(dirname -- "${marcador}")/atajos-preparados"
 [[ -e "${marcador}" ]] && exit 0
+[[ -e "${legado}" ]] && rm -f -- "${legado}"
 
 # Meta+Return as Qt encodes it, with the arithmetic written down rather than
 # left as a magic number:

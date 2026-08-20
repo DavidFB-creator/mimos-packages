@@ -1,0 +1,50 @@
+# shellcheck shell=bash
+# pacman sources this scriptlet; it has no shebang by design.
+#
+# The avatar migration ADR-148 left stated as pending. Every system
+# installed from 0.4 through 0.8 carries MIMI at
+# /usr/share/sddm/faces/<user>.face.icon — the one avatar path SDDM
+# prefers over EVERYTHING, including the photo the person picks in
+# Preferencias (UserModel.cpp v0.21.0, lines 144-149). New installs seed
+# AccountsService instead since ADR-148; this scriptlet brings existing
+# machines to the same order.
+#
+# Only OUR unmodified MIMI is touched: a face is removed solely when it is
+# byte-identical to the shipped mimi-face.png, so a face somebody placed
+# there deliberately — even a renamed copy of something else — survives.
+# The AccountsService fallback is seeded BEFORE the FacesDir file goes,
+# and never over an existing icon: at no instant is the account faceless,
+# and an interrupted run retries cleanly on the next upgrade because every
+# step is idempotent.
+
+_mimos_shipped_face="${mimos_test_shipped_face:-/usr/share/mimos/branding/mimi-face.png}"
+_mimos_faces_dir="${mimos_test_faces_dir:-/usr/share/sddm/faces}"
+_mimos_as_icons="${mimos_test_as_icons:-/var/lib/AccountsService/icons}"
+_mimos_as_users="${mimos_test_as_users:-/var/lib/AccountsService/users}"
+
+_mimos_migrate_face() {
+  [[ -r "${_mimos_shipped_face}" ]] || return 0
+  local face user icon
+  for face in "${_mimos_faces_dir}"/*.face.icon; do
+    [[ -f "${face}" ]] || continue
+    # Byte-identical to the shipped MIMI, or it is somebody's choice.
+    cmp -s "${_mimos_shipped_face}" "${face}" || continue
+    user="${face##*/}"
+    user="${user%.face.icon}"
+    icon="${_mimos_as_icons}/${user}"
+    if [[ ! -e "${icon}" ]]; then
+      install -Dm644 "${_mimos_shipped_face}" "${icon}"
+      if [[ ! -e "${_mimos_as_users}/${user}" ]]; then
+        install -d -m 0755 "${_mimos_as_users}"
+        printf '[User]\nIcon=%s\n' "${icon}" > "${_mimos_as_users}/${user}"
+      fi
+    fi
+    rm -f -- "${face}"
+    printf '  login avatar for %s: your own choice wins now; MIMI stays as the fallback\n' \
+      "${user}"
+  done
+}
+
+post_upgrade() {
+  _mimos_migrate_face
+}
