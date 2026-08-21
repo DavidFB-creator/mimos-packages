@@ -1,0 +1,40 @@
+{
+  "_comentario": [
+    "El catálogo canónico de la Tienda de MimOS (ADR-152). Cada entrada:",
+    "paquete (nombre EXACTO en los repos oficiales de Arch - se valida por",
+    "resolución real contra raíz vacía, nunca de memoria), nombre y",
+    "descripción en castellano escritos por nosotros, y categoría. Solo",
+    "repos oficiales, multilib incluido desde la adenda de ADR-152:",
+    "Steam entra por decision de David y mimos-release habilita el",
+    "repo en los sistemas instalados. Sin AUR, a propósito (v1). De aquí",
+    "derivan el modelo QML de TiendaMain.qml y la allowlist plana",
+    "mimos-aplicaciones.lista - scripts/generate-tienda-catalogo.py, y",
+    "make check falla si cualquiera de las dos derivaciones difiere."
+  ],
+  "categorias": ["Internet", "Fotos y dibujo", "Música y vídeo", "Juegos", "Utilidades"],
+  "aplicaciones": [
+    {"paquete": "thunderbird", "nombre": "Thunderbird", "descripcion": "Correo electrónico en tu escritorio, de los creadores de Firefox", "categoria": "Internet"},
+    {"paquete": "discord", "nombre": "Discord", "descripcion": "Chat de voz y texto para comunidades y amigos", "categoria": "Internet"},
+    {"paquete": "signal-desktop", "nombre": "Signal", "descripcion": "Mensajería privada y cifrada", "categoria": "Internet"},
+    {"paquete": "telegram-desktop", "nombre": "Telegram", "descripcion": "La mensajería de Telegram, en grande y con teclado", "categoria": "Internet"},
+    {"paquete": "qbittorrent", "nombre": "qBittorrent", "descripcion": "Descargas por BitTorrent, sin anuncios", "categoria": "Internet"},
+    {"paquete": "gimp", "nombre": "GIMP", "descripcion": "Edición de imágenes y fotografía, el clásico libre", "categoria": "Fotos y dibujo"},
+    {"paquete": "inkscape", "nombre": "Inkscape", "descripcion": "Dibujo vectorial: logotipos, carteles, diseños", "categoria": "Fotos y dibujo"},
+    {"paquete": "krita", "nombre": "Krita", "descripcion": "Pintura digital e ilustración", "categoria": "Fotos y dibujo"},
+    {"paquete": "darktable", "nombre": "darktable", "descripcion": "Revelado de fotos RAW, como un cuarto oscuro digital", "categoria": "Fotos y dibujo"},
+    {"paquete": "digikam", "nombre": "digiKam", "descripcion": "Organiza y etiqueta miles de fotos", "categoria": "Fotos y dibujo"},
+    {"paquete": "kdenlive", "nombre": "Kdenlive", "descripcion": "Edición de vídeo completa y libre", "categoria": "Música y vídeo"},
+    {"paquete": "obs-studio", "nombre": "OBS Studio", "descripcion": "Graba tu pantalla o emite en directo", "categoria": "Música y vídeo"},
+    {"paquete": "audacity", "nombre": "Audacity", "descripcion": "Grabación y edición de audio", "categoria": "Música y vídeo"},
+    {"paquete": "handbrake", "nombre": "HandBrake", "descripcion": "Convierte vídeos entre formatos", "categoria": "Música y vídeo"},
+    {"paquete": "vlc", "nombre": "VLC", "descripcion": "El reproductor que lo reproduce todo", "categoria": "Música y vídeo"},
+    {"paquete": "steam", "nombre": "Steam", "descripcion": "La mayor tienda de juegos de PC", "categoria": "Juegos"},
+    {"paquete": "supertuxkart", "nombre": "SuperTuxKart", "descripcion": "Karts con Tux: carreras para toda la familia", "categoria": "Juegos"},
+    {"paquete": "luanti", "nombre": "Luanti", "descripcion": "Construye mundos de bloques (antes Minetest)", "categoria": "Juegos"},
+    {"paquete": "gcompris-qt", "nombre": "GCompris", "descripcion": "Más de cien actividades educativas para peques", "categoria": "Juegos"},
+    {"paquete": "keepassxc", "nombre": "KeePassXC", "descripcion": "Guarda tus contraseñas bajo llave", "categoria": "Utilidades"},
+    {"paquete": "filelight", "nombre": "Filelight", "descripcion": "Descubre qué está llenando tu disco", "categoria": "Utilidades"},
+    {"paquete": "kdf", "nombre": "KDiskFree", "descripcion": "Vigila el espacio libre de tus discos", "categoria": "Utilidades"},
+    {"paquete": "code", "nombre": "Code", "descripcion": "Editor de código para programar (VS Code libre)", "categoria": "Utilidades"}
+  ]
+}

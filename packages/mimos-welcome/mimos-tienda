@@ -1,0 +1,153 @@
+#!/usr/bin/env bash
+# Tienda de MimOS launcher (ADR-152). All policy lives here, none in the
+# QML (ADR-093): this script computes which catalogue entries are already
+# installed, launches the identity-owning runner, and acts on its exit
+# status. The security boundary is the allowlist step: the selection the
+# QML persisted is re-validated token by token against the SHIPPED
+# catalogue list, so nothing written on the QML side of the fence can
+# reach a command line unvetted.
+set -Eeuo pipefail
+
+window='/usr/share/mimos/tienda/TiendaWindow.qml'
+lista='/usr/share/mimos/tienda/aplicaciones.lista'
+instalador='/usr/lib/mimos/mimos-tienda-instalar'
+live_marker='/usr/lib/mimos/live-environment'
+config_dir="${XDG_CONFIG_HOME:-${HOME}/.config}/mimos"
+config_file="${config_dir}/tienda.conf"
+
+show_error() {
+  local message="$1"
+  if command -v kdialog >/dev/null 2>&1; then
+    kdialog --title 'Tienda de MimOS' --error "${message}" || true
+  else
+    printf '%s\n' "${message}" >&2
+  fi
+}
+
+# The Live session is ephemeral: anything installed there evaporates at
+# shutdown, which for the person looks like the Tienda lying. Fail closed,
+# same marker discipline as the Centro (root-owned regular file, 0644).
+if [[ -f "${live_marker}" && ! -L "${live_marker}" ]] && \
+  [[ "$(stat -c '%u:%g:%a' "${live_marker}")" == '0:0:644' ]]; then
+  show_error 'La Tienda instala en un MimOS de verdad; en la sesión Live los cambios se perderían al apagar.'
+  exit 1
+fi
+
+if [[ ! -f "${window}" || ! -f "${lista}" ]]; then
+  show_error 'No se encuentra la interfaz de la Tienda de MimOS.'
+  exit 1
+fi
+
+# Twin of detect_appearance in /usr/bin/mimos-welcome, kept in step by the
+# welcome contract: the KConfig cascade order and the scheme patterns are
+# the measured halves (ADR-093, ADR-094).
+detect_appearance() {
+  local config_home="${XDG_CONFIG_HOME:-${HOME}/.config}"
+  local scheme='' candidate
+  for candidate in "${config_home}/kdeglobals" \
+    "${config_home}/kdedefaults/kdeglobals"; do
+    [[ -f "${candidate}" ]] || continue
+    scheme="$(sed -n 's/^ColorScheme=//p' "${candidate}" | head -n 1)"
+    [[ -n "${scheme}" ]] && break
+  done
+  case "${scheme}" in
+    *[Oo]scur*|*[Nn]octurn*|*[Dd]ark*|*[Bb]reeze[Dd]ark*)
+      printf 'oscuro'
+      ;;
+    *)
+      printf 'claro'
+      ;;
+  esac
+}
+
+# Which catalogue entries are already on this machine. Asked of pacman,
+# never guessed, and passed by argv because the QML has no way to ask.
+detect_instaladas() {
+  local paquete resultado=''
+  while IFS= read -r paquete; do
+    [[ -n "${paquete}" ]] || continue
+    if pacman -Q -- "${paquete}" >/dev/null 2>&1; then
+      resultado="${resultado:+${resultado} }${paquete}"
+    fi
+  done < "${lista}"
+  printf '%s' "${resultado}"
+}
+
+runner='/usr/lib/mimos/tienda-mimos'
+if [[ ! -x "${runner}" ]]; then
+  show_error 'El entorno de la Tienda de MimOS no está disponible.'
+  exit 1
+fi
+
+mkdir -p -- "${config_dir}"
+
+export QT_QUICK_CONTROLS_STYLE='Basic'
+
+appearance="$(detect_appearance)"
+instaladas="$(detect_instaladas)"
+set +e
+"${runner}" '--mimos-context=installed' "--mimos-appearance=${appearance}" \
+  "--mimos-instaladas=${instaladas}"
+status=$?
+set -e
+
+final_status=0
+case "${status}" in
+  0)
+    ;;
+  14)
+    # The allowlist boundary. The selection was written by the QML into
+    # the Settings file; every token must match a line of the SHIPPED
+    # catalogue exactly, or it is dropped with a warning. A token that is
+    # not a pacman name never even reaches the file comparison.
+    seleccion="$(sed -n 's/^paquetes=//p' "${config_file}" 2>/dev/null | head -n 1)"
+    validados=()
+    descartados=()
+    for token in ${seleccion}; do
+      if [[ "${token}" =~ ^[a-z0-9@._+-]+$ ]] && \
+        grep -Fxq -- "${token}" "${lista}"; then
+        validados+=("${token}")
+      else
+        descartados+=("${token}")
+      fi
+    done
+    if (( ${#descartados[@]} > 0 )); then
+      printf 'Tienda de MimOS: selección fuera del catálogo, descartada: %s\n' \
+        "${descartados[*]}" >&2
+    fi
+    if (( ${#validados[@]} == 0 )); then
+      show_error 'No hay nada válido que instalar.'
+      final_status=1
+    elif [[ ! -x "${instalador}" ]]; then
+      show_error 'El instalador de la Tienda no está disponible.'
+      final_status=1
+    elif command -v ghostty >/dev/null 2>&1; then
+      ghostty -e "${instalador}" "${validados[@]}" >/dev/null 2>&1 &
+    elif command -v konsole >/dev/null 2>&1; then
+      konsole -e "${instalador}" "${validados[@]}" >/dev/null 2>&1 &
+    else
+      show_error 'No se ha encontrado una terminal para instalar.'
+      final_status=1
+    fi
+    ;;
+  15)
+    # The advanced path: everything the official repositories and the AUR
+    # offer, through paru in a visible terminal. This used to be the
+    # Centro card's whole behaviour (ADR-106); the Tienda keeps it one
+    # level deeper for the person who knows what they are looking for.
+    if command -v paru >/dev/null 2>&1 && command -v ghostty >/dev/null 2>&1; then
+      ghostty -e paru >/dev/null 2>&1 &
+    elif command -v paru >/dev/null 2>&1 && command -v konsole >/dev/null 2>&1; then
+      konsole -e paru >/dev/null 2>&1 &
+    else
+      show_error 'No se ha encontrado paru o una terminal para abrirlo.'
+      final_status=1
+    fi
+    ;;
+  *)
+    printf 'Tienda de MimOS exited with status %s.\n' "${status}" >&2
+    final_status="${status}"
+    ;;
+esac
+
+exit "${final_status}"

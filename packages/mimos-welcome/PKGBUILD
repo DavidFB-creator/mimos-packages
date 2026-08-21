@@ -1,9 +1,9 @@
 # Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
 
 pkgname=mimos-welcome
-pkgver=0.9.0.beta.1
+pkgver=0.9.0.beta.2
 pkgrel=1
-pkgdesc='Centro de MimOS welcome and privacy application'
+pkgdesc='Centro de MimOS welcome and privacy application, and the Tienda'
 # Compiled since the runner exists: the generic qml6 tool declares its own
 # window identity (org.qt-project.qml, the Qr icon) and KWin honours the
 # window over any desktop file, so the identity must be owned in C++.
@@ -20,7 +20,7 @@ optdepends=(
   'mimos-release: version-aware autostart'
   'mimos-welcome-live: the Live-session Centro this launcher delegates to'
   'plasma-workspace: apply the MimOS Global Themes'
-  'paru: install applications from Centro de MimOS'
+  'paru: the Tienda advanced path into the whole catalogue and the AUR'
 )
 source=(
   'mimos-welcome'
@@ -30,15 +30,31 @@ source=(
   'mimos-welcome.desktop'
   'mimos-welcome-autostart.desktop'
   'centro-main.cpp'
+  'mimos-tienda'
+  'mimos-tienda-instalar'
+  'TiendaMain.qml'
+  'TiendaWindow.qml'
+  'tienda-main.cpp'
+  'mimos-tienda.desktop'
+  'mimos-aplicaciones.json'
+  'mimos-aplicaciones.lista'
   'LICENSE'
 )
-sha256sums=('0ba71b4871ed22e3b75616c0d4d72e91ea5640df35b02f98b219d2c90c7b7d41'
+sha256sums=('59273724cdcd20d5a1239787d9ff7b6b027cf46c8d9e4e2f01ff71028e4363f3'
             '7770a8046c166b04fbfd7d6fe4b1abd58ae71d0459456e18906a7b1ba3faf952'
             '0a3102de51428266d1100cdda5097ef9fabdaa3664c4f1a78d02099140e7978a'
             '39262739a86345fa459047a30f5cb039bd6cb3d69460014c522c9e7b6cf1c3cf'
             '78f118314a87d92961826cd87c84cfd12b029b99ed36e9404f4ab892aa172398'
             '78c2283d05869013f84bca6e89433ec9312bd30978293cbb49650afcaa59770c'
             'a8db9308c68d03f83f14ffbcc1dc3c4ef84eeba684d7963ad388f1c19bb44972'
+            'b2476d833b9482e2cf478e1d7e227d6321862eaf9f15f2488186bb73608ec666'
+            'f8f6a01c1af3a2c2d55538afd04a8e0ea86592490574cf2432d6d22af4570d1e'
+            'a915359e421193e0939404a43aaf1f89bb7285993fffa36bbd05b426a502ef5a'
+            'f78ae7d1f3d76c829a8d30d9063c122c60d19fcaf1748ba59e475109a1823b0d'
+            '5e8986afe017194cfed460b6f187f7c071f9cec531ed3a12aab559ee0ca17262'
+            'ae0ad90153fba749753410c4318a6b1abcdfdbcdf8dc14d1cc90a5da8daa74bd'
+            '7f1fed3b7dce6080c4bf824e611e8a92cbd1874e78c6c57f01b520715d6ea84c'
+            '349f5088c69332820bfa0923b7c84d1f508c5f136b30bfecca670b0e5271cf7e'
             '97d7ba0977ea88730c942625f66849bbef6536c3c6e103a39a4bb05b9fd3d9cf')
 
 build() {
@@ -46,6 +62,11 @@ build() {
     -DCENTRO_WINDOW_QML='"/usr/share/mimos/welcome/Window.qml"' \
     $(pkg-config --cflags --libs Qt6Qml Qt6Gui Qt6Core) \
     ${LDFLAGS} -o centro-mimos
+  # The Tienda gets its own runner for the same identity reason (ADR-152).
+  g++ -std=c++17 -fPIC ${CXXFLAGS} tienda-main.cpp \
+    -DTIENDA_WINDOW_QML='"/usr/share/mimos/tienda/TiendaWindow.qml"' \
+    $(pkg-config --cflags --libs Qt6Qml Qt6Gui Qt6Core) \
+    ${LDFLAGS} -o tienda-mimos
 }
 
 package() {
@@ -62,6 +83,24 @@ package() {
     "${pkgdir}/usr/share/applications/mimos-welcome.desktop"
   install -Dm644 mimos-welcome-autostart.desktop \
     "${pkgdir}/etc/xdg/autostart/mimos-welcome.desktop"
+  # Tienda de MimOS (ADR-152): curated installer with the Centro's exact
+  # architecture. The .lista is the launcher's allowlist -- derived from
+  # the canonical JSON by scripts/generate-tienda-catalogo.py, verified by
+  # make check, and shipped read-only where the launcher expects it.
+  install -Dm755 mimos-tienda "${pkgdir}/usr/bin/mimos-tienda"
+  install -Dm755 tienda-mimos "${pkgdir}/usr/lib/mimos/tienda-mimos"
+  install -Dm755 mimos-tienda-instalar \
+    "${pkgdir}/usr/lib/mimos/mimos-tienda-instalar"
+  install -Dm644 TiendaMain.qml \
+    "${pkgdir}/usr/share/mimos/tienda/TiendaMain.qml"
+  install -Dm644 TiendaWindow.qml \
+    "${pkgdir}/usr/share/mimos/tienda/TiendaWindow.qml"
+  install -Dm644 mimos-aplicaciones.json \
+    "${pkgdir}/usr/share/mimos/tienda/aplicaciones.json"
+  install -Dm644 mimos-aplicaciones.lista \
+    "${pkgdir}/usr/share/mimos/tienda/aplicaciones.lista"
+  install -Dm644 mimos-tienda.desktop \
+    "${pkgdir}/usr/share/applications/mimos-tienda.desktop"
   install -Dm644 LICENSE \
     "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }

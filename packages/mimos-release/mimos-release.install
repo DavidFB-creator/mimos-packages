@@ -12,6 +12,8 @@
 
 mimos_marker_begin='# >>> mimos channel >>>'
 mimos_marker_end='# <<< mimos channel <<<'
+mimos_multilib_begin='# >>> mimos multilib >>>'
+mimos_multilib_end='# <<< mimos multilib <<<'
 mimos_conf='/etc/pacman.conf'
 
 _mimos_add_channel() {
@@ -34,6 +36,45 @@ Include = /etc/pacman.d/mimos-mirrorlist
 ${mimos_marker_end}
 EOF
   printf '  MimOS package channel added to %s\n' "${mimos_conf}"
+}
+
+# The multilib repository, on by default (ADR-152 addendum, David's call:
+# Steam joins the Tienda's catalogue, and Steam lives in multilib). Enabling
+# the repo installs nothing 32-bit by itself -- it only lets the Tienda's
+# checkbox and a plain pacman find it, which is what CachyOS and Manjaro
+# ship out of the box. Same discipline as the channel block above: append
+# only, marker-guarded, idempotent, removed exactly on package removal. A
+# user who already enabled multilib themselves keeps their own section --
+# the guard checks for the section name, not just our marker.
+_mimos_add_multilib() {
+  if grep -Fq "${mimos_multilib_begin}" "${mimos_conf}" 2>/dev/null; then
+    return 0
+  fi
+  if grep -Eq '^\[multilib\]' "${mimos_conf}" 2>/dev/null; then
+    return 0
+  fi
+
+  cat >> "${mimos_conf}" <<EOF
+
+${mimos_multilib_begin}
+# Added by mimos-release. Remove this block, or the package, to opt out.
+# Steam and other 32-bit-adjacent applications live here.
+[multilib]
+Include = /etc/pacman.d/mirrorlist
+${mimos_multilib_end}
+EOF
+  printf '  multilib repository enabled in %s\n' "${mimos_conf}"
+}
+
+_mimos_remove_multilib() {
+  grep -Fq "${mimos_multilib_begin}" "${mimos_conf}" 2>/dev/null || return 0
+  local trimmed
+  trimmed="$(mktemp)"
+  sed "/^${mimos_multilib_begin}\$/,/^${mimos_multilib_end}\$/d" \
+    "${mimos_conf}" > "${trimmed}"
+  cat "${trimmed}" > "${mimos_conf}"
+  rm -f -- "${trimmed}"
+  printf '  multilib block removed from %s\n' "${mimos_conf}"
 }
 
 _mimos_remove_channel() {
@@ -240,20 +281,43 @@ _mimos_release_os_release() {
   printf '  %s restored to the Arch file.\n' "${mimos_os_release}"
 }
 
+# The Live profile used to enable qemu-guest-agent with a hand-made wants
+# link, and the airootfs reaches every installed disk, so every physical
+# MimOS boot waited 90 seconds for a virtio port that cannot exist and
+# printed "Dependency failed for QEMU Guest Agent" (ADR-149). The package's
+# own udev rule starts the agent whenever the port is really there, so the
+# link added nothing in a VM and noise everywhere else. Remove exactly the
+# link the profile made, and only while it still points at the stock unit --
+# anything else is somebody's own decision and not ours to undo.
+mimos_guest_agent_link='/etc/systemd/system/multi-user.target.wants/qemu-guest-agent.service'
+mimos_guest_agent_unit='/usr/lib/systemd/system/qemu-guest-agent.service'
+
+_mimos_quiet_guest_agent() {
+  [[ -L "${mimos_guest_agent_link}" ]] || return 0
+  [[ "$(readlink "${mimos_guest_agent_link}")" == "${mimos_guest_agent_unit}" ]] ||
+    return 0
+  rm -f -- "${mimos_guest_agent_link}"
+  printf '  qemu-guest-agent now starts only when its virtio port exists.\n'
+}
+
 post_install() {
   _mimos_add_channel
+  _mimos_add_multilib
   _mimos_configure_grub
   _mimos_claim_os_release
 }
 
 post_upgrade() {
   _mimos_add_channel
+  _mimos_add_multilib
   _mimos_configure_grub
   _mimos_claim_os_release
+  _mimos_quiet_guest_agent
 }
 
 pre_remove() {
   _mimos_remove_channel
+  _mimos_remove_multilib
   _mimos_unconfigure_grub
   _mimos_release_os_release
 }

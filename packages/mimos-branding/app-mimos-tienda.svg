@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- D5: MIMI asomando de la caja, y los brazos NACEN del corazon: cada
+       brazo se dibuja entero detras (empezando bien dentro del contorno
+       del corazon, que dibujado encima esconde el arranque), y el
+       antebrazo se repite encima del frente de la caja con el mismo
+       trazo, para que el abrazo al borde y el cuerpo sean una sola
+       pieza. La tecnica del icono del Centro, verbatim. -->
+  <!-- Brazos enteros, detras del corazon. -->
+  <g fill="none" stroke="#7C5CFC" stroke-width="30" stroke-linecap="round">
+    <path d="M200 200C150 210 120 240 122 280c2 26 26 46 62 52"/>
+    <path d="M312 200c50 10 80 40 78 80-2 26-26 46-62 52"/>
+  </g>
+  <!-- MIMI (corazon y cara). -->
+  <g transform="translate(64,10) scale(0.75)">
+    <path d="M256 405C200 350 106 268 106 195c0-65 46-100 90-100 30 0 52 23 60 50 8-27 30-50 60-50 44 0 90 35 90 100 0 73-94 155-150 210z" fill="#FF6FAE"/>
+    <g fill="#221B3A">
+      <circle cx="214" cy="222" r="11"/>
+      <circle cx="298" cy="222" r="11"/>
+    </g>
+    <path d="M221 250c7 30 67 30 74 0" fill="none" stroke="#221B3A" stroke-width="12" stroke-linecap="round"/>
+  </g>
+  <!-- Frente de la caja con lazo y sello. -->
+  <rect x="116" y="300" width="280" height="156" rx="18" fill="#FFFFFF" stroke="#7C5CFC" stroke-width="16"/>
+  <rect x="238" y="308" width="36" height="140" fill="#FFD3E5"/>
+  <path d="M256 402c-11-11-29-27-29-41 0-12 9-19 17-19 6 0 10 4 12 9 2-5 6-9 12-9 8 0 17 7 17 19 0 14-18 30-29 41z" fill="#FF6FAE"/>
+  <!-- Antebrazos otra vez, encima del borde: mismo trazo, misma anchura,
+       mismo color, y la oclusion es la que pone las manos DELANTE. -->
+  <g fill="none" stroke="#7C5CFC" stroke-width="30" stroke-linecap="round">
+    <path d="M122 280c2 26 26 46 62 52"/>
+    <path d="M390 280c-2 26-26 46-62 52"/>
+  </g>
+</svg>

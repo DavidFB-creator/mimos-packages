@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# The Tienda's terminal half (ADR-152): shows what is about to enter, then
+# runs the real transaction in front of the person. In a visible terminal
+# on purpose, like updating (ADR-104): pacman asks a password and real
+# questions, and hiding them is worse than showing them. snap-pac brackets
+# the transaction, so this is recoverable from the boot menu like any
+# update.
+set -Eeuo pipefail
+
+titulo() {
+  printf '\n\033[1;38;2;255;111;174m  %s\033[0m\n\n' "$*"
+}
+
+pausa_final() {
+  printf '\n  Pulsa Intro para cerrar esta ventana.'
+  read -r _ || true
+}
+
+if (( $# == 0 )); then
+  printf '  Nada que instalar.\n'
+  pausa_final
+  exit 1
+fi
+
+# Defence in depth: the launcher already validated against the shipped
+# allowlist; this guard only exists so the helper is safe even if invoked
+# by hand with something strange.
+for token in "$@"; do
+  if [[ ! "${token}" =~ ^[a-z0-9@._+-]+$ ]]; then
+    printf '  Nombre de paquete no válido: %s\n' "${token}" >&2
+    pausa_final
+    exit 1
+  fi
+done
+
+titulo 'Tienda de MimOS'
+printf '  Va a instalarse desde los repositorios oficiales:\n\n'
+printf '    %s\n' "$@"
+printf '\n  Antes se pone el sistema al día: en Arch instalar sobre un\n'
+printf '  sistema desactualizado es la receta de un sistema roto, así que\n'
+printf '  la transacción es una sola. Cada paso deja una instantánea: si\n'
+printf '  algo sale mal puedes volver atrás desde el menú de arranque.\n'
+
+titulo 'Instalando'
+# -Syu, never -S alone: a fresh installation has no synced databases at
+# all (measured in the doctored session -- pacman found NOTHING to
+# install), and -Sy without -u is the partial-upgrade machine this
+# project refuses everywhere else. One transaction, snap-pac around it.
+if ! sudo pacman -Syu --needed -- "$@"; then
+  printf '\n  La instalación no ha terminado bien; nada a medias queda\n'
+  printf '  activo, y la instantánea previa sigue en el menú de arranque.\n'
+  pausa_final
+  exit 1
+fi
+
+titulo 'Listo'
+printf '  Ya lo tienes en el menú de aplicaciones.\n'
+pausa_final

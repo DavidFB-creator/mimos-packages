@@ -192,23 +192,19 @@ while true; do
       continue
       ;;
     13)
-      # Opens paru in a terminal, not Discover.
+      # Opens the Tienda de MimOS (ADR-152), not Discover and not bare paru.
       #
-      # Discover was removed from MimOS on 2026-08-08 with Flatpak (ADR-106),
-      # and without a backend it could install nothing at all -- its optional
-      # dependencies are flatpak, fwupd and packagekit-qt6, and Arch itself
-      # marks the last "not recommended". The card promised a shop that had
-      # nothing to sell. paru reaches the official repositories and the AUR,
-      # which is the whole of what MimOS actually offers.
-      #
-      # In a terminal on purpose: installing software asks for a password and
-      # asks real questions, exactly as updating does (ADR-104).
-      if command -v paru >/dev/null 2>&1 && command -v ghostty >/dev/null 2>&1; then
-        ghostty -e paru >/dev/null 2>&1 &
-      elif command -v paru >/dev/null 2>&1 && command -v konsole >/dev/null 2>&1; then
-        konsole -e paru >/dev/null 2>&1 &
+      # Discover was removed on 2026-08-08 with Flatpak (ADR-106): without a
+      # backend it could install nothing at all. From 2026-08-08 to the
+      # Tienda's arrival this card opened paru in a terminal -- honest, and
+      # exactly the interface David's mother cannot use. The Tienda is the
+      # curated middle: our catalogue with Spanish descriptions, real pacman
+      # in a visible terminal underneath, and paru kept one level deeper for
+      # the person who knows what they are looking for.
+      if [[ -x /usr/bin/mimos-tienda ]]; then
+        /usr/bin/mimos-tienda >/dev/null 2>&1 &
       else
-        show_error 'No se ha encontrado paru o una terminal para abrirlo.'
+        show_error 'La Tienda de MimOS no está disponible.'
         final_status=1
       fi
       break

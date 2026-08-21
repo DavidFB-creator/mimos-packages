@@ -19,6 +19,24 @@ fi
 
 install -d -o mimos -g mimos /home/mimos/.config
 
+# The LIVE session must not automount (ADR-153). The skel seed of ADR-151
+# reaches this account too, and the kded device_automounter then mounts the
+# partitions Calamares has just created: kpmcore re-reads the partition
+# table after every mkfs, the automounter mounts the fresh filesystem, and
+# the job's own check (btrfs check, fsck.fat -w) refuses a mounted target --
+# «El instalador no pudo particionar el disco», at whichever partition
+# loses the race. Calamares' first job tries to unload that module itself
+# and cannot: it runs as root and the user's session bus refuses the
+# connection. Measured on the exact 0.9.0-beta.2 bytes, both directions:
+# freshly created vda1/vda2 mounted under /run/media/mimos mid-install,
+# and nothing mounts with the module quiet. Installed systems keep the
+# skel seed untouched -- only the installing seat goes quiet.
+cat > /home/mimos/.config/kded_device_automounterrc <<'EOF'
+[General]
+AutomountEnabled=false
+EOF
+chown mimos:mimos /home/mimos/.config/kded_device_automounterrc
+
 if [[ -f /etc/locale.gen ]] && ! grep -Eq '^es_ES\.UTF-8 UTF-8$' /etc/locale.gen; then
   sed -i 's/^#es_ES\.UTF-8 UTF-8/es_ES.UTF-8 UTF-8/' /etc/locale.gen
   locale-gen

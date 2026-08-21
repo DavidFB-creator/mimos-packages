@@ -1,7 +1,7 @@
 # Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
 
 pkgname=mimos-branding
-pkgver=0.9.0.beta.1
+pkgver=0.9.0.beta.2
 pkgrel=1
 install='mimos-branding.install'
 pkgdesc='Runtime visual identity assets for MimOS'
@@ -44,6 +44,7 @@ source=(
   'kdeglobals'
   'ksmserverrc'
   'ksplashrc'
+  'kded_device_automounterrc'
   'kglobalshortcutsrc'
   'speechd.conf'
   'zshrc'
@@ -70,6 +71,8 @@ source=(
   'index.theme'
   'app-mimos-centro.svg'
   'app-mimos-centro-small.svg'
+  'app-mimos-tienda.svg'
+  'app-mimos-tienda-small.svg'
   'app-mimos-instalador.svg'
   'start-here.svg'
   'mimos-escritorio-index.theme'
@@ -114,6 +117,7 @@ sha256sums=('c4eba059e0aec667b32e76e73b24c493e02cd87f962dfd133d50da134d510cd0'
             'c10aa173207569a37226f50d0013998cf7ec4c2325d62d4255a3fdd18451370e'
             '8eb74d238bf5f2dbf28d6b1952a036176b63d5590d79f2a04c10e7c68a9acac6'
             '21779e72a747e596f6dd7d888eb7160888ee2923236840d696e6d211cfbf46fd'
+            '49e8b84331a65fd8c51db7d921976b8cb262f6617189ceb427e84648d7bc3623'
             '34cf132c4d65b0fb6ba88bde6551905628f661b0d5836510d940b21563f7f52c'
             '33a2721f8e59d1b7a95b145db2e3683e82043c952d34c113baabaf4364664c82'
             'a3aca64c8e14a98f3738e1720597c67a18adf5f41bb6452e2622205cb5866b87'
@@ -140,6 +144,8 @@ sha256sums=('c4eba059e0aec667b32e76e73b24c493e02cd87f962dfd133d50da134d510cd0'
             '51edbb5327ccc72aaaf1c2101413204798ff78237276041535ff41aad8584bfb'
             'c4eba059e0aec667b32e76e73b24c493e02cd87f962dfd133d50da134d510cd0'
             '8d6a159572081bc920809405c81348d9f21cb68d2413eec46161de63c6485646'
+            '0a61a108066d492c24fe2f9bb9b47996e4d8f7904b150649b37b2a52426537a8'
+            '282908188a90c3d405ace6b3eee06d47673b57b8b6928bef23e0ffca68dc51e2'
             '71807ea204370b435bedd25c4f53cd1d5e194e0fbd2155eec5dcdac51e458055'
             'f47693b1511c6b4aa167d945884eb6df2658825b5214a6db4158ad973321694d'
             '5f5eccdab4c56532122aa0eb9dadddec5767842d466567c5b1e0ed08dd3d788a'
@@ -244,6 +250,15 @@ package() {
   # is packaged, is named by both Global Themes -- and never runs on the one
   # login that has never applied a theme, which is everybody's first.
   install -Dm644 ksplashrc "${pkgdir}/etc/skel/.config/ksplashrc"
+  # A plugged USB simply appears (ADR-151): the kded device_automounter
+  # mounts on ATTACH with an active session, and deliberately NOT on login
+  # -- mounting is parsing an untrusted filesystem, and attach is the only
+  # moment intent is nearby. Keys measured by behaviour on the exact
+  # 0.9.0-beta.1 bytes: a hotplugged stick stays unmounted without this
+  # file and lands in /run/media with it. Skel only, so a user who turns
+  # it off in Preferencias stays off.
+  install -Dm644 kded_device_automounterrc \
+    "${pkgdir}/etc/skel/.config/kded_device_automounterrc"
   # Two shortcuts every account gets: Meta+W closes a window and Meta+Return
   # opens the terminal. Only from skel -- kglobalaccel keeps its shortcuts in
   # memory and never re-reads this file, so a new account is the one case
@@ -332,8 +347,16 @@ package() {
   install -Dm644 app-mimos-instalador.svg "${esc}/scalable/apps/mimos-instalador.svg"
   install -Dm644 app-mimos-centro-small.svg "${esc}/small/apps/mimos-centro.svg"
   install -Dm644 app-mimos-instalador.svg "${esc}/small/apps/mimos-instalador.svg"
+  # The Tienda's own icon (ADR-152, D5 chosen by David from rendered
+  # candidates): MIMI hugging the rim of an open gift box, arms drawn with
+  # the Centro icon's occlusion trick. Below 32 px the small variant drops
+  # the face for the sealed box, same measured rule as the Centro.
+  install -Dm644 app-mimos-tienda.svg "${esc}/scalable/apps/mimos-tienda.svg"
+  install -Dm644 app-mimos-tienda-small.svg "${esc}/small/apps/mimos-tienda.svg"
   install -Dm644 app-mimos-centro.svg \
     "${pkgdir}/usr/share/icons/hicolor/scalable/apps/mimos-centro.svg"
+  install -Dm644 app-mimos-tienda.svg \
+    "${pkgdir}/usr/share/icons/hicolor/scalable/apps/mimos-tienda.svg"
   install -Dm644 app-mimos-instalador.svg \
     "${pkgdir}/usr/share/icons/hicolor/scalable/apps/mimos-instalador.svg"
   # The distribution logo, named by LOGO=mimos in /etc/os-release. KDE's
