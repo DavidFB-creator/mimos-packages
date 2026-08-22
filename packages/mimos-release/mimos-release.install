@@ -300,6 +300,27 @@ _mimos_quiet_guest_agent() {
   printf '  qemu-guest-agent now starts only when its virtio port exists.\n'
 }
 
+# The journal in RAM (ADR-155). Archiso's volatile-storage.conf reaches every
+# installed disk through the airootfs, lives in /etc and therefore beats the
+# packaged drop-in, so every existing MimOS forgets its journal at every boot.
+# The transition removes it on new installations; this repairs the ones
+# already out there, because updating repairs.
+#
+# Only the file archiso wrote, and only while it still says exactly what
+# archiso made it say. Somebody who chose a volatile journal themselves wrote
+# something of their own, and undoing that is not ours to do.
+mimos_journal_volatile='/etc/systemd/journald.conf.d/volatile-storage.conf'
+
+_mimos_persist_journal() {
+  [[ -f "${mimos_journal_volatile}" ]] || return 0
+  grep -Eq '^[[:space:]]*Storage=volatile[[:space:]]*$' "${mimos_journal_volatile}" ||
+    return 0
+  grep -Evq '^[[:space:]]*(#|\[Journal\]|Storage=volatile[[:space:]]*$|$)' \
+    "${mimos_journal_volatile}" && return 0
+  rm -f -- "${mimos_journal_volatile}"
+  printf '  the system journal survives a reboot now; it was being kept in RAM.\n'
+}
+
 post_install() {
   _mimos_add_channel
   _mimos_add_multilib
@@ -313,6 +334,7 @@ post_upgrade() {
   _mimos_configure_grub
   _mimos_claim_os_release
   _mimos_quiet_guest_agent
+  _mimos_persist_journal
 }
 
 pre_remove() {

@@ -1,0 +1,90 @@
+# Cada fichero que el airootfs de archiso (perfil releng) pone bajo /etc, y
+# qué le pasa cuando ese sistema de ficheros se convierte en un disco
+# instalado. Este fichero existe porque durante once releases los fuimos
+# quitando de uno en uno según los tropezábamos —ADR-115 (la consola de root),
+# ADR-137 (las unidades livecd-*), ADR-140 (el resolved), ADR-155 (el diario en
+# RAM)— y cada uno vivió meses en las máquinas de la gente. La lista completa
+# convierte «lo descubrimos por casualidad» en «está clasificado o el build no
+# pasa»: scripts/check-airootfs-legacy.sh compara este fichero con el releng
+# instalado y suspende ante una ruta que nadie haya juzgado.
+#
+# Formato: VEREDICTO<TAB>ruta<TAB>motivo
+#   RETIRAR   lo quita la transición Live -> instalado.
+#   SE_QUEDA  es correcto en un disco, o lo sustituye el instalador, y el
+#             motivo dice cuál de las dos cosas.
+#
+# Una ruta nueva en un archiso futuro no aparece aquí, y entonces la
+# comprobación falla y alguien tiene que decidir. Ese es todo el mecanismo.
+
+# --- Identidad del sistema: el instalador escribe la suya encima -----------
+SE_QUEDA	etc/hostname	Calamares escribe el nombre que elige la persona.
+SE_QUEDA	etc/locale.conf	el módulo localecfg lo reescribe con el idioma elegido.
+SE_QUEDA	etc/localtime	el módulo locale lo reapunta a la zona elegida.
+SE_QUEDA	etc/passwd	el módulo users crea la cuenta y borra la del Live.
+SE_QUEDA	etc/shadow	igual que passwd; la cuenta Live desaparece con ella.
+SE_QUEDA	etc/resolv.conf	NetworkManager lo gestiona en cuanto arranca la red.
+SE_QUEDA	etc/motd	mimos-branding lo sustituye por el suyo, derivado (ADR-083).
+
+# --- Arranque e initramfs ---------------------------------------------------
+RETIRAR	etc/mkinitcpio.conf.d/archiso.conf	los HOOKS del Live dejan un initramfs que no arranca de un disco (ya se retiraba).
+SE_QUEDA	etc/mkinitcpio.d/linux.preset	la transición lo reemplaza por el preset normal en vez de borrarlo.
+
+# --- Seguridad --------------------------------------------------------------
+RETIRAR	etc/ssh/sshd_config.d/10-archiso.conf	dice PermitRootLogin yes y PasswordAuthentication yes. Correcto en un medio Live sin nada que perder; en un disco es la familia de ADR-115. Hoy no muerde porque root queda bloqueado y sshd no se activa solo, pero quien active SSH y algún día le ponga contraseña a root expone root a la red sin enterarse. OpenSSH trae prohibit-password por defecto justo por esto.
+RETIRAR	etc/systemd/system/getty@tty1.service.d/autologin.conf	la consola de root sin contraseña (ADR-115).
+
+# --- Portátil ---------------------------------------------------------------
+RETIRAR	etc/systemd/logind.conf.d/do-not-suspend.conf	HandleLidSwitch=ignore. Dentro de una sesión KDE no se nota, porque PowerDevil coge un inhibidor block sobre handle-lid-switch (medido en el portátil de David). Fuera de sesión sí: en la pantalla de entrada se cierra la tapa y el portátil sigue encendido.
+
+# --- Diario y red -----------------------------------------------------------
+RETIRAR	etc/systemd/journald.conf.d/volatile-storage.conf	el diario en RAM, borrado en cada arranque (ADR-155).
+RETIRAR	etc/systemd/resolved.conf.d/archiso.conf	forzaba MulticastDNS=yes por encima de nuestra configuración (ADR-140).
+RETIRAR	etc/systemd/network/20-ethernet.network	configuración de networkd, que MimOS enmascara porque manda NetworkManager.
+RETIRAR	etc/systemd/network/20-wlan.network	igual que la anterior.
+RETIRAR	etc/systemd/network/20-wwan.network	igual que la anterior.
+RETIRAR	etc/systemd/networkd.conf.d/ipv6-privacy-extensions.conf	configuración de un networkd que no corre.
+RETIRAR	etc/systemd/system/systemd-networkd-wait-online.service.d/wait-for-only-one-interface.conf	igual: ajusta una unidad enmascarada.
+RETIRAR	etc/systemd/system/multi-user.target.wants/systemd-networkd.service	networkd activado; lo enmascaramos, y un enlace de activación sobre una unidad enmascarada solo produce ruido.
+RETIRAR	etc/systemd/system/sockets.target.wants/systemd-networkd.socket	igual que la anterior.
+RETIRAR	etc/systemd/system/network-online.target.wants/systemd-networkd-wait-online.service	igual que la anterior.
+SE_QUEDA	etc/systemd/system/dbus-org.freedesktop.network1.service	alias de D-Bus inerte mientras la unidad esté enmascarada.
+SE_QUEDA	etc/systemd/system/multi-user.target.wants/systemd-resolved.service	resolved lo queremos: es quien resuelve nombres (ADR-140).
+SE_QUEDA	etc/systemd/system/dbus-org.freedesktop.resolve1.service	alias de resolved, que sí corre.
+
+# --- Reloj ------------------------------------------------------------------
+RETIRAR	etc/systemd/system/sysinit.target.wants/systemd-time-wait-sync.service	espera a que el reloj se sincronice antes de seguir. En un Live con el reloj a cero tiene sentido; en un disco son 33 segundos de arranque medidos en el portátil de David, sin nada a cambio: timesyncd sigue sincronizando igual.
+SE_QUEDA	etc/systemd/system/sysinit.target.wants/systemd-timesyncd.service	sincronizar la hora sí lo queremos.
+SE_QUEDA	etc/systemd/system/dbus-org.freedesktop.timesync1.service	alias de timesyncd, que sí corre.
+
+# --- Cosas del Live que no son de un disco ----------------------------------
+RETIRAR	etc/systemd/system/choose-mirror.service	reescribe la lista de réplicas desde un parámetro de arranque (ADR-137).
+RETIRAR	etc/systemd/system/multi-user.target.wants/choose-mirror.service	su enlace de activación.
+RETIRAR	etc/systemd/system/livecd-alsa-unmuter.service	desmutea el sonido de un medio Live (ADR-137).
+RETIRAR	etc/systemd/system/sound.target.wants/livecd-alsa-unmuter.service	su enlace de activación.
+RETIRAR	etc/systemd/system/livecd-talk.service	arranca espeakup: no es superficie, es un lector de pantalla puesto por sorpresa (ADR-137).
+RETIRAR	etc/systemd/system/multi-user.target.wants/livecd-talk.service	su enlace de activación.
+RETIRAR	etc/systemd/system/pacman-init.service	inicializa un llavero efímero; en un disco el llavero es real (ADR-078).
+RETIRAR	etc/systemd/system/multi-user.target.wants/pacman-init.service	su enlace de activación.
+RETIRAR	etc/systemd/system/etc-pacman.d-gnupg.mount	el tmpfs sobre el llavero, que era el defecto entero de ADR-078.
+RETIRAR	etc/systemd/system/multi-user.target.wants/iwd.service	la red la lleva NetworkManager; dos gestores sobre la misma tarjeta se pelean.
+RETIRAR	etc/systemd/system/multi-user.target.wants/sshd.service	un escritorio no abre SSH sin que nadie lo pida. Medido: una instalación limpia no escucha en el 22 (ADR-123).
+RETIRAR	etc/systemd/system/cloud-init.target.wants/cloud-config.service	cloud-init no está instalado: son enlaces colgando a unidades que no existen.
+RETIRAR	etc/systemd/system/cloud-init.target.wants/cloud-final.service	igual que la anterior.
+RETIRAR	etc/systemd/system/cloud-init.target.wants/cloud-init-local.service	igual que la anterior.
+RETIRAR	etc/systemd/system/cloud-init.target.wants/cloud-init-main.service	igual que la anterior.
+RETIRAR	etc/systemd/system/cloud-init.target.wants/cloud-init-network.service	igual que la anterior.
+RETIRAR	etc/modprobe.d/broadcom-wl.conf	acompaña al blob que ADR-097 desinstala cuando no hay hardware Broadcom. Hoy es solo comentarios —medido— así que se retira por limpieza y no por efecto.
+
+# --- Se quedan a conciencia -------------------------------------------------
+SE_QUEDA	etc/systemd/system/multi-user.target.wants/hv_fcopy_daemon.service	agente de Hyper-V: sirve a quien instale MimOS dentro de una máquina virtual (ADR-137).
+SE_QUEDA	etc/systemd/system/multi-user.target.wants/hv_kvp_daemon.service	igual que el anterior.
+SE_QUEDA	etc/systemd/system/multi-user.target.wants/hv_vss_daemon.service	igual que el anterior.
+SE_QUEDA	etc/systemd/system/multi-user.target.wants/vboxservice.service	agente de VirtualBox, mismo motivo.
+SE_QUEDA	etc/systemd/system/multi-user.target.wants/vmtoolsd.service	agente de VMware, mismo motivo.
+SE_QUEDA	etc/systemd/system/multi-user.target.wants/vmware-vmblock-fuse.service	agente de VMware, mismo motivo.
+SE_QUEDA	etc/systemd/system/multi-user.target.wants/ModemManager.service	un portátil con módem o un móvil compartiendo datos lo necesita, y NetworkManager habla con él.
+SE_QUEDA	etc/systemd/system/dbus-org.freedesktop.ModemManager1.service	su alias de D-Bus.
+SE_QUEDA	etc/systemd/system/sockets.target.wants/pcscd.socket	lectores de tarjetas inteligentes (DNIe, certificados). Es un socket de unix, no de red, así que no añade superficie externa: NEGACION-15 sigue exigiendo que nada escuche fuera del allowlist.
+SE_QUEDA	etc/systemd/system-generators/systemd-gpt-auto-generator	enmascarado por archiso. Desenmascararlo cambia qué se monta al arrancar en un disco con fstab escrito por Calamares, y eso necesita su propia medición antes de tocarlo. Se queda con la deuda dicha.
+SE_QUEDA	etc/pacman.d/hooks/uncomment-mirrors.hook	archiso borra sus propios hooks al terminar de componer (zzzz99), así que no llega a la imagen.
+SE_QUEDA	etc/pacman.d/hooks/zzzz99-remove-custom-hooks-from-airootfs.hook	es el hook que borra los anteriores, y se borra a sí mismo.

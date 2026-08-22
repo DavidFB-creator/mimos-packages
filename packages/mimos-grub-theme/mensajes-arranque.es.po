@@ -1,18 +1,24 @@
 # MimOS boot messages, Spanish.
 #
-# This is not a translation of GRUB: it is a small catalogue that replaces two
+# This is not a translation of GRUB: it is a small catalogue that replaces four
 # of its strings and nothing else. It is compiled into
 # /usr/share/locale/es@mimos/LC_MESSAGES/grub.mo -- a locale name GRUB does not
 # own, so no file conflicts with the grub package -- and reached by the
 # LANGUAGE list in /etc/default/grub.d/10-mimos.cfg. Every string we do not
 # name here falls through to GRUB's own es catalogue.
 #
+# THE TWO LOADING LINES ARE BLANK ON PURPOSE (ADR-154, David's call on
+# 2026-08-22, superseding his own ADR-125 wording): «me gustaría que no saliera
+# ni una vez». They are not empty strings, because an empty msgstr means
+# "untranslated" to gettext and falls back to the msgid -- the English line
+# this exists to remove. A single space is the smallest thing that is a
+# translation, and `echo ' '` draws nothing on the background.
+#
 # Both msgstr deliberately drop the %s. GRUB passes the kernel's version
 # string, which on Arch is the word `linux`, and "Cargando Linux linux" is what
 # started all this. printf with a surplus argument and no conversion in the
 # format prints the format once -- measured with bash before this file was
-# written -- so dropping it is safe rather than merely tidy. Which kernel is
-# being loaded is already on the menu entry the person just chose.
+# written -- so dropping it is safe rather than merely tidy.
 msgid ""
 msgstr ""
 "Project-Id-Version: mimos-grub-theme\n"
@@ -22,7 +28,19 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 msgid "Loading Linux %s ..."
-msgstr "Cargando MimOS…"
+msgstr " "
 
 msgid "Loading initial ramdisk ..."
-msgstr "Preparando el arranque…"
+msgstr " "
+
+# The advanced submenu read "MimOS Linux, with Linux linux": the same stutter
+# as the loading line, from the same cause -- GRUB_DISTRIBUTOR plus a kernel
+# package called `linux`. Photographed on David's laptop on 2026-08-22.
+msgid "%s, with Linux %s"
+msgstr "MimOS"
+
+msgid "%s, with Linux %s (fallback initramfs)"
+msgstr "MimOS (arranque de reserva)"
+
+msgid "Advanced options for %s"
+msgstr "Opciones avanzadas"

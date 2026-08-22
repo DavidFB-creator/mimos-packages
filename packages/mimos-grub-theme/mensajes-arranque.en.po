@@ -6,7 +6,8 @@
 # file an English installation would keep reading "Loading Linux linux ...",
 # which is exactly the line this whole change exists to remove.
 #
-# See mensajes-arranque.es.po for why both msgstr drop the %s.
+# See mensajes-arranque.es.po for why the loading lines are a single space
+# rather than empty, and why both msgstr drop the %s.
 msgid ""
 msgstr ""
 "Project-Id-Version: mimos-grub-theme\n"
@@ -16,7 +17,16 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 msgid "Loading Linux %s ..."
-msgstr "Loading MimOS…"
+msgstr " "
 
 msgid "Loading initial ramdisk ..."
-msgstr "Getting things ready…"
+msgstr " "
+
+msgid "%s, with Linux %s"
+msgstr "MimOS"
+
+msgid "%s, with Linux %s (fallback initramfs)"
+msgstr "MimOS (fallback boot)"
+
+msgid "Advanced options for %s"
+msgstr "Advanced options"

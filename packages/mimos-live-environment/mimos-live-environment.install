@@ -101,6 +101,83 @@ _mimos_remove_live_resolved_config() {
   fi
 }
 
+_mimos_sweep_airootfs_leftovers() {
+  # The whole family, swept at once (ADR-156).
+  #
+  # Four ADRs removed these one at a time as somebody tripped over them --
+  # ADR-115's root console, ADR-137's livecd units, ADR-140's resolved
+  # drop-in, ADR-155's journal in RAM -- and each lived on real machines for
+  # months first. Every path below is judged in
+  # airootfs-clasificacion.txt beside this scriptlet, and
+  # check-airootfs-legacy.sh refuses a build where archiso ships something
+  # that file has not judged. That is what turns "we find them by accident"
+  # into "it is classified or the build stops".
+  #
+  # Removing a path that is already gone is a no-op, and that is deliberate:
+  # several of these are also taken away by Calamares or by archiso itself,
+  # and depending on somebody else's mechanism is how ADR-078 happened.
+  local resto
+  for resto in \
+    /etc/ssh/sshd_config.d/10-archiso.conf \
+    /etc/systemd/logind.conf.d/do-not-suspend.conf \
+    /etc/systemd/network/20-ethernet.network \
+    /etc/systemd/network/20-wlan.network \
+    /etc/systemd/network/20-wwan.network \
+    /etc/systemd/networkd.conf.d/ipv6-privacy-extensions.conf \
+    /etc/systemd/system/systemd-networkd-wait-online.service.d/wait-for-only-one-interface.conf \
+    /etc/systemd/system/multi-user.target.wants/systemd-networkd.service \
+    /etc/systemd/system/sockets.target.wants/systemd-networkd.socket \
+    /etc/systemd/system/network-online.target.wants/systemd-networkd-wait-online.service \
+    /etc/systemd/system/sysinit.target.wants/systemd-time-wait-sync.service \
+    /etc/systemd/system/multi-user.target.wants/iwd.service \
+    /etc/systemd/system/multi-user.target.wants/sshd.service \
+    /etc/systemd/system/cloud-init.target.wants/cloud-config.service \
+    /etc/systemd/system/cloud-init.target.wants/cloud-final.service \
+    /etc/systemd/system/cloud-init.target.wants/cloud-init-local.service \
+    /etc/systemd/system/cloud-init.target.wants/cloud-init-main.service \
+    /etc/systemd/system/cloud-init.target.wants/cloud-init-network.service \
+    /etc/modprobe.d/broadcom-wl.conf; do
+    rm -f "${resto}" || return 1
+    if [[ -e "${resto}" || -L "${resto}" ]]; then
+      printf 'mimos-live-environment: %s survived removal.\n' "${resto}" >&2
+      return 1
+    fi
+  done
+
+  # Y los directorios que acaban de quedarse vacíos, sólo si los vaciamos
+  # nosotros: rmdir se niega a tocar uno con algo dentro, así que un fichero
+  # de otro paquete o de una persona lo salva. Mismo gesto que la carpeta del
+  # autologin de ADR-115. Sin esto, un `cloud-init.target.wants` vacío queda
+  # en el disco apuntando a un paquete que no existe.
+  local vacio
+  for vacio in \
+    /etc/systemd/system/cloud-init.target.wants \
+    /etc/systemd/system/systemd-networkd-wait-online.service.d \
+    /etc/systemd/network \
+    /etc/systemd/networkd.conf.d; do
+    rmdir "${vacio}" 2> /dev/null || true
+  done
+}
+
+_mimos_remove_live_volatile_journal() {
+  # Archiso keeps its journal in RAM, which is exactly right for a medium
+  # with no disk to write to -- and it does it from
+  # /etc/systemd/journald.conf.d/volatile-storage.conf, which lives in the
+  # airootfs and therefore reaches every installed disk. /etc beats
+  # /usr/lib, so it also beat our own drop-in: every MimOS ever installed
+  # forgot its whole journal at every boot, our 500M cap was reserving RAM
+  # rather than disk, and mimos-diagnostico could never show the boot that
+  # went wrong. Found on David's laptop on 2026-08-22 by asking
+  # `journalctl --list-boots` and getting one. Fourth time an airootfs file
+  # has ridden onto a disk: ADR-115, ADR-137, ADR-140, and now this.
+  local resto='/etc/systemd/journald.conf.d/volatile-storage.conf'
+  rm -f "${resto}" || return 1
+  if [[ -e "${resto}" ]]; then
+    printf 'mimos-live-environment: %s survived removal.\n' "${resto}" >&2
+    return 1
+  fi
+}
+
 _mimos_remove_live_only_units() {
   # Three Archiso units that are right for a Live image and wrong on a disk.
   # Same shape as the root console above and found the same way: not by
@@ -157,6 +234,16 @@ pre_remove() {
 
   if ! _mimos_remove_live_resolved_config; then
     printf 'mimos-live-environment: refusing to leave the Live resolved configuration on the installed system.\n' >&2
+    return 1
+  fi
+
+  if ! _mimos_remove_live_volatile_journal; then
+    printf 'mimos-live-environment: refusing to leave the journal in RAM on the installed system.\n' >&2
+    return 1
+  fi
+
+  if ! _mimos_sweep_airootfs_leftovers; then
+    printf 'mimos-live-environment: refusing to leave Live-medium configuration on the installed system.\n' >&2
     return 1
   fi
 }
