@@ -1,7 +1,7 @@
 # Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
 
 pkgname=mimos-grub-theme
-pkgver=0.9.0.beta.3
+pkgver=0.9.0.beta.4
 pkgrel=1
 pkgdesc='MimOS boot menu theme for GRUB'
 arch=('any')
@@ -22,7 +22,6 @@ makedepends=('gettext')
 source=(
   'LICENSE'
   'mimos-grub-theme.install'
-  '09-mimos-consola'
   '10-mimos.cfg'
   'mensajes-arranque.es.po'
   'mensajes-arranque.en.po'
@@ -43,11 +42,10 @@ source=(
 )
 sha256sums=('97d7ba0977ea88730c942625f66849bbef6536c3c6e103a39a4bb05b9fd3d9cf'
             '6304e8c0c705515b2541dd64b0672dc9b85ebe71f9d81beae696d051261eec4a'
-            '06a28c534aaa5a3d729c100c43095fe1a0089f08b8748d0ae44658d896c6c247'
-            '781cc2af24e38f270e6916441c09d8268020032100913a46b1bf0b7fa4d0f601'
+            '90056de5dc4799902ea3e4e81112fc59df22b10d90ab4c8aa1529f6080e2829d'
             '5ac96fb1ee950abec980c7f4e950847f91d40d7310e0b97229b730396f677fc6'
             '0ada37de2e833d6c84acae2c8693f881776b05e230c3a38287c2f0ad8f26b8ec'
-            '193e5e39536956fa88e8d4445a69d8f703c34d9bd416ca3510f238a826c1b4f1'
+            'dec184ba44998d04354e1ede8b4a50384aa0f98501424c53be31fa60f415fc7f'
             '0888f34b6a6f19692db2685f0eea53f2b557ddd559516e698e673385681c7f3d'
             '3fc7944128b0713b0aae29e74bac879f957502335cc7adf6f3ca7d2089c986bc'
             '988728e0098babcfb0dd93cdba137d457c23dc4faadab4c4df486582164fe1e1'
@@ -84,9 +82,6 @@ package() {
 
   # The drop-in, marked backup so a person who edits it does not lose the edit
   # on the next upgrade -- it is configuration, not artwork.
-  # A generator, so 0755: grub-mkconfig executes what it finds here. It emits
-  # the console background that 00_header refuses to emit beside a theme.
-  install -Dm755 09-mimos-consola "${pkgdir}/etc/grub.d/09-mimos-consola"
   install -Dm644 10-mimos.cfg "${pkgdir}/etc/default/grub.d/10-mimos.cfg"
 
   # The boot-message catalogues, under a locale name grub does not own. Using

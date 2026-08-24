@@ -1,6 +1,6 @@
 pkgbase = mimos-branding
 	pkgdesc = Runtime visual identity assets for MimOS
-	pkgver = 0.9.0.beta.3
+	pkgver = 0.9.0.beta.4
 	pkgrel = 1
 	url = https://github.com/DavidFB-creator/MimOS
 	install = mimos-branding.install
@@ -122,7 +122,7 @@ pkgbase = mimos-branding
 	sha256sums = 2529b239c22bab0383458bce2edf2a6c64db9128dd15fcd88920b3c14231a8e0
 	sha256sums = 7aefd2450c534be27876061f3e6fcf7d1195b91da6e727efaa5c46556aea5657
 	sha256sums = 5cef60cb8a6a8e199d75497c3983c0f3c824a206df76416268d70bb37ab2e750
-	sha256sums = 2db2e18c8af68bdf88592d4a3d291a6a23076cf08a89f1169dcd3bfbc4f19410
+	sha256sums = b2498f43cd00d927cd64145786b610f039b5bc690c52900e83f78a26de9caf03
 	sha256sums = 51efe6ce11c6c32bb7f11901a1309f97102866bb03ad89fca2feeda75a7651f3
 	sha256sums = aa9f502bb1cb0ea55cd85b602fb6e09d7d8c452cf8bc78b940afa5728a876e20
 	sha256sums = f4453ecab442b97a60577209c813f62ad9537df270d33d60ac9c60be23b4cf1c

@@ -27,7 +27,6 @@ snapper_template="${target_root}/usr/share/snapper/config-templates/default"
 snapper_config="${target_root}/etc/snapper/configs/root"
 snapper_conf_d="${target_root}/etc/conf.d/snapper"
 grub_btrfs_config="${target_root}/etc/default/grub-btrfs/config"
-grub_defaults="${target_root}/etc/default/grub"
 snapshots_dir="${target_root}/.snapshots"
 
 if [[ ! -r "${snapper_template}" ]]; then
@@ -128,17 +127,37 @@ if [[ -w "${grub_btrfs_config}" ]]; then
   # row that takes the machine back to the day it was installed.
   _set_grub_btrfs GRUB_BTRFS_IGNORE_SNAPSHOT_TYPE '("post")'
 
-  # Derived, never transcribed: an encrypted target needs GRUB to open the
-  # LUKS container before it can read a snapshot, exactly as it does for the
-  # normal entry. grubcfg sets GRUB_ENABLE_CRYPTODISK on the encrypted
-  # installations and only those, so mirroring that file answers the question
-  # for this machine instead of guessing it. Getting this wrong produces a
-  # menu full of snapshot entries that cannot be booted -- a recovery path
-  # that fails at the moment it is needed.
-  if grep -qE '^[[:space:]]*GRUB_ENABLE_CRYPTODISK=["]?y' "${grub_defaults}" 2>/dev/null; then
-    _set_grub_btrfs GRUB_BTRFS_ENABLE_CRYPTODISK 'true'
-    printf 'Encrypted target: snapshot entries will open the LUKS container.\n'
-  fi
+  # No GRUB_BTRFS_ENABLE_CRYPTODISK here, and the reason is measured rather
+  # than assumed -- an earlier version of this helper set it, and that line
+  # was wrong in three separate ways at once.
+  #
+  # It derived the value from GRUB_ENABLE_CRYPTODISK in /etc/default/grub,
+  # which sounded careful and could not work: settings.conf runs
+  # shellprocess@configure-snapshots BEFORE grubcfg, and grubcfg is what
+  # writes that flag. On a fresh installation the file being read does not
+  # carry it yet, so the branch never executed on any MimOS ever installed --
+  # under a comment claiming that getting it wrong "produces a menu full of
+  # snapshot entries that cannot be booted".
+  #
+  # It was reachable in exactly one place: a hand run on an existing system,
+  # where grubcfg HAS written the flag. Which is backwards -- never where it
+  # was needed, only where nobody asked for it.
+  #
+  # And it would not have helped if it had run. Read out of grub-btrfs 4.14's
+  # own generator, the `true` branch emits
+  #     cryptomount -u $(... '(?<=cryptdevice=UUID=).*(?=:cryptdev)')
+  # whose lookahead requires the LUKS mapper name to begin with `cryptdev`.
+  # Calamares names the mapper, and nothing guarantees that shape, so the
+  # substitution can come out empty and the entries carry a cryptomount with
+  # no UUID. Enabling this flag is not a safe fix for the ordering bug; it is
+  # a second way to break the same menu.
+  #
+  # What settles it: `make test-installer-snapshots-encrypted` boots a
+  # snapshot out of the recovery menu on a LUKS2 target and restores from it,
+  # and it has always passed WITHOUT this flag. In the MimOS layout GRUB
+  # opens the container before it reads grub.cfg -- that is what
+  # GRUB_ENABLE_CRYPTODISK does -- so by the time these entries are drawn the
+  # container is already open and `insmod ${boot_fs}` is enough.
 fi
 
 # --- services ----------------------------------------------------------

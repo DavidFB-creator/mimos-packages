@@ -132,13 +132,34 @@ for _ in $(seq 1 "${attempts}"); do
   sleep "${delay}"
 done
 
+# The marker means "this account is done", and it is written only when that
+# is true -- the rule ADR-123 established after one slow login left a machine
+# that would never retry. The touchpad and shortcut helpers both follow it;
+# this one used to write the marker whatever happened, arguing the opposite
+# without knowing about the other two.
+#
+# The three terminal states are genuinely done and record which one it was,
+# because an empty marker cannot tell "the setting reached the panel" from
+# "there is no battery here" -- which is what left ADR-123's own fix with no
+# runtime gate for two releases.
+#
+# `sin-applet` is not one of them. Sixty seconds without the applet appearing
+# means "I could not tell", and the login it happens on is exactly the first
+# one -- the login this helper exists for. Accepted cost, said plainly: on a
+# machine where somebody removed the battery applet from the tray on purpose,
+# this polls for a bounded sixty seconds at every login and gives up. That is
+# a sleeping shell and no CPU, against a laptop that would otherwise never
+# show its percentage again.
 case "${estado}" in
-  aplicada) printf 'Battery percentage enabled.\n' ;;
-  ya-configurada) printf 'The battery percentage was already set; left alone.\n' ;;
-  *) printf 'No battery applet appeared in the panel; nothing changed.\n' >&2 ;;
+  aplicada)
+    printf 'Battery percentage enabled.\n'
+    anotar 'aplicada'
+    ;;
+  ya-configurada)
+    printf 'The battery percentage was already set; left alone.\n'
+    anotar 'ya-configurada'
+    ;;
+  *)
+    printf 'No battery applet appeared in the panel; will retry next login.\n' >&2
+    ;;
 esac
-
-# Written whatever the outcome, and holding it: the marker is this helper's
-# only evidence that it ran at all, and a machine that retried this at every
-# login for the rest of its life would be worse than one that missed it once.
-anotar "${estado}"

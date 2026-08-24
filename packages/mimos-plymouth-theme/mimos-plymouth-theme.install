@@ -2,10 +2,30 @@
 # The default theme lives in /etc/plymouth/plymouthd.conf, a file the
 # plymouth package owns, so this package selects itself through
 # plymouth-set-default-theme — the tool that file belongs to — rather than
-# shipping a copy of another package's configuration. No -R: the image
-# build has no plymouth hook in its initramfs, and the installed target's
-# initramfs is generated after packages land (Calamares initcpiocfg adds
-# the plymouth hook by itself when it detects the binary).
+# shipping a copy of another package's configuration.
+#
+# No -R, and the reason covers installation only -- which is worth saying,
+# because it is easy to read it as covering everything.
+#
+# At installation it is right: the image build has no plymouth hook in its
+# initramfs, and the target's initramfs is generated after the packages land
+# (Calamares initcpiocfg adds the plymouth hook itself once it detects the
+# binary).
+#
+# On an UPGRADE it is not the same question, and the answer was measured
+# rather than assumed. plymouth's own mkinitcpio install hook does
+# `add_full_dir "$PLYMOUTH_THEME_DIR"`, so the theme -- script and artwork
+# both -- travels INSIDE the initramfs. A machine that already has MimOS
+# therefore keeps showing the old splash until something else rebuilds its
+# initramfs. On Arch that happens within a kernel update or two, so it heals
+# on its own, silently and on nobody's schedule.
+#
+# Deliberately not fixed here: rebuilding an initramfs from a scriptlet is
+# something this project has never done, and the boot path is the worst place
+# to start during a freeze. If a splash fix ever has to reach installed
+# machines on purpose, the mechanism is a pacman hook targeting this theme's
+# own files, and it belongs with the rest of the "new things reach installed
+# machines" work for 1.0.
 
 _mimos_select_theme() {
   if command -v plymouth-set-default-theme >/dev/null 2>&1; then

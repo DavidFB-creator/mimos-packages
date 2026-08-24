@@ -23,8 +23,17 @@
 #    happens to have. GRUB does not scroll: it silently stops drawing the rows
 #    that do not fit, and the first casualty is whatever the generators put
 #    last -- measured, that was the firmware-settings entry.
-# 4. Both terminal geometry AND a bound background are needed for the screen
-#    that follows the menu. Either one alone is worse than neither (ADR-125).
+# 4. The screen that follows the menu is deliberately BLACK, and reaching it
+#    takes the terminal geometry below and NO bound background (ADR-157).
+#    ADR-125 measured the three outcomes: geometry plus an image gives the
+#    menu's own artwork, an image without the geometry gives a black
+#    rectangle painted over that artwork, and geometry without an image
+#    gives a plain black screen. The third is what MimOS wants now, because
+#    Windows' boot manager draws only its spinner and never clears what is
+#    underneath -- with our artwork bound, choosing Windows meant eleven
+#    seconds of MimOS background with a Windows spinner on it, filmed on
+#    David's laptop. Do not re-add background_image here to "fix" the black:
+#    the black is the fix.
 
 title-text: ""
 desktop-image: "background.png"
@@ -34,9 +43,11 @@ desktop-image-v-align: "center"
 desktop-color: "#221B3A"
 
 # The console GRUB draws on once the menu is gone, while the kernel and the
-# initramfs are read. Full screen so the bound background lands 1:1; the image
-# itself is named by /etc/default/grub.d/10-mimos.cfg, because background_image
-# is a GRUB command and not a theme property.
+# initramfs are read. Full screen and nothing bound behind it, which is what
+# makes that screen a plain black one rather than a black rectangle painted
+# over the menu's artwork -- see rule 4 above. Nothing in this package binds
+# a console background any more, and a contract rejects any file that starts
+# to (ADR-157).
 terminal-left: "0"
 terminal-top: "0"
 terminal-width: "100%"
@@ -86,7 +97,12 @@ terminal-font: "Unifont Regular 16"
 
 + label {
   id = "__timeout__"
-  text = "Arrancando en %d segundos"
+  # «Arrancando en 1 segundos», filmado en el portátil de David el
+  # 2026-08-23. GRUB sustituye un %d en una cadena fija y no sabe de
+  # plurales: no hay forma de escribir «1 segundo» y «5 segundos» con una
+  # sola plantilla. Así que la unidad se abrevia, que en una cuenta atrás
+  # es natural en castellano y es correcta para todos los números.
+  text = "Arrancando en %d s"
   left = 0
   top = 86%
   width = 100%
