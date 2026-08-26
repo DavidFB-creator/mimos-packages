@@ -1,7 +1,7 @@
 # Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
 
 pkgname=mimos-welcome
-pkgver=0.9.0.beta.4
+pkgver=1.0.0.rc.1
 pkgrel=1
 pkgdesc='Centro de MimOS welcome and privacy application, and the Tienda'
 # Compiled since the runner exists: the generic qml6 tool declares its own
@@ -42,7 +42,7 @@ source=(
 )
 sha256sums=('59273724cdcd20d5a1239787d9ff7b6b027cf46c8d9e4e2f01ff71028e4363f3'
             '7770a8046c166b04fbfd7d6fe4b1abd58ae71d0459456e18906a7b1ba3faf952'
-            '0a3102de51428266d1100cdda5097ef9fabdaa3664c4f1a78d02099140e7978a'
+            '7603d36a8dedb87d7f11700dd1e04968cc2226181a20656b43feebe4ac59c1d9'
             '39262739a86345fa459047a30f5cb039bd6cb3d69460014c522c9e7b6cf1c3cf'
             '78f118314a87d92961826cd87c84cfd12b029b99ed36e9404f4ab892aa172398'
             '78c2283d05869013f84bca6e89433ec9312bd30978293cbb49650afcaa59770c'

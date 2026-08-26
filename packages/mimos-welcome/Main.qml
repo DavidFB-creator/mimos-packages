@@ -28,7 +28,7 @@ Item {
     // silently go stale again. It said ALPHA through three betas, and the
     // contract pinned that string as a required fragment, which meant the
     // checker was guaranteeing the wrong answer rather than catching it.
-    readonly property string releaseChannel: "BETA"
+    readonly property string releaseChannel: "RC"
 
     signal closeRequested()
     signal themeRequested(string variant)

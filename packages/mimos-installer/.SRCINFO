@@ -1,6 +1,6 @@
 pkgbase = mimos-installer
 	pkgdesc = Entry point that opens the reviewed MimOS installation path
-	pkgver = 0.9.0.beta.4
+	pkgver = 1.0.0.rc.1
 	pkgrel = 1
 	url = https://github.com/DavidFB-creator/MimOS
 	arch = any

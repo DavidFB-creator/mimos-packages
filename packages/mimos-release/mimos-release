@@ -1,9 +1,9 @@
 NAME="MimOS"
-VERSION="0.9 Beta 4"
-VERSION_ID="0.9.0-beta.4"
+VERSION="1.0 RC 1"
+VERSION_ID="1.0.0-rc.1"
 ID=mimos
 ID_LIKE=arch
-PRETTY_NAME="MimOS 0.9 Beta 4"
+PRETTY_NAME="MimOS 1.0 RC 1"
 ANSI_COLOR="1;38;2;255;111;174"
 LOGO=mimos
 HOME_URL="https://mimoslinux.org/"
