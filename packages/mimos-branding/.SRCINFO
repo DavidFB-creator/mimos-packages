@@ -1,6 +1,6 @@
 pkgbase = mimos-branding
 	pkgdesc = Runtime visual identity assets for MimOS
-	pkgver = 1.0.0.rc.1
+	pkgver = 1.0.0
 	pkgrel = 1
 	url = https://github.com/DavidFB-creator/MimOS
 	install = mimos-branding.install

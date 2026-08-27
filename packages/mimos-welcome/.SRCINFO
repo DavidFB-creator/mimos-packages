@@ -1,6 +1,6 @@
 pkgbase = mimos-welcome
 	pkgdesc = Centro de MimOS welcome and privacy application, and the Tienda
-	pkgver = 1.0.0.rc.1
+	pkgver = 1.0.0
 	pkgrel = 1
 	url = https://github.com/DavidFB-creator/MimOS
 	arch = x86_64
@@ -34,7 +34,7 @@ pkgbase = mimos-welcome
 	source = LICENSE
 	sha256sums = 59273724cdcd20d5a1239787d9ff7b6b027cf46c8d9e4e2f01ff71028e4363f3
 	sha256sums = 7770a8046c166b04fbfd7d6fe4b1abd58ae71d0459456e18906a7b1ba3faf952
-	sha256sums = 7603d36a8dedb87d7f11700dd1e04968cc2226181a20656b43feebe4ac59c1d9
+	sha256sums = 57196ccf7e57a71210a78c4ac3a86f09edacf8f64235948596aaf340275e9513
 	sha256sums = 39262739a86345fa459047a30f5cb039bd6cb3d69460014c522c9e7b6cf1c3cf
 	sha256sums = 78f118314a87d92961826cd87c84cfd12b029b99ed36e9404f4ab892aa172398
 	sha256sums = 78c2283d05869013f84bca6e89433ec9312bd30978293cbb49650afcaa59770c

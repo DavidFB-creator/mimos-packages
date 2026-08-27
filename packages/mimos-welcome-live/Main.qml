@@ -21,7 +21,7 @@ Item {
     // view has no file capability by contract and so cannot read
     // /etc/mimos-release itself; check-welcome-contract.sh derives the
     // expected value from VERSION and fails when the two drift.
-    readonly property string releaseChannel: "RC"
+    readonly property string releaseChannel: "ESTABLE"
 
     signal closeRequested()
     signal installerRequested()

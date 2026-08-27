@@ -1,7 +1,7 @@
 # Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
 
 pkgname=mimos-welcome-live
-pkgver=1.0.0.rc.1
+pkgver=1.0.0
 pkgrel=1
 pkgdesc='Centro de MimOS for the Live session: welcome, install and community'
 # Compiled since the runner exists: the generic qml6 tool declares its own
@@ -30,7 +30,7 @@ source=(
   'LICENSE'
 )
 sha256sums=('44410985ab3c05533929d1ade3baa89832a819dc8e56257642942a0ae63f3ef2'
-            '9cf6891c934371d18174f5ff47f22676d9ef9cc0078da9728811e7ce56aac626'
+            '4725e527195c467daadc8a9f576a2bc9eaf80fca0092684229b7b4fbf8e67f40'
             '33f1cfcea2125afa94c9bd1178f0031f55912e328f94fd4a0e02fca17794f010'
             '9f500c6a1d1e05a0dc8b792e11fc3b888a49e7a6de80ee46893ae7c6c7f1209b'
             'a8db9308c68d03f83f14ffbcc1dc3c4ef84eeba684d7963ad388f1c19bb44972'

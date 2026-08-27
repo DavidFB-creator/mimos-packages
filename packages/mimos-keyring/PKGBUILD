@@ -14,7 +14,7 @@
 # `pacman -Syu` and a configured repository that does not answer fails it.
 
 pkgname=mimos-keyring
-pkgver=1.0.0.rc.1
+pkgver=1.0.0
 pkgrel=1
 pkgdesc='MimOS package signing keys'
 arch=('any')
