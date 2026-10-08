@@ -1,7 +1,9 @@
 [Desktop Entry]
 Type=Application
 Name=Tienda de MimOS
+Name[ca]=Botiga de MimOS
 Comment=Instala aplicaciones elegidas con cariño para tu MimOS
+Comment[ca]=Instal·la aplicacions triades amb afecte per al teu MimOS
 Exec=mimos-tienda
 Icon=mimos-tienda
 Terminal=false

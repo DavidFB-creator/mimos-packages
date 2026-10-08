@@ -26,6 +26,12 @@ Presentation {
     // One layout, four slides. Each slide paints its own background because a
     // Presentation Slide has none of its own, and the gradient matches the
     // window behind it so the slideshow does not read as a pasted rectangle.
+    //
+    // The copy goes through qsTr() (ADR-159): Calamares installs the
+    // branding's own catalogue -- lang/calamares-mimos_<lang>.qm beside this
+    // file -- for the language the person chose on the welcome page, so an
+    // installation run in Catalan reads a Catalan slideshow. The slogan is
+    // the brand's and stays as written.
 
     Slide {
         Rectangle {
@@ -85,7 +91,7 @@ Presentation {
                     font.family: "Inter"
                     font.pixelSize: 34
                     font.weight: Font.DemiBold
-                    text: "Un hogar acogedor"
+                    text: qsTr("Un hogar acogedor")
                 }
 
                 Rectangle {
@@ -103,8 +109,7 @@ Presentation {
                     color: presentation.inkSoft
                     font.family: "Inter"
                     font.pixelSize: 20
-                    text: "KDE Plasma sobre Wayland, en español desde el " +
-                          "primer arranque, y la solidez de Arch Linux debajo."
+                    text: qsTr("KDE Plasma sobre Wayland, en tu idioma desde el primer arranque, y la solidez de Arch Linux debajo.")
                 }
             }
         }
@@ -131,7 +136,7 @@ Presentation {
                     font.family: "Inter"
                     font.pixelSize: 34
                     font.weight: Font.DemiBold
-                    text: "Actualizaciones firmadas"
+                    text: qsTr("Actualizaciones firmadas")
                 }
 
                 Rectangle {
@@ -149,8 +154,7 @@ Presentation {
                     color: presentation.inkSoft
                     font.family: "Inter"
                     font.pixelSize: 20
-                    text: "Cada actualización de MimOS se comprueba con la " +
-                          "clave del proyecto antes de tocar tu equipo."
+                    text: qsTr("Cada actualización de MimOS se comprueba con la clave del proyecto antes de tocar tu equipo.")
                 }
             }
         }
@@ -187,7 +191,7 @@ Presentation {
                     font.family: "Inter"
                     font.pixelSize: 34
                     font.weight: Font.DemiBold
-                    text: "Ya casi está"
+                    text: qsTr("Ya casi está")
                 }
 
                 Text {
@@ -197,7 +201,7 @@ Presentation {
                     color: presentation.inkSoft
                     font.family: "Inter"
                     font.pixelSize: 20
-                    text: "Al terminar, Centro de MimOS te enseñará tu nuevo hogar."
+                    text: qsTr("Al terminar, Centro de MimOS te enseñará tu nuevo hogar.")
                 }
             }
         }

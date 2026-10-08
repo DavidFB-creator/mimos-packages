@@ -34,6 +34,9 @@ Item {
 
     // 0 = portada (category cards), 1 = one category's list.
     property int paginaActual: 0
+    // A category ID from the generated block (internet, fotos, ...), never
+    // its display name: the names are translated and a translated string is
+    // not a key (ADR-159).
     property string categoriaActual: ""
 
     signal closeRequested()
@@ -63,31 +66,37 @@ Item {
     // packages/mimos-welcome/mimos-aplicaciones.json. Do not edit
     // by hand; the launcher validates selections against the same
     // canonical file's flat derivation (ADR-152).
-    readonly property var categorias: ["Internet", "Fotos y dibujo", "Música y vídeo", "Juegos", "Utilidades"]
+    readonly property var categorias: [
+        {"id": "internet", "nombre": qsTr("Internet")},
+        {"id": "fotos", "nombre": qsTr("Fotos y dibujo")},
+        {"id": "media", "nombre": qsTr("Música y vídeo")},
+        {"id": "juegos", "nombre": qsTr("Juegos")},
+        {"id": "utilidades", "nombre": qsTr("Utilidades")}
+    ]
     readonly property var catalogo: [
-        {"paquete": "thunderbird", "nombre": "Thunderbird", "descripcion": "Correo electrónico en tu escritorio, de los creadores de Firefox", "categoria": "Internet"},
-        {"paquete": "discord", "nombre": "Discord", "descripcion": "Chat de voz y texto para comunidades y amigos", "categoria": "Internet"},
-        {"paquete": "signal-desktop", "nombre": "Signal", "descripcion": "Mensajería privada y cifrada", "categoria": "Internet"},
-        {"paquete": "telegram-desktop", "nombre": "Telegram", "descripcion": "La mensajería de Telegram, en grande y con teclado", "categoria": "Internet"},
-        {"paquete": "qbittorrent", "nombre": "qBittorrent", "descripcion": "Descargas por BitTorrent, sin anuncios", "categoria": "Internet"},
-        {"paquete": "gimp", "nombre": "GIMP", "descripcion": "Edición de imágenes y fotografía, el clásico libre", "categoria": "Fotos y dibujo"},
-        {"paquete": "inkscape", "nombre": "Inkscape", "descripcion": "Dibujo vectorial: logotipos, carteles, diseños", "categoria": "Fotos y dibujo"},
-        {"paquete": "krita", "nombre": "Krita", "descripcion": "Pintura digital e ilustración", "categoria": "Fotos y dibujo"},
-        {"paquete": "darktable", "nombre": "darktable", "descripcion": "Revelado de fotos RAW, como un cuarto oscuro digital", "categoria": "Fotos y dibujo"},
-        {"paquete": "digikam", "nombre": "digiKam", "descripcion": "Organiza y etiqueta miles de fotos", "categoria": "Fotos y dibujo"},
-        {"paquete": "kdenlive", "nombre": "Kdenlive", "descripcion": "Edición de vídeo completa y libre", "categoria": "Música y vídeo"},
-        {"paquete": "obs-studio", "nombre": "OBS Studio", "descripcion": "Graba tu pantalla o emite en directo", "categoria": "Música y vídeo"},
-        {"paquete": "audacity", "nombre": "Audacity", "descripcion": "Grabación y edición de audio", "categoria": "Música y vídeo"},
-        {"paquete": "handbrake", "nombre": "HandBrake", "descripcion": "Convierte vídeos entre formatos", "categoria": "Música y vídeo"},
-        {"paquete": "vlc", "nombre": "VLC", "descripcion": "El reproductor que lo reproduce todo", "categoria": "Música y vídeo"},
-        {"paquete": "steam", "nombre": "Steam", "descripcion": "La mayor tienda de juegos de PC", "categoria": "Juegos"},
-        {"paquete": "supertuxkart", "nombre": "SuperTuxKart", "descripcion": "Karts con Tux: carreras para toda la familia", "categoria": "Juegos"},
-        {"paquete": "luanti", "nombre": "Luanti", "descripcion": "Construye mundos de bloques (antes Minetest)", "categoria": "Juegos"},
-        {"paquete": "gcompris-qt", "nombre": "GCompris", "descripcion": "Más de cien actividades educativas para peques", "categoria": "Juegos"},
-        {"paquete": "keepassxc", "nombre": "KeePassXC", "descripcion": "Guarda tus contraseñas bajo llave", "categoria": "Utilidades"},
-        {"paquete": "filelight", "nombre": "Filelight", "descripcion": "Descubre qué está llenando tu disco", "categoria": "Utilidades"},
-        {"paquete": "kdf", "nombre": "KDiskFree", "descripcion": "Vigila el espacio libre de tus discos", "categoria": "Utilidades"},
-        {"paquete": "code", "nombre": "Code", "descripcion": "Editor de código para programar (VS Code libre)", "categoria": "Utilidades"}
+        {"paquete": "thunderbird", "nombre": "Thunderbird", "descripcion": qsTr("Correo electrónico en tu escritorio, de los creadores de Firefox"), "categoria": "internet"},
+        {"paquete": "discord", "nombre": "Discord", "descripcion": qsTr("Chat de voz y texto para comunidades y amigos"), "categoria": "internet"},
+        {"paquete": "signal-desktop", "nombre": "Signal", "descripcion": qsTr("Mensajería privada y cifrada"), "categoria": "internet"},
+        {"paquete": "telegram-desktop", "nombre": "Telegram", "descripcion": qsTr("La mensajería de Telegram, en grande y con teclado"), "categoria": "internet"},
+        {"paquete": "qbittorrent", "nombre": "qBittorrent", "descripcion": qsTr("Descargas por BitTorrent, sin anuncios"), "categoria": "internet"},
+        {"paquete": "gimp", "nombre": "GIMP", "descripcion": qsTr("Edición de imágenes y fotografía, el clásico libre"), "categoria": "fotos"},
+        {"paquete": "inkscape", "nombre": "Inkscape", "descripcion": qsTr("Dibujo vectorial: logotipos, carteles, diseños"), "categoria": "fotos"},
+        {"paquete": "krita", "nombre": "Krita", "descripcion": qsTr("Pintura digital e ilustración"), "categoria": "fotos"},
+        {"paquete": "darktable", "nombre": "darktable", "descripcion": qsTr("Revelado de fotos RAW, como un cuarto oscuro digital"), "categoria": "fotos"},
+        {"paquete": "digikam", "nombre": "digiKam", "descripcion": qsTr("Organiza y etiqueta miles de fotos"), "categoria": "fotos"},
+        {"paquete": "kdenlive", "nombre": "Kdenlive", "descripcion": qsTr("Edición de vídeo completa y libre"), "categoria": "media"},
+        {"paquete": "obs-studio", "nombre": "OBS Studio", "descripcion": qsTr("Graba tu pantalla o emite en directo"), "categoria": "media"},
+        {"paquete": "audacity", "nombre": "Audacity", "descripcion": qsTr("Grabación y edición de audio"), "categoria": "media"},
+        {"paquete": "handbrake", "nombre": "HandBrake", "descripcion": qsTr("Convierte vídeos entre formatos"), "categoria": "media"},
+        {"paquete": "vlc", "nombre": "VLC", "descripcion": qsTr("El reproductor que lo reproduce todo"), "categoria": "media"},
+        {"paquete": "steam", "nombre": "Steam", "descripcion": qsTr("La mayor tienda de juegos de PC"), "categoria": "juegos"},
+        {"paquete": "supertuxkart", "nombre": "SuperTuxKart", "descripcion": qsTr("Karts con Tux: carreras para toda la familia"), "categoria": "juegos"},
+        {"paquete": "luanti", "nombre": "Luanti", "descripcion": qsTr("Construye mundos de bloques (antes Minetest)"), "categoria": "juegos"},
+        {"paquete": "gcompris-qt", "nombre": "GCompris", "descripcion": qsTr("Más de cien actividades educativas para peques"), "categoria": "juegos"},
+        {"paquete": "keepassxc", "nombre": "KeePassXC", "descripcion": qsTr("Guarda tus contraseñas bajo llave"), "categoria": "utilidades"},
+        {"paquete": "filelight", "nombre": "Filelight", "descripcion": qsTr("Descubre qué está llenando tu disco"), "categoria": "utilidades"},
+        {"paquete": "kdf", "nombre": "KDiskFree", "descripcion": qsTr("Vigila el espacio libre de tus discos"), "categoria": "utilidades"},
+        {"paquete": "code", "nombre": "Code", "descripcion": qsTr("Editor de código para programar (VS Code libre)"), "categoria": "utilidades"}
     ]
     // mimos-catalogo-end
 
@@ -104,16 +113,27 @@ Item {
 
     property int seleccionadas: 0
 
-    // Presentation only: a category glyph is not catalogue data.
+    // Presentation only: a category glyph is not catalogue data. Keyed by
+    // the category ID, which is the one thing about a category that no
+    // translation moves.
     function glifoCategoria(categoria) {
         switch (categoria) {
-        case "Internet": return "🌐";
-        case "Fotos y dibujo": return "🎨";
-        case "Música y vídeo": return "🎬";
-        case "Juegos": return "🎮";
-        case "Utilidades": return "🧰";
+        case "internet": return "🌐";
+        case "fotos": return "🎨";
+        case "media": return "🎬";
+        case "juegos": return "🎮";
+        case "utilidades": return "🧰";
         default: return "📦";
         }
+    }
+
+    function nombreCategoria(categoria) {
+        for (const entrada of root.categorias) {
+            if (entrada.id === categoria) {
+                return entrada.nombre;
+            }
+        }
+        return categoria;
     }
 
     function cuentaCategoria(categoria) {
@@ -211,9 +231,9 @@ Item {
         implicitHeight: 128
         Layout.fillWidth: true
         Layout.preferredWidth: 1
-        Accessible.name: control.categoria
+        Accessible.name: root.nombreCategoria(control.categoria)
         Accessible.description:
-            root.cuentaCategoria(control.categoria) + " aplicaciones"
+            qsTr("%1 aplicaciones").arg(root.cuentaCategoria(control.categoria))
         Keys.onReturnPressed: control.clicked()
         Keys.onEnterPressed: control.clicked()
         onClicked: root.abreCategoria(control.categoria)
@@ -230,7 +250,7 @@ Item {
             Text {
                 Layout.alignment: Qt.AlignHCenter
                 Layout.fillWidth: true
-                text: control.categoria
+                text: root.nombreCategoria(control.categoria)
                 color: root.ink
                 font.pixelSize: 15
                 font.bold: true
@@ -240,7 +260,7 @@ Item {
 
             Text {
                 Layout.alignment: Qt.AlignHCenter
-                text: root.cuentaCategoria(control.categoria) + " aplicaciones"
+                text: qsTr("%1 aplicaciones").arg(root.cuentaCategoria(control.categoria))
                 color: root.inkMuted
                 font.pixelSize: 12
             }
@@ -272,15 +292,15 @@ Item {
 
             MimosButton {
                 objectName: "botonVolver"
-                text: "‹ Volver"
+                text: qsTr("‹ Volver")
                 visible: root.paginaActual === 1
                 onClicked: root.vuelvePortada()
             }
 
             Text {
                 text: root.paginaActual === 1
-                    ? root.categoriaActual
-                    : "Tienda de MimOS"
+                    ? root.nombreCategoria(root.categoriaActual)
+                    : qsTr("Tienda de MimOS")
                 color: root.ink
                 font.pixelSize: 26
                 font.bold: true
@@ -295,7 +315,7 @@ Item {
                 Text {
                     id: badge
                     anchors.centerIn: parent
-                    text: "repos oficiales de Arch"
+                    text: qsTr("repos oficiales de Arch")
                     color: root.inkMuted
                     font.pixelSize: 11
                     font.bold: true
@@ -316,10 +336,7 @@ Item {
 
                 Text {
                     Layout.fillWidth: true
-                    text: "Elige una categoría, marca lo que quieras y pulsa "
-                          + "instalar: verás lo que ocurre en un terminal, con "
-                          + "tu contraseña por delante y una instantánea por "
-                          + "debajo."
+                    text: qsTr("Elige una categoría, marca lo que quieras y pulsa instalar: verás lo que ocurre en un terminal, con tu contraseña por delante y una instantánea por debajo.")
                     color: root.inkMuted
                     font.pixelSize: 13
                     wrapMode: Text.WordWrap
@@ -336,8 +353,8 @@ Item {
                         model: root.categorias
 
                         TarjetaCategoria {
-                            required property string modelData
-                            categoria: modelData
+                            required property var modelData
+                            categoria: modelData.id
                         }
                     }
                 }
@@ -377,7 +394,7 @@ Item {
                     enabled: !fila.instalada
                     Accessible.name: fila.nombre
                     Accessible.description: fila.instalada
-                        ? fila.descripcion + " (ya instalada)"
+                        ? qsTr("%1 (ya instalada)").arg(fila.descripcion)
                         : fila.descripcion
 
                     onToggled: {
@@ -391,7 +408,7 @@ Item {
                         Text {
                             Layout.fillWidth: true
                             text: fila.instalada
-                                ? fila.nombre + " · ya en tu MimOS"
+                                ? qsTr("%1 · ya en tu MimOS").arg(fila.nombre)
                                 : fila.nombre
                             color: fila.instalada ? root.inkMuted : root.ink
                             font.pixelSize: 14
@@ -427,15 +444,15 @@ Item {
             MimosButton {
                 objectName: "botonInstalar"
                 text: root.seleccionadas > 0
-                    ? "Instalar seleccionadas (" + root.seleccionadas + ")"
-                    : "Instalar seleccionadas"
+                    ? qsTr("Instalar seleccionadas (%1)").arg(root.seleccionadas)
+                    : qsTr("Instalar seleccionadas")
                 enabled: root.seleccionadas > 0
                 onClicked: root.instalarRequested()
             }
 
             MimosButton {
                 objectName: "botonAvanzado"
-                text: "¿No está lo que buscas? Todo el catálogo…"
+                text: qsTr("¿No está lo que buscas? Todo el catálogo…")
                 onClicked: root.busquedaAvanzadaRequested()
             }
 
@@ -443,7 +460,7 @@ Item {
 
             MimosButton {
                 objectName: "botonCerrar"
-                text: "Cerrar"
+                text: qsTr("Cerrar")
                 onClicked: root.closeRequested()
             }
         }

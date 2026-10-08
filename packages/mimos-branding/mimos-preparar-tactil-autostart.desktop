@@ -1,7 +1,9 @@
 [Desktop Entry]
 Type=Application
 Name=Preparar el táctil de MimOS
+Name[ca]=Preparar el tàctil de MimOS
 Comment=Ajusta el táctil la primera vez que inicias sesión
+Comment[ca]=Ajusta el tàctil el primer cop que inicies sessió
 Exec=/usr/lib/mimos/mimos-preparar-tactil
 Icon=input-touchpad
 OnlyShowIn=KDE;

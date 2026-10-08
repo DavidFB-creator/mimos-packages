@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC2016
 # mimos — la puerta de entrada amable a los comandos de MimOS.
 #
 # No hace nada por sí mismo: delega en los comandos que ya existen y que
@@ -11,9 +12,19 @@
 # mejor que un «command not found» de bash.
 set -euo pipefail
 
+# Translations (ADR-159). Every string a person reads below is written in
+# Spanish and looked up in mimos-release.mo for the session's language; a missing
+# catalogue means Spanish. eval_gettext keeps $variables inside the msgid so
+# the translator can move them, which is why SC2016 is off for this file.
+export TEXTDOMAIN=mimos-release
+export TEXTDOMAINDIR="${mimos_test_textdomaindir:-/usr/share/locale}"
+# shellcheck disable=SC1091
+. gettext.sh
+
 ayuda() {
-  cat <<'AYUDA'
-mimos — tu ordenador también merece unos mimos
+  # The verbs (actualizar, restaurar, diagnostico, ayuda) are the command's
+  # API and stay as they are in every language; only the prose moves.
+  gettext 'mimos — tu ordenador también merece unos mimos
 
   mimos actualizar    Actualiza el sistema entero, en orden seguro
   mimos restaurar     Vuelve a una instantánea anterior del sistema
@@ -24,15 +35,15 @@ mimos — tu ordenador también merece unos mimos
 Cada uno también existe por su nombre completo: mimos-actualizar,
 mimos-restaurar y mimos-diagnostico. La guía completa está en
 https://mimoslinux.org/cuidados/ y la comunidad en el Discord de MimOS.
-AYUDA
+'
 }
 
 delegar() {
   local destino="$1"
   shift
   if ! command -v "${destino}" > /dev/null 2>&1; then
-    printf 'mimos: «%s» no está en este sistema.\n' "${destino}" >&2
-    printf 'En la sesión Live algunos comandos no existen todavía; en un MimOS instalado deberían estar todos.\n' >&2
+    eval_gettext 'mimos: «$destino» no está en este sistema.' >&2; echo >&2
+    gettext 'En la sesión Live algunos comandos no existen todavía; en un MimOS instalado deberían estar todos.' >&2; echo >&2
     exit 1
   fi
   exec "${destino}" "$@"
@@ -49,7 +60,7 @@ case "${orden}" in
     ayuda
     ;;
   *)
-    printf 'mimos: no conozco «%s».\n\n' "${orden}" >&2
+    eval_gettext 'mimos: no conozco «$orden».' >&2; printf '\n\n' >&2
     ayuda >&2
     exit 1
     ;;

@@ -28,29 +28,31 @@ SystemTrayIcon {
 
     readonly property int total: oficiales + aur + flatpak
 
-    function plural(n, singular, pluralForm) {
-        return n === 1 ? singular : pluralForm;
-    }
-
-    // Spanish counts, written out rather than assembled from fragments,
-    // because "1 actualizaciones" is the kind of thing that makes a system
-    // feel machine-made.
+    // Counts written out as whole sentences rather than assembled from
+    // fragments, because "1 actualizaciones" is the kind of thing that makes
+    // a system feel machine-made. Each form is its own translatable string:
+    // MimOS ships Spanish and Catalan (ADR-159), and both split at exactly
+    // one, so a singular/plural pair is the honest shape -- Qt's %n plural
+    // machinery would need a catalogue for the SOURCE language too, since an
+    // untranslated %n string has no plural forms of its own.
     readonly property string resumen: total === 1
-        ? 'Hay 1 actualización disponible'
-        : 'Hay ' + total + ' actualizaciones disponibles'
+        ? qsTr("Hay 1 actualización disponible")
+        : qsTr("Hay %1 actualizaciones disponibles").arg(total)
 
     readonly property string detalle: {
         var partes = [];
         if (oficiales > 0) {
-            partes.push(oficiales + ' '
-                + plural(oficiales, 'oficial', 'oficiales'));
+            partes.push(oficiales === 1
+                ? qsTr("1 oficial")
+                : qsTr("%1 oficiales").arg(oficiales));
         }
         if (aur > 0) {
-            partes.push(aur + ' del AUR');
+            partes.push(qsTr("%1 del AUR").arg(aur));
         }
         if (flatpak > 0) {
-            partes.push(flatpak + ' '
-                + plural(flatpak, 'Flatpak', 'de Flatpak'));
+            partes.push(flatpak === 1
+                ? qsTr("1 Flatpak")
+                : qsTr("%1 de Flatpak").arg(flatpak));
         }
         return partes.join(' · ');
     }
@@ -59,16 +61,16 @@ SystemTrayIcon {
 
     menu: Menu {
         MenuItem {
-            text: qsTr('Actualizar ahora')
+            text: qsTr("Actualizar ahora")
             onTriggered: Qt.exit(20)
         }
         MenuItem {
-            text: qsTr('Volver a comprobar')
+            text: qsTr("Volver a comprobar")
             onTriggered: Qt.exit(21)
         }
         MenuSeparator {}
         MenuItem {
-            text: qsTr('Ocultar hasta la próxima')
+            text: qsTr("Ocultar hasta la próxima")
             onTriggered: Qt.exit(0)
         }
     }
@@ -87,8 +89,8 @@ SystemTrayIcon {
             bandeja.showMessage(
                 resumen,
                 detalle.length > 0
-                    ? detalle + '\nPulsa para actualizar tu MimOS.'
-                    : 'Pulsa para actualizar tu MimOS.');
+                    ? detalle + "\n" + qsTr("Pulsa para actualizar tu MimOS.")
+                    : qsTr("Pulsa para actualizar tu MimOS."));
         }
     }
 }

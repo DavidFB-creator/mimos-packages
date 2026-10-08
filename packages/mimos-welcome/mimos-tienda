@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2016
 # Tienda de MimOS launcher (ADR-152). All policy lives here, none in the
 # QML (ADR-093): this script computes which catalogue entries are already
 # installed, launches the identity-owning runner, and acts on its exit
@@ -7,6 +8,15 @@
 # catalogue list, so nothing written on the QML side of the fence can
 # reach a command line unvetted.
 set -Eeuo pipefail
+
+# Translations (ADR-159). Every string a person reads below is written in
+# Spanish and looked up in mimos-welcome.mo for the session's language; a missing
+# catalogue means Spanish. eval_gettext keeps $variables inside the msgid so
+# the translator can move them, which is why SC2016 is off for this file.
+export TEXTDOMAIN=mimos-welcome
+export TEXTDOMAINDIR="${mimos_test_textdomaindir:-/usr/share/locale}"
+# shellcheck disable=SC1091
+. gettext.sh
 
 window='/usr/share/mimos/tienda/TiendaWindow.qml'
 lista='/usr/share/mimos/tienda/aplicaciones.lista'
@@ -18,7 +28,7 @@ config_file="${config_dir}/tienda.conf"
 show_error() {
   local message="$1"
   if command -v kdialog >/dev/null 2>&1; then
-    kdialog --title 'Tienda de MimOS' --error "${message}" || true
+    kdialog --title "$(gettext 'Tienda de MimOS')" --error "${message}" || true
   else
     printf '%s\n' "${message}" >&2
   fi
@@ -29,12 +39,12 @@ show_error() {
 # same marker discipline as the Centro (root-owned regular file, 0644).
 if [[ -f "${live_marker}" && ! -L "${live_marker}" ]] && \
   [[ "$(stat -c '%u:%g:%a' "${live_marker}")" == '0:0:644' ]]; then
-  show_error 'La Tienda instala en un MimOS de verdad; en la sesión Live los cambios se perderían al apagar.'
+  show_error "$(gettext 'La Tienda instala en un MimOS de verdad; en la sesión Live los cambios se perderían al apagar.')"
   exit 1
 fi
 
 if [[ ! -f "${window}" || ! -f "${lista}" ]]; then
-  show_error 'No se encuentra la interfaz de la Tienda de MimOS.'
+  show_error "$(gettext 'No se encuentra la interfaz de la Tienda de MimOS.')"
   exit 1
 fi
 
@@ -75,7 +85,7 @@ detect_instaladas() {
 
 runner='/usr/lib/mimos/tienda-mimos'
 if [[ ! -x "${runner}" ]]; then
-  show_error 'El entorno de la Tienda de MimOS no está disponible.'
+  show_error "$(gettext 'El entorno de la Tienda de MimOS no está disponible.')"
   exit 1
 fi
 
@@ -112,21 +122,22 @@ case "${status}" in
       fi
     done
     if (( ${#descartados[@]} > 0 )); then
-      printf 'Tienda de MimOS: selección fuera del catálogo, descartada: %s\n' \
-        "${descartados[*]}" >&2
+      export descartados_lista="${descartados[*]}"
+      eval_gettext 'Tienda de MimOS: selección fuera del catálogo, descartada: $descartados_lista' >&2
+      echo >&2
     fi
     if (( ${#validados[@]} == 0 )); then
-      show_error 'No hay nada válido que instalar.'
+      show_error "$(gettext 'No hay nada válido que instalar.')"
       final_status=1
     elif [[ ! -x "${instalador}" ]]; then
-      show_error 'El instalador de la Tienda no está disponible.'
+      show_error "$(gettext 'El instalador de la Tienda no está disponible.')"
       final_status=1
     elif command -v ghostty >/dev/null 2>&1; then
       ghostty -e "${instalador}" "${validados[@]}" >/dev/null 2>&1 &
     elif command -v konsole >/dev/null 2>&1; then
       konsole -e "${instalador}" "${validados[@]}" >/dev/null 2>&1 &
     else
-      show_error 'No se ha encontrado una terminal para instalar.'
+      show_error "$(gettext 'No se ha encontrado una terminal para instalar.')"
       final_status=1
     fi
     ;;
@@ -140,7 +151,7 @@ case "${status}" in
     elif command -v paru >/dev/null 2>&1 && command -v konsole >/dev/null 2>&1; then
       konsole -e paru >/dev/null 2>&1 &
     else
-      show_error 'No se ha encontrado paru o una terminal para abrirlo.'
+      show_error "$(gettext 'No se ha encontrado paru o una terminal para abrirlo.')"
       final_status=1
     fi
     ;;

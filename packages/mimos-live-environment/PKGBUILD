@@ -1,7 +1,7 @@
 # Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
 
 pkgname=mimos-live-environment
-pkgver=1.0.0
+pkgver=1.0.1
 pkgrel=1
 pkgdesc='Removable Live-session state for MimOS installation media'
 arch=('any')
@@ -25,7 +25,7 @@ source=(
 sha256sums=('865ab28ace6c525113cf18b07ff3b0dd805baf89d9ba3447ae6dab958c4b3c08'
             '451ce6b91c279fc1ca9713466ae487a7731e892a6421b9fea9c5cabdcb9e17de'
             'b931d6303f373f1166bab6f834b21e9698280589eeb9834ad0cb20f48d31c57a'
-            '9024a58a0b8ed29ded97eabac24ecc7f3b114f13dcc1911981cf1b654a92d2f7'
+            '10c5cada120871d35abe145f4e48c4a6d1411f7ed2bf3465a4730d7f60a0223a'
             '19c7eeb84cb74ce447e0c4a52fc17579dd91e98ad9e1c3cb2dac639d7c5b034f'
             'f21ae0678525af4b22644b3a83057ef035471e52f3052389c58ca1c65223fd6f'
             '97d7ba0977ea88730c942625f66849bbef6536c3c6e103a39a4bb05b9fd3d9cf')

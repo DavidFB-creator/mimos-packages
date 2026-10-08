@@ -1,7 +1,9 @@
 [Desktop Entry]
 Type=Application
 Name=Centro de MimOS
+Name[ca]=Centre de MimOS
 Comment=Bienvenida, privacidad y estado de MimOS
+Comment[ca]=Benvinguda, privadesa i estat de MimOS
 Exec=/usr/bin/mimos-welcome
 Icon=mimos-centro
 Terminal=false

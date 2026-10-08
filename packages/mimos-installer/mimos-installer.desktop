@@ -1,8 +1,11 @@
 [Desktop Entry]
 Type=Application
 Name=Instalar MimOS
+Name[ca]=Instal·lar MimOS
 GenericName=Instalador del sistema
+GenericName[ca]=Instal·lador del sistema
 Comment=Instala MimOS en este equipo
+Comment[ca]=Instal·la MimOS en aquest equip
 Exec=/usr/bin/mimos-installer
 Icon=mimos-instalador
 Terminal=false

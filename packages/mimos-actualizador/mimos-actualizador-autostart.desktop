@@ -1,7 +1,9 @@
 [Desktop Entry]
 Type=Application
 Name=Actualizar MimOS
+Name[ca]=Actualitzar MimOS
 Comment=Avisa cuando hay actualizaciones disponibles
+Comment[ca]=Avisa quan hi ha actualitzacions disponibles
 Exec=/usr/bin/mimos-actualizador --daemon
 Icon=system-software-update
 OnlyShowIn=KDE;

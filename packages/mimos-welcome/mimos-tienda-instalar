@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2016
 # The Tienda's terminal half (ADR-152): shows what is about to enter, then
 # runs the real transaction in front of the person. In a visible terminal
 # on purpose, like updating (ADR-104): pacman asks a password and real
@@ -7,17 +8,26 @@
 # update.
 set -Eeuo pipefail
 
+# Translations (ADR-159). Every string a person reads below is written in
+# Spanish and looked up in mimos-welcome.mo for the session's language; a missing
+# catalogue means Spanish. eval_gettext keeps $variables inside the msgid so
+# the translator can move them, which is why SC2016 is off for this file.
+export TEXTDOMAIN=mimos-welcome
+export TEXTDOMAINDIR="${mimos_test_textdomaindir:-/usr/share/locale}"
+# shellcheck disable=SC1091
+. gettext.sh
+
 titulo() {
   printf '\n\033[1;38;2;255;111;174m  %s\033[0m\n\n' "$*"
 }
 
 pausa_final() {
-  printf '\n  Pulsa Intro para cerrar esta ventana.'
+  printf '\n  %s' "$(gettext 'Pulsa Intro para cerrar esta ventana.')"
   read -r _ || true
 }
 
 if (( $# == 0 )); then
-  printf '  Nada que instalar.\n'
+  printf '  %s\n' "$(gettext 'Nada que instalar.')"
   pausa_final
   exit 1
 fi
@@ -27,32 +37,36 @@ fi
 # by hand with something strange.
 for token in "$@"; do
   if [[ ! "${token}" =~ ^[a-z0-9@._+-]+$ ]]; then
-    printf '  Nombre de paquete no válido: %s\n' "${token}" >&2
+    printf '  %s\n' "$(eval_gettext 'Nombre de paquete no válido: $token')" >&2
     pausa_final
     exit 1
   fi
 done
 
-titulo 'Tienda de MimOS'
-printf '  Va a instalarse desde los repositorios oficiales:\n\n'
+titulo "$(gettext 'Tienda de MimOS')"
+printf '  %s\n\n' "$(gettext 'Va a instalarse desde los repositorios oficiales:')"
 printf '    %s\n' "$@"
-printf '\n  Antes se pone el sistema al día: en Arch instalar sobre un\n'
-printf '  sistema desactualizado es la receta de un sistema roto, así que\n'
-printf '  la transacción es una sola. Cada paso deja una instantánea: si\n'
-printf '  algo sale mal puedes volver atrás desde el menú de arranque.\n'
+printf '\n'
+gettext '  Antes se pone el sistema al día: en Arch instalar sobre un
+  sistema desactualizado es la receta de un sistema roto, así que
+  la transacción es una sola. Cada paso deja una instantánea: si
+  algo sale mal puedes volver atrás desde el menú de arranque.'
+printf '\n'
 
-titulo 'Instalando'
+titulo "$(gettext 'Instalando')"
 # -Syu, never -S alone: a fresh installation has no synced databases at
 # all (measured in the doctored session -- pacman found NOTHING to
 # install), and -Sy without -u is the partial-upgrade machine this
 # project refuses everywhere else. One transaction, snap-pac around it.
 if ! sudo pacman -Syu --needed -- "$@"; then
-  printf '\n  La instalación no ha terminado bien; nada a medias queda\n'
-  printf '  activo, y la instantánea previa sigue en el menú de arranque.\n'
+  printf '\n'
+  gettext '  La instalación no ha terminado bien; nada a medias queda
+  activo, y la instantánea previa sigue en el menú de arranque.'
+  printf '\n'
   pausa_final
   exit 1
 fi
 
-titulo 'Listo'
-printf '  Ya lo tienes en el menú de aplicaciones.\n'
+titulo "$(gettext 'Listo')"
+printf '  %s\n' "$(gettext 'Ya lo tienes en el menú de aplicaciones.')"
 pausa_final

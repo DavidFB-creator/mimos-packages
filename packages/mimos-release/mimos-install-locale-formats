@@ -1,0 +1,69 @@
+#!/bin/bash
+# Give a Catalan installation Catalan formats (dates, numbers, money).
+#
+# Calamares derives LANG from the language chosen at the welcome page and
+# every LC_* from the LOCATION. MimOS installs from Europe/Madrid, so a
+# Catalan installation came out as LANG=ca_ES.UTF-8 with all nine LC_* at
+# es_ES.UTF-8: a desktop in Catalan with its dates and month names in
+# Spanish. Measured on the first image that carried the Catalan catalogues
+# (docs/evidence/installer/1.0.0-catalan-gate.md), not reasoned.
+#
+# Calamares runs this inside the target right after `localecfg`, which is
+# what wrote /etc/locale.conf and generated the locales in it. The rule is
+# the speech helper's: a DEFAULT, never a policy. It moves the formats only
+# while every LC_* still carries the value the location produced for the
+# same territory -- es_<territory> -- so formats somebody chose by hand on
+# the location page (en_US, say) stay. Choosing es_ES there by hand looks
+# identical to the default and cannot be told apart; that cost is accepted
+# and written in the known issues. It exits 0 whenever there is nothing to
+# do, so an unusual target cannot fail an installation over a date format.
+set -euo pipefail
+
+locale_conf='/etc/locale.conf'
+locale_gen='/etc/locale.gen'
+
+if [[ ! -f "${locale_conf}" ]]; then
+  echo 'mimos-install-locale-formats: no /etc/locale.conf; nothing to do.' >&2
+  exit 0
+fi
+
+lang="$(sed -n 's/^LANG=//p' "${locale_conf}" | head -n 1 | tr -d '"')"
+# ca_ES.UTF-8 -> language ca, territory ES, charset UTF-8.
+language="${lang%%_*}"
+rest="${lang#*_}"
+territory="${rest%%.*}"
+charset="${rest#*.}"
+if [[ -z "${lang}" || "${lang}" != *_*.* ]]; then
+  exit 0
+fi
+# Only the languages MimOS ships formats for and has read are claimed
+# (ADR-159: Catalan). Spanish needs nothing: its formats already match.
+case "${language}" in
+  ca) ;;
+  *) exit 0 ;;
+esac
+
+# Pointing the formats at a locale that was never generated would leave
+# every program falling back to C. localecfg generates LANG's locale, so
+# this should always hold; asking is cheaper than assuming.
+if ! grep -Eq "^${language}_${territory}\.${charset}[[:space:]]" "${locale_gen}" 2>/dev/null; then
+  echo "mimos-install-locale-formats: ${lang} is not generated; keeping the formats." >&2
+  exit 0
+fi
+
+location_default="es_${territory}.${charset}"
+mapfile -t lc_values < <(sed -n 's/^LC_[A-Z_]*=//p' "${locale_conf}" | tr -d '"')
+if (( ${#lc_values[@]} == 0 )); then
+  # No LC_* at all: everything already follows LANG.
+  exit 0
+fi
+for value in "${lc_values[@]}"; do
+  if [[ "${value}" != "${location_default}" ]]; then
+    # Something other than the location's default: a choice. Never touch it.
+    exit 0
+  fi
+done
+
+sed -i "s/^\(LC_[A-Z_]*\)=\"\{0,1\}${location_default//./\\.}\"\{0,1\}\$/\1=${lang}/" \
+  "${locale_conf}"
+echo "mimos-install-locale-formats: formats follow ${lang}." >&2

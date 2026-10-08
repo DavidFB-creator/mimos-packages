@@ -11,7 +11,8 @@
         "Id": "mimos-oscuro",
         "License": "MIT",
         "Name": "MimOS Oscuro",
-        "Version": "1.0.0",
+        "Name[ca]": "MimOS Fosc",
+        "Version": "1.0.1",
         "Website": "https://mimoslinux.org"
     },
     "X-Plasma-API": "5.0"

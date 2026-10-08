@@ -123,6 +123,7 @@ ForegroundVisited=211,167,199
 [General]
 ColorScheme=Mimos nocturnos
 Name=Mimos nocturnos
+Name[ca]=Mimos nocturns
 shadeSortColumn=true
 
 [KDE]

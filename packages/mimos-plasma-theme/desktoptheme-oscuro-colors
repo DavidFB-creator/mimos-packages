@@ -124,6 +124,7 @@ ForegroundVisited=217,160,240
 AccentColor=255,111,174
 ColorScheme=MimOS Oscuro
 Name=MimOS Oscuro
+Name[ca]=MimOS Fosc
 shadeSortColumn=true
 
 [KDE]

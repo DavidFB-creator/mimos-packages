@@ -1,13 +1,15 @@
 # Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
 
 pkgname=mimos-calamares-config
-pkgver=1.0.0
+pkgver=1.0.1
 pkgrel=1
 pkgdesc='Disconnected Calamares configuration and branding for MimOS'
 arch=('any')
 url='https://github.com/DavidFB-creator/MimOS'
 license=('MIT')
 depends=('calamares=3.4.2' 'mimos-branding' 'qt6-declarative')
+# lrelease, for the slideshow's Catalan catalogue (ADR-159).
+makedepends=('qt6-tools')
 source=(
   'settings.conf'
   'branding.desc'
@@ -22,6 +24,9 @@ source=(
   'unpackfs.conf'
   'shellprocess@initialize-keyring.conf'
   'shellprocess@default-face.conf'
+  'shellprocess@speech-language.conf'
+  'shellprocess@locale-formats.conf'
+  'calamares-mimos_ca.ts'
   'shellprocess@remove-broadcom-wl.conf'
   'shellprocess@configure-snapshots.conf'
   'machineid.conf'
@@ -39,9 +44,9 @@ source=(
   'finished.conf'
   'LICENSE'
 )
-sha256sums=('32da54451e19cf9f1daf405b9550291d26a49d17883bb9289b6654e4b0851ac1'
-            'f3f244b93dc4a80232abb457e282f7a5a4dc166d809f69304ae8b881f19f25d4'
-            '6fb27f2cc98e25789781efa7d1287806e7dd7f98b951592050f88b0b52521e1d'
+sha256sums=('a2bac5323f5dbef292f66a90bc8c7412b997c69dfa12b14160592653c71137cb'
+            '0a0615b177bb3385a4ba112c8781fedfaeba99a1e0dcc11ee4d8810abf87352b'
+            'b5577361f960c817a8e8703ca15fbf541a4ab02b4667cb87940f87d9fe973a44'
             'ea03a28613edd41277f2cae5aabdb2ecfc2144911e44e6c61d99e86c711ff9fd'
             '31dd620a1344d3d74d4834e2cc9b15eca4fe5c4d694c65c44045725e9379706c'
             'ecb634ac231dc72ef0c4523be5d3cb8b5f322e6bdb3c9113f57a340432315317'
@@ -52,6 +57,9 @@ sha256sums=('32da54451e19cf9f1daf405b9550291d26a49d17883bb9289b6654e4b0851ac1'
             '7156aa2599a837f05ed63de21b498fef0e3d7beba8b15b189d4853a43f194643'
             'dcfcfbe62ad079d4799cda3acbacb9d8f19866c4c9183b3a2329111987e9a5d2'
             '2b3833b349cd38e28ebb9ee1bf59f7605425eaa5e1a9563bacd5a6496f68bda3'
+            '6dffa3b503fe2f42f626cb1efc82bab033b9210d36009dfa8e82a0d43b2d2e58'
+            'b3dbe51a94d6b25d18b452a8515aff75c2adaf239593008a1bc707c3a3ce9b23'
+            '352e5bf68ef21b3ed8178b6a84956e5ff4683fcaeffff2867f54c34fd11e04f7'
             'c547e51d9e0f48be8d1841be5e9c2396c418e48c47bce66088d6ee7925f558dc'
             'dcbb815b68d6f31edb58faabb4f9ca683cac2f193652543dc339907d552ba77d'
             'c7da961c74c6025810caa03fb70c97b8941792cb738dd65b9120a02b1468df61'
@@ -69,6 +77,13 @@ sha256sums=('32da54451e19cf9f1daf405b9550291d26a49d17883bb9289b6654e4b0851ac1'
             'a58ea98db51aac6ad37cca397191f84cc510504aef018a770f8608d82132b4c6'
             '97d7ba0977ea88730c942625f66849bbef6536c3c6e103a39a4bb05b9fd3d9cf')
 
+build() {
+  # The slideshow's strings are qsTr() and Calamares installs the branding's
+  # own catalogue for the chosen language, from lang/calamares-<component>
+  # beside show.qml (ADR-159).
+  /usr/lib/qt6/bin/lrelease -silent calamares-mimos_ca.ts -qm calamares-mimos_ca.qm
+}
+
 package() {
   local module_config
 
@@ -76,6 +91,7 @@ package() {
   for module_config in \
     welcome locale keyboard partition users mount unpackfs \
     shellprocess@initialize-keyring shellprocess@default-face \
+    shellprocess@speech-language shellprocess@locale-formats \
     shellprocess@remove-broadcom-wl shellprocess@configure-snapshots \
     machineid \
     luksbootkeyfile fstab initcpiocfg grubcfg initcpio packages removeuser \
@@ -90,6 +106,12 @@ package() {
     "${pkgdir}/usr/share/calamares/branding/mimos/show.qml"
   install -Dm644 stylesheet.qss \
     "${pkgdir}/usr/share/calamares/branding/mimos/stylesheet.qss"
+  install -Dm644 calamares-mimos_ca.qm \
+    "${pkgdir}/usr/share/calamares/branding/mimos/lang/calamares-mimos_ca.qm"
+  # The source beside its compiled form, so the package-source contract
+  # sees every declared file reach the installation.
+  install -Dm644 calamares-mimos_ca.ts \
+    "${pkgdir}/usr/share/calamares/branding/mimos/lang/calamares-mimos_ca.ts"
   ln -s ../../../mimos/branding/mimos-symbol.svg \
     "${pkgdir}/usr/share/calamares/branding/mimos/mimos-symbol.svg"
   # MIMI herself, for the product icon and the slideshow. The file ships in

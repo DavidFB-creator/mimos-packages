@@ -34,6 +34,7 @@
   "themes": {
     "mimos-claro": {
       "name": "MimOS Claro",
+      "name_ca": "MimOS Clar",
       "appearance": "light",
       "description": "Daytime scheme on soft Besito pinks with Noche text; deep Besito carries the selection, canonical Besito the titlebars.",
       "roles": {
@@ -86,6 +87,7 @@
     },
     "mimos-oscuro": {
       "name": "MimOS Oscuro",
+      "name_ca": "MimOS Fosc",
       "appearance": "dark",
       "description": "Night scheme on Noche with Nube text and lifted Abrazo accents.",
       "roles": {
@@ -133,6 +135,7 @@
     },
     "mimos-nocturnos": {
       "name": "Mimos nocturnos",
+      "name_ca": "Mimos nocturns",
       "appearance": "dark",
       "description": "Late-night scheme: warmer, dimmer, and lower in blue than MimOS Oscuro, without dropping any text pair below AA.",
       "roles": {

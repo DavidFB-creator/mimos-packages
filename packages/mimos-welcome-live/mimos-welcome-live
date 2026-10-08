@@ -1,5 +1,15 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2016
 set -Eeuo pipefail
+
+# Translations (ADR-159). Every string a person reads below is written in
+# Spanish and looked up in mimos-welcome-live.mo for the session's language; a missing
+# catalogue means Spanish. eval_gettext keeps $variables inside the msgid so
+# the translator can move them, which is why SC2016 is off for this file.
+export TEXTDOMAIN=mimos-welcome-live
+export TEXTDOMAINDIR="${mimos_test_textdomaindir:-/usr/share/locale}"
+# shellcheck disable=SC1091
+. gettext.sh
 
 window='/usr/share/mimos/welcome-live/Window.qml'
 release_file='/etc/mimos-release'
@@ -14,7 +24,7 @@ autostart=false
 show_error() {
   local message="$1"
   if command -v kdialog >/dev/null 2>&1; then
-    kdialog --title 'Centro de MimOS' --error "${message}" || true
+    kdialog --title "$(gettext 'Centro de MimOS')" --error "${message}" || true
   else
     printf '%s\n' "${message}" >&2
   fi
@@ -38,12 +48,12 @@ esac
 # installed Centro (ADR-093).
 if ! [[ -f "${live_marker}" && ! -L "${live_marker}" ]] || \
   [[ "$(stat -c '%u:%g:%a' "${live_marker}")" != '0:0:644' ]]; then
-  show_error 'Este Centro de MimOS solo funciona en la sesión Live.'
+  show_error "$(gettext 'Este Centro de MimOS solo funciona en la sesión Live.')"
   exit 1
 fi
 
 if [[ ! -f "${window}" ]]; then
-  show_error 'No se encuentra la interfaz de Centro de MimOS.'
+  show_error "$(gettext 'No se encuentra la interfaz de Centro de MimOS.')"
   exit 1
 fi
 
@@ -126,7 +136,7 @@ detect_appearance() {
 # override (ADR-093).
 runner='/usr/lib/mimos/centro-mimos-live'
 if [[ ! -x "${runner}" ]]; then
-  show_error 'El entorno de Centro de MimOS no está disponible.'
+  show_error "$(gettext 'El entorno de Centro de MimOS no está disponible.')"
   exit 1
 fi
 
@@ -159,18 +169,18 @@ case "${status}" in
     # the marker must still be valid now, not merely at launch.
     if ! [[ -f "${live_marker}" && ! -L "${live_marker}" ]] || \
       [[ "$(stat -c '%u:%g:%a' "${live_marker}")" != '0:0:644' ]]; then
-      show_error 'El instalador solo está disponible desde el entorno Live.'
+      show_error "$(gettext 'El instalador solo está disponible desde el entorno Live.')"
       exit 1
     fi
     if [[ -x /usr/bin/mimos-installer ]]; then
       /usr/bin/mimos-installer >/dev/null 2>&1 &
       exit 0
     fi
-    show_error 'MimOS Installer todavía no está disponible.'
+    show_error "$(gettext 'MimOS Installer todavía no está disponible.')"
     exit 1
     ;;
   11|12|13)
-    show_error 'Esa acción solo está disponible en el sistema instalado.'
+    show_error "$(gettext 'Esa acción solo está disponible en el sistema instalado.')"
     exit 1
     ;;
   *)

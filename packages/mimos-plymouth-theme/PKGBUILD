@@ -1,7 +1,7 @@
 # Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
 
 pkgname=mimos-plymouth-theme
-pkgver=1.0.0
+pkgver=1.0.1
 pkgrel=1
 pkgdesc='MimOS boot splash for Plymouth: MIMI over the Noche gradient'
 arch=('any')

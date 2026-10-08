@@ -1,7 +1,7 @@
 # Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
 
 pkgname=mimos-grub-theme
-pkgver=1.0.0
+pkgver=1.0.1
 pkgrel=1
 pkgdesc='MimOS boot menu theme for GRUB'
 arch=('any')
@@ -25,6 +25,7 @@ source=(
   '10-mimos.cfg'
   'mensajes-arranque.es.po'
   'mensajes-arranque.en.po'
+  'mensajes-arranque.ca.po'
   'theme.txt'
   'background.png'
   'menu.pf2'
@@ -45,6 +46,7 @@ sha256sums=('97d7ba0977ea88730c942625f66849bbef6536c3c6e103a39a4bb05b9fd3d9cf'
             '90056de5dc4799902ea3e4e81112fc59df22b10d90ab4c8aa1529f6080e2829d'
             '5ac96fb1ee950abec980c7f4e950847f91d40d7310e0b97229b730396f677fc6'
             '0ada37de2e833d6c84acae2c8693f881776b05e230c3a38287c2f0ad8f26b8ec'
+            'c5210ed41c311eef1499b09f44126d32f3c754a6e0aa04a6c3af7d67dba49ee1'
             'dec184ba44998d04354e1ede8b4a50384aa0f98501424c53be31fa60f415fc7f'
             '0888f34b6a6f19692db2685f0eea53f2b557ddd559516e698e673385681c7f3d'
             '3fc7944128b0713b0aae29e74bac879f957502335cc7adf6f3ca7d2089c986bc'
@@ -89,7 +91,7 @@ package() {
   # /usr/share/locale/es/LC_MESSAGES/grub.mo is theirs, and two packages cannot
   # own one path.
   local idioma
-  for idioma in es en; do
+  for idioma in es en ca; do
     msgfmt --output-file "${srcdir}/grub-${idioma}.mo" \
       "mensajes-arranque.${idioma}.po"
     install -Dm644 "${srcdir}/grub-${idioma}.mo" \

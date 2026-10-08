@@ -1,5 +1,15 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2016
 set -Eeuo pipefail
+
+# Translations (ADR-159). Every string a person reads below is written in
+# Spanish and looked up in mimos-welcome.mo for the session's language; a missing
+# catalogue means Spanish. eval_gettext keeps $variables inside the msgid so
+# the translator can move them, which is why SC2016 is off for this file.
+export TEXTDOMAIN=mimos-welcome
+export TEXTDOMAINDIR="${mimos_test_textdomaindir:-/usr/share/locale}"
+# shellcheck disable=SC1091
+. gettext.sh
 
 window='/usr/share/mimos/welcome/Window.qml'
 release_file='/etc/mimos-release'
@@ -14,7 +24,7 @@ runtime_context='installed'
 show_error() {
   local message="$1"
   if command -v kdialog >/dev/null 2>&1; then
-    kdialog --title 'Centro de MimOS' --error "${message}" || true
+    kdialog --title "$(gettext 'Centro de MimOS')" --error "${message}" || true
   else
     printf '%s\n' "${message}" >&2
   fi
@@ -50,12 +60,12 @@ if [[ "${runtime_context}" == 'live' ]]; then
   if [[ -x "${live_launcher}" ]]; then
     exec "${live_launcher}"
   fi
-  show_error 'La sesión Live no tiene disponible su Centro de MimOS.'
+  show_error "$(gettext 'La sesión Live no tiene disponible su Centro de MimOS.')"
   exit 1
 fi
 
 if [[ ! -f "${window}" ]]; then
-  show_error 'No se encuentra la interfaz de Centro de MimOS.'
+  show_error "$(gettext 'No se encuentra la interfaz de Centro de MimOS.')"
   exit 1
 fi
 
@@ -144,7 +154,7 @@ detect_appearance() {
 # override (ADR-093).
 runner='/usr/lib/mimos/centro-mimos'
 if [[ ! -x "${runner}" ]]; then
-  show_error 'El entorno de Centro de MimOS no está disponible.'
+  show_error "$(gettext 'El entorno de Centro de MimOS no está disponible.')"
   exit 1
 fi
 
@@ -167,27 +177,27 @@ while true; do
       break
       ;;
     10)
-      show_error 'El instalador solo está disponible desde el entorno Live.'
+      show_error "$(gettext 'El instalador solo está disponible desde el entorno Live.')"
       final_status=1
       break
       ;;
     11)
       if command -v plasma-apply-lookandfeel >/dev/null 2>&1; then
         plasma-apply-lookandfeel -a org.mimos.claro.desktop \
-          >/dev/null 2>&1 || show_error 'No se pudo aplicar MimOS Claro.'
+          >/dev/null 2>&1 || show_error "$(gettext 'No se pudo aplicar MimOS Claro.')"
         apply_theme_wallpaper claro
       else
-        show_error 'La herramienta de temas de Plasma no está disponible.'
+        show_error "$(gettext 'La herramienta de temas de Plasma no está disponible.')"
       fi
       continue
       ;;
     12)
       if command -v plasma-apply-lookandfeel >/dev/null 2>&1; then
         plasma-apply-lookandfeel -a org.mimos.oscuro.desktop \
-          >/dev/null 2>&1 || show_error 'No se pudo aplicar MimOS Oscuro.'
+          >/dev/null 2>&1 || show_error "$(gettext 'No se pudo aplicar MimOS Oscuro.')"
         apply_theme_wallpaper oscuro
       else
-        show_error 'La herramienta de temas de Plasma no está disponible.'
+        show_error "$(gettext 'La herramienta de temas de Plasma no está disponible.')"
       fi
       continue
       ;;
@@ -204,7 +214,7 @@ while true; do
       if [[ -x /usr/bin/mimos-tienda ]]; then
         /usr/bin/mimos-tienda >/dev/null 2>&1 &
       else
-        show_error 'La Tienda de MimOS no está disponible.'
+        show_error "$(gettext 'La Tienda de MimOS no está disponible.')"
         final_status=1
       fi
       break

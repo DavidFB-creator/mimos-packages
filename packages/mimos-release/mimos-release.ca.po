@@ -1,0 +1,163 @@
+# Catalan catalogue for mimos-release (ADR-159). Written in source and reviewed
+# by David on 2026-10-07;
+# scripts/check-translations.py keeps it complete and free of stale entries.
+msgid ""
+msgstr ""
+"Project-Id-Version: mimos-release\n"
+"Language: ca\n"
+"PO-Revision-Date: 2026-10-07\n"
+"Last-Translator: XI14\n"
+"Language-Team: MimOS\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid ""
+"mimos — tu ordenador también merece unos mimos\n"
+"\n"
+"  mimos actualizar    Actualiza el sistema entero, en orden seguro\n"
+"  mimos restaurar     Vuelve a una instantánea anterior del sistema\n"
+"  mimos diagnostico   Prepara un informe local, anonimizado, que nunca\n"
+"                      se envía solo (acepta sus propias opciones)\n"
+"  mimos ayuda         Esta ayuda\n"
+"\n"
+"Cada uno también existe por su nombre completo: mimos-actualizar,\n"
+"mimos-restaurar y mimos-diagnostico. La guía completa está en\n"
+"https://mimoslinux.org/cuidados/ y la comunidad en el Discord de MimOS.\n"
+msgstr ""
+"mimos — tu ordenador también merece unos mimos\n"
+"\n"
+"  mimos actualizar    Actualitza tot el sistema, en un ordre segur\n"
+"  mimos restaurar     Torna a una instantània anterior del sistema\n"
+"  mimos diagnostico   Prepara un informe local, anonimitzat, que mai\n"
+"                      no s'envia sol (accepta les seves pròpies opcions)\n"
+"  mimos ayuda         Aquesta ajuda\n"
+"\n"
+"Cadascun també existeix pel seu nom complet: mimos-actualizar,\n"
+"mimos-restaurar i mimos-diagnostico. La guia completa és a\n"
+"https://mimoslinux.org/cuidados/ i la comunitat al Discord de MimOS.\n"
+
+msgid "mimos: «$destino» no está en este sistema."
+msgstr "mimos: «$destino» no és en aquest sistema."
+
+msgid "En la sesión Live algunos comandos no existen todavía; en un MimOS instalado deberían estar todos."
+msgstr "A la sessió Live algunes ordres encara no existeixen; en un MimOS instal·lat hi haurien de ser totes."
+
+msgid "mimos: no conozco «$orden»."
+msgstr "mimos: no conec «$orden»."
+
+msgid ""
+"Uso: mimos-restaurar [--listar | --limpiar]\n"
+"\n"
+"Devuelve MimOS al estado de la instantánea desde la que has arrancado.\n"
+"\n"
+"  --listar    Muestra las instantáneas disponibles y no cambia nada.\n"
+"  --limpiar   Borra los sistemas antiguos que dejó una restauración.\n"
+"\n"
+"Para restaurar: reinicia, elige «Recuperar MimOS» en el menú de\n"
+"arranque, arranca la instantánea que quieras recuperar, y ejecuta este\n"
+"comando con sudo desde ahí.\n"
+msgstr ""
+"Ús: mimos-restaurar [--listar | --limpiar]\n"
+"\n"
+"Retorna MimOS a l'estat de la instantània des de la qual has arrencat.\n"
+"\n"
+"  --listar    Mostra les instantànies disponibles i no canvia res.\n"
+"  --limpiar   Esborra els sistemes antics que va deixar una restauració.\n"
+"\n"
+"Per restaurar: reinicia, tria «Recuperar MimOS» al menú d'arrencada,\n"
+"arrenca la instantània que vulguis recuperar, i executa aquesta ordre\n"
+"amb sudo des d'allà.\n"
+
+msgid "Ejecuta este comando con sudo: sudo mimos-restaurar --listar"
+msgstr "Executa aquesta ordre amb sudo: sudo mimos-restaurar --listar"
+
+msgid "Ejecuta este comando con sudo."
+msgstr "Executa aquesta ordre amb sudo."
+
+msgid ""
+"No has arrancado desde una instantánea, así que no hay nada que restaurar.\n"
+"\n"
+"  Para recuperar el sistema:\n"
+"    1. Reinicia el ordenador.\n"
+"    2. En el menú de arranque elige «Recuperar MimOS».\n"
+"    3. Arranca la instantánea anterior al problema.\n"
+"    4. Vuelve a ejecutar «sudo mimos-restaurar» desde ahí.\n"
+"\n"
+"  Puedes ver las instantáneas que tienes con «sudo mimos-restaurar --listar»."
+msgstr ""
+"No has arrencat des d'una instantània, així que no hi ha res a restaurar.\n"
+"\n"
+"  Per recuperar el sistema:\n"
+"    1. Reinicia l'ordinador.\n"
+"    2. Al menú d'arrencada tria «Recuperar MimOS».\n"
+"    3. Arrenca la instantània anterior al problema.\n"
+"    4. Torna a executar «sudo mimos-restaurar» des d'allà.\n"
+"\n"
+"  Pots veure les instantànies que tens amb «sudo mimos-restaurar --listar»."
+
+msgid "No se puede saber en qué disco está MimOS."
+msgstr "No es pot saber en quin disc és MimOS."
+
+msgid "No se ha podido montar $root_spec."
+msgstr "No s'ha pogut muntar $root_spec."
+
+msgid "No hay sistemas antiguos que borrar."
+msgstr "No hi ha sistemes antics per esborrar."
+
+msgid "Se van a borrar estos sistemas antiguos, para siempre:"
+msgstr "S'esborraran aquests sistemes antics, per sempre:"
+
+msgid "¿Continuar? Escribe «si» para borrar: "
+msgstr "Continuar? Escriu «si» per esborrar: "
+
+msgid "No se ha borrado nada."
+msgstr "No s'ha esborrat res."
+
+msgid "Espacio liberado."
+msgstr "Espai alliberat."
+
+msgid "La instantánea $snapshot_subvol no está donde debería."
+msgstr "La instantània $snapshot_subvol no és on hauria de ser."
+
+msgid "No hay un subvolumen @ que reemplazar."
+msgstr "No hi ha cap subvolum @ per reemplaçar."
+
+msgid "Vas a devolver MimOS al estado de esta instantánea:"
+msgstr "Retornaràs MimOS a l'estat d'aquesta instantània:"
+
+msgid "El sistema actual no se borra: se guarda como «$broken»,"
+msgstr "El sistema actual no s'esborra: es desa com a «$broken»,"
+
+msgid "por si quieres rescatar algo de él antes de eliminarlo."
+msgstr "per si en vols rescatar alguna cosa abans d'eliminar-lo."
+
+msgid "¿Continuar? Escribe «si» para restaurar: "
+msgstr "Continuar? Escriu «si» per restaurar: "
+
+msgid "No se ha cambiado nada."
+msgstr "No s'ha canviat res."
+
+msgid "No se ha podido apartar el sistema actual. No se ha cambiado nada."
+msgstr "No s'ha pogut apartar el sistema actual. No s'ha canviat res."
+
+msgid "No se ha podido crear el sistema restaurado. Se ha deshecho el cambio."
+msgstr "No s'ha pogut crear el sistema restaurat. S'ha desfet el canvi."
+
+msgid "Listo. MimOS ha vuelto a esa instantánea."
+msgstr "Fet. MimOS ha tornat a aquella instantània."
+
+msgid "El sistema anterior se ha guardado como «$broken»."
+msgstr "El sistema anterior s'ha desat com a «$broken»."
+
+msgid "Cuando compruebes que todo va bien, libera su espacio con:"
+msgstr "Quan comprovis que tot va bé, allibera'n l'espai amb:"
+
+msgid "(No se reinicia: modo de prueba.)"
+msgstr "(No es reinicia: mode de prova.)"
+
+msgid "¿Reiniciar ahora? [S/n]: "
+msgstr "Reiniciar ara? [S/n]: "
+
+msgid "Reinicia cuando quieras para entrar en el sistema restaurado."
+msgstr "Reinicia quan vulguis per entrar al sistema restaurat."

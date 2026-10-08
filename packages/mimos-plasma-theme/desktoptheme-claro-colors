@@ -124,6 +124,7 @@ ForegroundVisited=122,62,156
 AccentColor=255,111,174
 ColorScheme=MimOS Claro
 Name=MimOS Claro
+Name[ca]=MimOS Clar
 shadeSortColumn=true
 
 [KDE]

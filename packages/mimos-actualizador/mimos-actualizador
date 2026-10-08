@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2016
 # The tray updater: watches for updates, shows the icon, and runs the update
 # when asked.
 #
@@ -18,6 +19,15 @@
 # process appears exactly when something new is available, so the person is
 # told once and not once an hour. See ADR-104.
 set -Eeuo pipefail
+
+# Translations (ADR-159). Every string a person reads below is written in
+# Spanish and looked up in mimos-actualizador.mo for the session's language; a missing
+# catalogue means Spanish. eval_gettext keeps $variables inside the msgid so
+# the translator can move them, which is why SC2016 is off for this file.
+export TEXTDOMAIN=mimos-actualizador
+export TEXTDOMAINDIR="${mimos_test_textdomaindir:-/usr/share/locale}"
+# shellcheck disable=SC1091
+. gettext.sh
 
 readonly runner='/usr/lib/mimos/actualizador-mimos'
 readonly checker='/usr/lib/mimos/mimos-buscar-actualizaciones'
@@ -56,7 +66,7 @@ abrir_terminal() {
   elif command -v konsole > /dev/null 2>&1; then
     konsole -e "${updater}"
   elif command -v kdialog > /dev/null 2>&1; then
-    kdialog --error 'No hay ninguna terminal para mostrar la actualización.'
+    kdialog --error "$(gettext 'No hay ninguna terminal para mostrar la actualización.')"
     return 1
   else
     printf 'No terminal available to run the update.\n' >&2
@@ -70,7 +80,7 @@ case "${1:---daemon}" in
     exec "${updater}"
     ;;
   *)
-    printf 'Uso: mimos-actualizador [--daemon|--ahora]\n' >&2
+    printf '%s\n' "$(gettext 'Uso: mimos-actualizador [--daemon|--ahora]')" >&2
     exit 2
     ;;
 esac

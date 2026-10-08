@@ -188,8 +188,8 @@ Item {
     }
 
     component BackButton: MimosButton {
-        text: "← Volver"
-        Accessible.name: "Volver a la portada"
+        text: qsTr("← Volver")
+        Accessible.name: qsTr("Volver a la portada")
         onClicked: root.showPage(0)
     }
 
@@ -266,8 +266,7 @@ Item {
                             // The OS in Besito is the logotype treatment; on
                             // light grounds it is a recorded brand exemption,
                             // never a licence for Besito body text.
-                            text: "Bienvenido a Mim<font color=\""
-                                  + root.kiss + "\">OS</font>"
+                            text: qsTr("Bienvenido a Mim<font color=\"%1\">OS</font>").arg(root.kiss)
                             color: root.ink
                             font.pixelSize: 34
                             font.bold: true
@@ -294,7 +293,7 @@ Item {
                                 id: releaseLabel
                                 objectName: "releaseLabel"
                                 anchors.centerIn: parent
-                                text: root.releaseChannel + " · INSTALADO"
+                                text: root.releaseChannel + qsTr(" · INSTALADO")
                                 color: root.ink
                                 font.pixelSize: 11
                                 font.bold: true
@@ -305,7 +304,7 @@ Item {
                             objectName: "homeIntro"
                             Layout.alignment: Qt.AlignHCenter
                             Layout.fillWidth: true
-                            text: "Gracias por instalar MimOS. Este es tu nuevo hogar: desde aquí puedes dar los primeros pasos y dejarlo todo a tu gusto."
+                            text: qsTr("Gracias por instalar MimOS. Este es tu nuevo hogar: desde aquí puedes dar los primeros pasos y dejarlo todo a tu gusto.")
                             color: root.inkMuted
                             font.pixelSize: 14
                             horizontalAlignment: Text.AlignHCenter
@@ -323,48 +322,48 @@ Item {
                                 id: firstStepsCard
                                 objectName: "firstStepsCard"
                                 glyph: "🚀"
-                                text: "Primeros pasos"
-                                caption: "Una guía corta para estrenar tu sistema"
+                                text: qsTr("Primeros pasos")
+                                caption: qsTr("Una guía corta para estrenar tu sistema")
                                 onClicked: root.showPage(1)
                             }
 
                             MimosCard {
                                 objectName: "discoverCard"
                                 glyph: "🛍️"
-                                text: "Instalar aplicaciones"
-                                caption: "Busca e instala desde los repositorios de Arch y el AUR"
+                                text: qsTr("Instalar aplicaciones")
+                                caption: qsTr("Busca e instala desde los repositorios de Arch y el AUR")
                                 onClicked: root.discoverRequested()
                             }
 
                             MimosCard {
                                 objectName: "personalizeCard"
                                 glyph: "🎨"
-                                text: "Personalizar MimOS"
-                                caption: "Cambia entre MimOS Claro y MimOS Oscuro"
+                                text: qsTr("Personalizar MimOS")
+                                caption: qsTr("Cambia entre MimOS Claro y MimOS Oscuro")
                                 onClicked: root.showPage(2)
                             }
 
                             MimosCard {
                                 objectName: "documentationCard"
                                 glyph: "📖"
-                                text: "Documentación"
-                                caption: "Abre mimoslinux.org en tu navegador"
+                                text: qsTr("Documentación")
+                                caption: qsTr("Abre mimoslinux.org en tu navegador")
                                 onClicked: Qt.openUrlExternally("https://mimoslinux.org")
                             }
 
                             MimosCard {
                                 objectName: "privacyCard"
                                 glyph: "🛡️"
-                                text: "Privacidad"
-                                caption: "Telemetría automática desactivada; revisa tus preferencias locales"
+                                text: qsTr("Privacidad")
+                                caption: qsTr("Telemetría automática desactivada; revisa tus preferencias locales")
                                 onClicked: root.showPage(3)
                             }
 
                             MimosCard {
                                 objectName: "supportCard"
                                 glyph: "💗"
-                                text: "Crear paquete de soporte"
-                                caption: "Cómo generar un informe local con mimos-diagnostico"
+                                text: qsTr("Crear paquete de soporte")
+                                caption: qsTr("Cómo generar un informe local con mimos-diagnostico")
                                 onClicked: root.showPage(4)
                             }
                         }
@@ -388,7 +387,7 @@ Item {
 
                         Text {
                             Layout.fillWidth: true
-                            text: "Primeros pasos"
+                            text: qsTr("Primeros pasos")
                             color: root.ink
                             font.pixelSize: 26
                             font.bold: true
@@ -397,20 +396,20 @@ Item {
                         Repeater {
                             model: [
                                 {
-                                    title: "1 · Ponlo a tu gusto",
-                                    body: "En «Personalizar MimOS» puedes cambiar entre MimOS Claro y MimOS Oscuro con un clic; el fondo de pantalla cambia contigo. Para más ajustes, abre Preferencias del sistema."
+                                    title: qsTr("1 · Ponlo a tu gusto"),
+                                    body: qsTr("En «Personalizar MimOS» puedes cambiar entre MimOS Claro y MimOS Oscuro con un clic; el fondo de pantalla cambia contigo. Para más ajustes, abre Preferencias del sistema.")
                                 },
                                 {
-                                    title: "2 · Instala tus aplicaciones",
-                                    body: "«Instalar aplicaciones» abre paru en una terminal, con acceso a los repositorios oficiales de Arch y al AUR. Se hace en terminal a propósito: instalar pide contraseña y hace preguntas, y es mejor verlas."
+                                    title: qsTr("2 · Instala tus aplicaciones"),
+                                    body: qsTr("«Instalar aplicaciones» abre la Tienda de MimOS: eliges por categorías, marcas lo que quieras y se instala desde los repositorios oficiales de Arch, en un terminal donde ves lo que pasa. Si no está lo que buscas, «Todo el catálogo…» abre paru, con acceso al AUR.")
                                 },
                                 {
-                                    title: "3 · Mantenlo actualizado",
-                                    body: "MimOS te avisa desde la bandeja del sistema cuando hay actualizaciones, y cada una deja una instantánea por si hay que volver atrás. Es una beta: actualiza a menudo y no la uses todavía para datos importantes."
+                                    title: qsTr("3 · Mantenlo actualizado"),
+                                    body: qsTr("MimOS te avisa desde la bandeja del sistema cuando hay actualizaciones, y cada una deja una instantánea por si hay que volver atrás.")
                                 },
                                 {
-                                    title: "4 · Pide ayuda cuando quieras",
-                                    body: "La comunidad está en Discord y la documentación en mimoslinux.org. Si algo falla, «Crear paquete de soporte» explica cómo preparar un informe local."
+                                    title: qsTr("4 · Pide ayuda cuando quieras"),
+                                    body: qsTr("La comunidad está en Discord y la documentación en mimoslinux.org. Si algo falla, «Crear paquete de soporte» explica cómo preparar un informe local.")
                                 }
                             ]
 
@@ -452,7 +451,7 @@ Item {
 
                         MimosButton {
                             objectName: "communityButton"
-                            text: "Abrir la comunidad en Discord"
+                            text: qsTr("Abrir la comunidad en Discord")
                             Accessible.name: text
                             onClicked: Qt.openUrlExternally("https://discord.gg/RQ4ftnb9mB")
                         }
@@ -476,7 +475,7 @@ Item {
 
                         Text {
                             Layout.fillWidth: true
-                            text: "Personalizar MimOS"
+                            text: qsTr("Personalizar MimOS")
                             color: root.ink
                             font.pixelSize: 26
                             font.bold: true
@@ -484,7 +483,7 @@ Item {
 
                         Text {
                             Layout.fillWidth: true
-                            text: "Elige el tema del sistema. Se aplica al momento y esta ventana se reabrirá con el aspecto nuevo."
+                            text: qsTr("Elige el tema del sistema. Se aplica al momento y esta ventana se reabrirá con el aspecto nuevo.")
                             color: root.inkMuted
                             font.pixelSize: 14
                             wrapMode: Text.WordWrap
@@ -498,8 +497,8 @@ Item {
                                 id: claroButton
                                 objectName: "claroButton"
                                 glyph: "🌸"
-                                text: "MimOS Claro"
-                                caption: "Aplica el tema claro con sus rositas"
+                                text: qsTr("MimOS Claro")
+                                caption: qsTr("Aplica el tema claro con sus rositas")
                                 onClicked: root.themeRequested("claro")
                             }
 
@@ -507,15 +506,15 @@ Item {
                                 id: oscuroButton
                                 objectName: "oscuroButton"
                                 glyph: "🌙"
-                                text: "MimOS Oscuro"
-                                caption: "Aplica el tema oscuro sobre Noche"
+                                text: qsTr("MimOS Oscuro")
+                                caption: qsTr("Aplica el tema oscuro sobre Noche")
                                 onClicked: root.themeRequested("oscuro")
                             }
                         }
 
                         Text {
                             Layout.fillWidth: true
-                            text: "Para fuentes, iconos y demás detalles, abre Preferencias del sistema desde el menú de aplicaciones."
+                            text: qsTr("Para fuentes, iconos y demás detalles, abre Preferencias del sistema desde el menú de aplicaciones.")
                             color: root.inkMuted
                             font.pixelSize: 13
                             wrapMode: Text.WordWrap
@@ -540,7 +539,7 @@ Item {
 
                         Text {
                             Layout.fillWidth: true
-                            text: "Privacidad clara, sin letra pequeña"
+                            text: qsTr("Privacidad clara, sin letra pequeña")
                             color: root.ink
                             font.pixelSize: 26
                             font.bold: true
@@ -548,7 +547,7 @@ Item {
 
                         Text {
                             Layout.fillWidth: true
-                            text: "Estas preferencias se guardan únicamente en tu perfil local. Centro de MimOS no envía ningún dato."
+                            text: qsTr("Estas preferencias se guardan únicamente en tu perfil local. Centro de MimOS no envía ningún dato.")
                             color: root.inkMuted
                             font.pixelSize: 15
                             wrapMode: Text.WordWrap
@@ -577,7 +576,7 @@ Item {
                                     Layout.fillWidth: true
                                     Layout.minimumWidth: 0
                                     Text {
-                                        text: "Telemetría automática desactivada"
+                                        text: qsTr("Telemetría automática desactivada")
                                         color: root.ink
                                         font.pixelSize: 17
                                         font.bold: true
@@ -585,7 +584,7 @@ Item {
                                     Text {
                                         Layout.fillWidth: true
                                         Layout.minimumWidth: 0
-                                        text: "MimOS no incorpora seguimiento ni subidas silenciosas."
+                                        text: qsTr("MimOS no incorpora seguimiento ni subidas silenciosas.")
                                         color: root.inkMuted
                                         wrapMode: Text.WordWrap
                                     }
@@ -598,10 +597,10 @@ Item {
                             objectName: "updatesSwitch"
                             Layout.fillWidth: true
                             Layout.minimumWidth: 0
-                            text: "Mostrar Centro de MimOS después de una actualización"
+                            text: qsTr("Mostrar Centro de MimOS después de una actualización")
                             checked: root.showAfterUpdates
                             Accessible.name: text
-                            Accessible.description: "Guarda localmente si debe mostrarse la bienvenida de una versión nueva"
+                            Accessible.description: qsTr("Guarda localmente si debe mostrarse la bienvenida de una versión nueva")
                             onToggled: root.showAfterUpdates = checked
                         }
 
@@ -610,10 +609,10 @@ Item {
                             objectName: "hardwareSwitch"
                             Layout.fillWidth: true
                             Layout.minimumWidth: 0
-                            text: "Incluir un resumen del hardware en informes manuales"
+                            text: qsTr("Incluir un resumen del hardware en informes manuales")
                             checked: root.includeHardwareDetails
                             Accessible.name: text
-                            Accessible.description: "Preferencia local, desactivada inicialmente; el informe solo se crea con mimos-diagnostico y nunca se envía solo"
+                            Accessible.description: qsTr("Preferencia local, desactivada inicialmente; el informe solo se crea con mimos-diagnostico y nunca se envía solo")
                             onToggled: root.includeHardwareDetails = checked
                         }
 
@@ -622,17 +621,17 @@ Item {
                             objectName: "logsSwitch"
                             Layout.fillWidth: true
                             Layout.minimumWidth: 0
-                            text: "Incluir registros recientes en informes manuales"
+                            text: qsTr("Incluir registros recientes en informes manuales")
                             checked: root.includeRecentLogs
                             Accessible.name: text
-                            Accessible.description: "Preferencia local, desactivada inicialmente; el informe solo se crea con mimos-diagnostico y nunca se envía solo"
+                            Accessible.description: qsTr("Preferencia local, desactivada inicialmente; el informe solo se crea con mimos-diagnostico y nunca se envía solo")
                             onToggled: root.includeRecentLogs = checked
                         }
 
                         Text {
                             Layout.fillWidth: true
                             Layout.minimumWidth: 0
-                            text: "Estas opciones solo establecen valores predeterminados para mimos-diagnostico y nunca autorizan un envío."
+                            text: qsTr("Estas opciones solo establecen valores predeterminados para mimos-diagnostico y nunca autorizan un envío.")
                             color: root.inkMuted
                             font.pixelSize: 12
                             wrapMode: Text.WordWrap
@@ -641,9 +640,9 @@ Item {
                         MimosButton {
                             id: resetPrivacyButton
                             objectName: "resetPrivacyButton"
-                            text: "Restablecer valores privados"
+                            text: qsTr("Restablecer valores privados")
                             Accessible.name: text
-                            Accessible.description: "Activa la bienvenida y desactiva la inclusión de hardware y registros"
+                            Accessible.description: qsTr("Activa la bienvenida y desactiva la inclusión de hardware y registros")
                             onClicked: root.resetPrivacy()
                         }
                     }
@@ -666,7 +665,7 @@ Item {
 
                         Text {
                             Layout.fillWidth: true
-                            text: "Crear paquete de soporte"
+                            text: qsTr("Crear paquete de soporte")
                             color: root.ink
                             font.pixelSize: 26
                             font.bold: true
@@ -674,7 +673,7 @@ Item {
 
                         Text {
                             Layout.fillWidth: true
-                            text: "Si algo falla y quieres pedir ayuda, MimOS puede preparar un informe local con los datos básicos del sistema. Se crea solo cuando tú lo pides, se guarda en tu carpeta personal y nunca se envía automáticamente."
+                            text: qsTr("Si algo falla y quieres pedir ayuda, MimOS puede preparar un informe local con los datos básicos del sistema. Se crea solo cuando tú lo pides, se guarda en tu carpeta personal y nunca se envía automáticamente.")
                             color: root.inkMuted
                             font.pixelSize: 15
                             wrapMode: Text.WordWrap
@@ -695,7 +694,7 @@ Item {
                                 spacing: 8
 
                                 Text {
-                                    text: "Abre una terminal (Konsole) y escribe:"
+                                    text: qsTr("Abre una terminal (Konsole) y escribe:")
                                     color: root.ink
                                     font.pixelSize: 15
                                     font.bold: true
@@ -723,7 +722,7 @@ Item {
 
                                 Text {
                                     Layout.fillWidth: true
-                                    text: "«--solo-ver» muestra lo que contendría el informe sin crear nada. Cuando estés conforme, repite el comando sin esa opción y confirma: el archivo queda en tu carpeta personal, con direcciones y nombres ya tachados, listo para adjuntarlo tú donde quieras."
+                                    text: qsTr("«--solo-ver» muestra lo que contendría el informe sin crear nada. Cuando estés conforme, repite el comando sin esa opción y confirma: el archivo queda en tu carpeta personal, con direcciones y nombres ya tachados, listo para adjuntarlo tú donde quieras.")
                                     color: root.inkMuted
                                     font.pixelSize: 14
                                     wrapMode: Text.WordWrap
@@ -739,7 +738,7 @@ Item {
 
                 Text {
                     Layout.fillWidth: true
-                    text: "Tab navegar · Enter activar · Esc volver o cerrar"
+                    text: qsTr("Tab navegar · Enter activar · Esc volver o cerrar")
                     color: root.inkMuted
                     font.pixelSize: 12
                 }
@@ -754,7 +753,7 @@ Item {
                 MimosButton {
                     id: closeButton
                     objectName: "closeButton"
-                    text: "Cerrar"
+                    text: qsTr("Cerrar")
                     Accessible.name: text
                     onClicked: root.closeRequested()
                 }

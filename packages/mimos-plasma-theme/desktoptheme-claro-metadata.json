@@ -11,7 +11,8 @@
         "Id": "mimos-claro",
         "License": "MIT",
         "Name": "MimOS Claro",
-        "Version": "1.0.0",
+        "Name[ca]": "MimOS Clar",
+        "Version": "1.0.1",
         "Website": "https://mimoslinux.org"
     },
     "X-Plasma-API": "5.0"

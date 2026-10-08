@@ -1,8 +1,11 @@
 [Desktop Entry]
 Type=Application
 Name=Actualizar MimOS
+Name[ca]=Actualitzar MimOS
 GenericName=Actualizaciones del sistema
+GenericName[ca]=Actualitzacions del sistema
 Comment=Actualiza los repositorios oficiales, el AUR y Flatpak
+Comment[ca]=Actualitza els repositoris oficials, l'AUR i Flatpak
 Exec=/usr/bin/mimos-actualizador --ahora
 Icon=system-software-update
 Terminal=false

@@ -1,0 +1,70 @@
+#!/bin/bash
+# Make the screen reader speak the language the system was installed in
+# (ADR-159).
+#
+# speech-dispatcher takes no notice of LANG: without a DefaultLanguage it
+# reads everything with espeak-ng's English voice, which is how ADR-051 was
+# found -- by a person listening. The fix then was a skel file saying "es",
+# and it is still right for a Spanish installation. For any other language
+# it is the same defect one layer up: a Catalan desktop read aloud with a
+# Spanish accent, and nothing to say so.
+#
+# Calamares runs this inside the target after `users` (and after
+# `localecfg`, which is what wrote /etc/locale.conf), so both the account
+# and the chosen locale exist. The rule is the one the skel file already
+# states: a DEFAULT, never a policy. It touches the file only while it still
+# carries the shipped default, so a person who changed their voice keeps it,
+# and it exits 0 when there is nothing to do, so an unusual target cannot
+# fail an installation over a voice.
+set -euo pipefail
+
+locale_conf='/etc/locale.conf'
+passwd_file='/etc/passwd'
+# The only value the shipped skel file carries; anything else is a choice.
+shipped_language='es'
+
+# The first human account is UID 1000: the one Calamares creates on a
+# target. Asking /etc/passwd needs no NSS services, which an installer
+# chroot does not have running.
+user_entry="$(awk -F: '$3 == 1000 { print $1 ":" $6; exit }' "${passwd_file}")"
+if [[ -z "${user_entry}" ]]; then
+  echo 'mimos-install-speech-language: no UID-1000 account; nothing to do.' >&2
+  exit 0
+fi
+user_name="${user_entry%%:*}"
+user_home="${user_entry#*:}"
+speechd_conf="${user_home}/.config/speech-dispatcher/speechd.conf"
+
+if [[ ! -f "${speechd_conf}" ]]; then
+  echo 'mimos-install-speech-language: no speech default in the home; nothing to do.' >&2
+  exit 0
+fi
+
+lang=''
+if [[ -r "${locale_conf}" ]]; then
+  lang="$(sed -n 's/^LANG=//p' "${locale_conf}" | head -n 1 | tr -d '"')"
+fi
+# ca_ES.UTF-8 -> ca. The voice is per language, not per territory.
+language="${lang%%_*}"
+language="${language%%.*}"
+if [[ -z "${language}" || "${language}" == "${shipped_language}" ]]; then
+  exit 0
+fi
+# A language the synthesiser cannot speak is worse than Spanish: espeak-ng
+# would fall back to English on its own. Only the languages MimOS ships and
+# has heard are claimed here (ADR-159: Catalan).
+case "${language}" in
+  ca) ;;
+  *) echo "mimos-install-speech-language: no voice default for ${language}; keeping ${shipped_language}." >&2
+     exit 0 ;;
+esac
+
+if ! grep -Eq "^DefaultLanguage[[:space:]]+\"${shipped_language}\"[[:space:]]*$" "${speechd_conf}"; then
+  # Already something else: a choice, or not ours. Never overwrite it.
+  exit 0
+fi
+
+sed -i "s/^DefaultLanguage[[:space:]]\+\"${shipped_language}\"[[:space:]]*\$/DefaultLanguage \"${language}\"/" \
+  "${speechd_conf}"
+chown "${user_name}:" "${speechd_conf}" 2>/dev/null || true
+echo "mimos-install-speech-language: DefaultLanguage \"${language}\" for ${user_name}." >&2

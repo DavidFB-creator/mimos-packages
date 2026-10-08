@@ -12,7 +12,7 @@ ApplicationWindow {
     height: 680
     minimumWidth: 760
     minimumHeight: 540
-    title: "Centro de MimOS"
+    title: qsTr("Centro de MimOS")
     color: centro.ground
     readonly property bool installedContext:
         Qt.application.arguments.indexOf("--mimos-context=installed") !== -1

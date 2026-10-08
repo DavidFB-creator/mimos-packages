@@ -1,7 +1,9 @@
 [Desktop Entry]
 Type=Application
 Name=Preparar los atajos de MimOS
+Name[ca]=Preparar les dreceres de MimOS
 Comment=Registra el atajo del terminal la primera vez que inicias sesión
+Comment[ca]=Registra la drecera del terminal el primer cop que inicies sessió
 Exec=/usr/lib/mimos/mimos-preparar-atajos
 Icon=preferences-desktop-keyboard
 OnlyShowIn=KDE;

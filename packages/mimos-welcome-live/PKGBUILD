@@ -1,7 +1,7 @@
 # Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
 
 pkgname=mimos-welcome-live
-pkgver=1.0.0
+pkgver=1.0.1
 pkgrel=1
 pkgdesc='Centro de MimOS for the Live session: welcome, install and community'
 # Compiled since the runner exists: the generic qml6 tool declares its own
@@ -13,8 +13,10 @@ arch=('x86_64')
 options=('!debug')
 url='https://github.com/DavidFB-creator/MimOS'
 license=('MIT')
-depends=('bash' 'qt6-declarative' 'mimos-branding')
-makedepends=('gcc' 'pkgconf')
+# gettext for the launcher's strings (ADR-159); qt6-tools and gettext at
+# build time compile the Catalan catalogues from the sources beside them.
+depends=('bash' 'gettext' 'qt6-declarative' 'mimos-branding')
+makedepends=('gcc' 'pkgconf' 'qt6-tools' 'gettext')
 optdepends=(
   'kdialog: show graphical error messages'
   'mimos-installer: launch MimOS Installer'
@@ -27,20 +29,27 @@ source=(
   'Window.qml'
   'mimos-welcome-live-autostart.desktop'
   'centro-main.cpp'
+  'centro-live_ca.ts'
+  'mimos-welcome-live.ca.po'
   'LICENSE'
 )
-sha256sums=('44410985ab3c05533929d1ade3baa89832a819dc8e56257642942a0ae63f3ef2'
-            '4725e527195c467daadc8a9f576a2bc9eaf80fca0092684229b7b4fbf8e67f40'
-            '33f1cfcea2125afa94c9bd1178f0031f55912e328f94fd4a0e02fca17794f010'
-            '9f500c6a1d1e05a0dc8b792e11fc3b888a49e7a6de80ee46893ae7c6c7f1209b'
-            'a8db9308c68d03f83f14ffbcc1dc3c4ef84eeba684d7963ad388f1c19bb44972'
+sha256sums=('44b5976cfd4c59930da39bc595efadf3b8d212150f4d4882872d9619fabc2b0a'
+            '0bd1640da90d348764d0341c1d2b41a2301329215925e6a481f6594c5031e676'
+            'b735e57e318376a7e50c6e3d7e42d8b9e6457cb4dfe9ca0503e72364f40288cd'
+            '2ece71da7e3143fbe7166f87ae29a526bae95d54a83adff3fdbb97b5111e334e'
+            '0949e2ce9015cbdab00d2e26fa11b0de8b812c8b65666b097262b957b653b94a'
+            '3487d36cde188a6d06122d6a509a703ad5c6d5bbca3753acf816f9cc5f6886a6'
+            '0f27b2ae8a11161b9b80942ad6d10dd6f63e76f363aa2456557775d3471fbbff'
             '97d7ba0977ea88730c942625f66849bbef6536c3c6e103a39a4bb05b9fd3d9cf')
 
 build() {
   g++ -std=c++17 -fPIC ${CXXFLAGS} centro-main.cpp \
     -DCENTRO_WINDOW_QML='"/usr/share/mimos/welcome-live/Window.qml"' \
+    -DTRADUCCIONES_DIR='"/usr/share/mimos/translations"' \
     $(pkg-config --cflags --libs Qt6Qml Qt6Gui Qt6Core) \
     ${LDFLAGS} -o centro-mimos-live
+  /usr/lib/qt6/bin/lrelease -silent centro-live_ca.ts -qm centro-live_ca.qm
+  msgfmt --check --output-file mimos-welcome-live.mo mimos-welcome-live.ca.po
 }
 
 package() {
@@ -54,6 +63,9 @@ package() {
   # session, so the menu carries exactly one "Centro de MimOS" (ADR-093).
   install -Dm644 mimos-welcome-live-autostart.desktop \
     "${pkgdir}/etc/xdg/autostart/mimos-welcome-live.desktop"
+  install -Dm644 centro-live_ca.qm "${pkgdir}/usr/share/mimos/translations/centro-live_ca.qm"
+  install -Dm644 mimos-welcome-live.mo \
+    "${pkgdir}/usr/share/locale/ca/LC_MESSAGES/mimos-welcome-live.mo"
   install -Dm644 LICENSE \
     "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }

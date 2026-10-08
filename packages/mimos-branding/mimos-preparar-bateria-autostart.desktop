@@ -1,7 +1,9 @@
 [Desktop Entry]
 Type=Application
 Name=Preparar la batería de MimOS
+Name[ca]=Preparar la bateria de MimOS
 Comment=Muestra el porcentaje de batería la primera vez que inicias sesión
+Comment[ca]=Mostra el percentatge de bateria el primer cop que inicies sessió
 Exec=/usr/lib/mimos/mimos-preparar-bateria
 Icon=battery
 OnlyShowIn=KDE;

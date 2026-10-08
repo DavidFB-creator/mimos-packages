@@ -1,7 +1,7 @@
 # Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
 
 pkgname=mimos-release
-pkgver=1.0.0
+pkgver=1.0.1
 pkgrel=1
 pkgdesc='Release identity for MimOS'
 arch=('any')
@@ -9,21 +9,28 @@ arch=('any')
 # configuration without the generator would leave a file that looks like a
 # setting and does nothing -- this project's most-repeated defect, and one it
 # has a rule about.
-depends=('zram-generator')
+# gettext: `mimos` and mimos-restaurar read their strings through
+# /usr/bin/gettext (ADR-159); it is in base, so this declares what is
+# already true.
+depends=('zram-generator' 'gettext')
+makedepends=('gettext')
 url='https://github.com/DavidFB-creator/MimOS'
 license=('MIT')
 source=('mimos' 'mimos-release' 'mimos-mirrorlist' 'mimos-release.install'
         'mimos-remove-unneeded-broadcom-wl' 'mimos-configure-snapshots'
+        'mimos-install-locale-formats'
         'mimos-restaurar' 'mimos-tiempos.conf' 'mimos-diario.conf'
         'mimos-zram.conf' 'mimos-volcados.conf' 'mimos-resolucion.conf'
-        'mimos-zona-publica.xml' 'mimos.preset' 'LICENSE')
-sha256sums=('de1e12ae066dd23266f26ca45c97c095ada20a0fd7fe1f07c11e046886acf0ae'
-            '3732a0361778d588ba119b14513a388d08be9d98e0116faf724944e1bc53a0a4'
+        'mimos-zona-publica.xml' 'mimos.preset' 'mimos-release.ca.po'
+        'LICENSE')
+sha256sums=('9c12b820a51caace727367cccf15af41e2829729f46e06fa9175cf13607e176f'
+            '74bd13b0c69d82dd3a1f3f9df82e75abfe47cf4d4936a8b9c5995c235f5ab5ec'
             '324741c65ad2bdafe4d9c45f15ea24e57c6e48ae31bd3f89e08c7e5df482f8ae'
             '5de8f0799a2f140dd7c8bf85e32eca418b9baba8db7066e34f1ebdd691abf0b1'
             '56ed0532501f5d37e4de26236f83d9a5036f3c208d6d6782d16de9f6b3199c61'
             '7db6a468036531c7911140c1428b6817d8f5b5a03efbb7e69361bbf06dd89c58'
-            '6b886dd91dc114e77be8fc71ee7e05d804503a66f7a4fc13ec55f1996f9d2c00'
+            '2815d748c32ea769f6f95ca25b4588be6a627d518dc9605f24372a6e653d3b16'
+            'dc7c6324fc621441ecff76b2c6734ca3949faf2227d8ca3bfb828486d4c44abd'
             'b52979482c1e760bdd277328a264f67c6733019367ca4e5489f921dea1e14737'
             '30455c5ad440d7a8ce26ce52c03f0ce712dea9f0e7db81c9afe61512fdc9e131'
             '186d7f8541dd04e1b75fa842ac0904123458e7eb5cb45637c0567071a417e9d3'
@@ -31,6 +38,7 @@ sha256sums=('de1e12ae066dd23266f26ca45c97c095ada20a0fd7fe1f07c11e046886acf0ae'
             '6bc6f9b50a4f4e98ee498128b864250fc5aa72ea31d15e8bf6b7299e1f611b31'
             '9112cd0adee99f020ba7d9b8903d0fe43f138cc69fbee1f3866f742d6da7adc8'
             '285f17276226611efbd68b5986283e165be8105d6468c4686244f68bd5dd989d'
+            'a0aa61f7f464c73784c0053a4110e217293879422afa37ebed85b4d9dfff69cf'
             '97d7ba0977ea88730c942625f66849bbef6536c3c6e103a39a4bb05b9fd3d9cf')
 # The mirrorlist is configuration: a user who edits it must not have it
 # overwritten by the next update, and pacman must leave a .pacnew instead.
@@ -44,8 +52,16 @@ backup=('etc/pacman.d/mimos-mirrorlist'
 # copy exists to base ours on. See the install file for the full reasoning.
 install='mimos-release.install'
 
+build() {
+  # The Catalan catalogue for `mimos` and mimos-restaurar (ADR-159),
+  # compiled here rather than committed as .mo.
+  msgfmt --check --output-file mimos-release.mo mimos-release.ca.po
+}
+
 package() {
   install -Dm644 mimos-release "${pkgdir}/etc/mimos-release"
+  install -Dm644 mimos-release.mo \
+    "${pkgdir}/usr/share/locale/ca/LC_MESSAGES/mimos-release.mo"
   # The friendly front door: `mimos ayuda` instead of three hyphenated
   # names. It delegates to commands other packages own and checks they
   # exist first, so the Live session gets an explanation rather than
@@ -62,6 +78,10 @@ package() {
   # alias loads it on every machine and taints the kernel. See ADR-097.
   install -Dm755 mimos-remove-unneeded-broadcom-wl \
     "${pkgdir}/usr/lib/mimos/mimos-remove-unneeded-broadcom-wl"
+  # Calamares runs this in the target right after localecfg: a Catalan
+  # installation's formats follow its language, not its location. ADR-159.
+  install -Dm755 mimos-install-locale-formats \
+    "${pkgdir}/usr/lib/mimos/mimos-install-locale-formats"
   # Calamares runs this in the target before the bootloader, so the first
   # grub.cfg already lists the installation's own snapshot. See ADR-102.
   install -Dm755 mimos-configure-snapshots \

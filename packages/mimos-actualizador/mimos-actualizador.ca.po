@@ -1,0 +1,85 @@
+# Catalan catalogue for mimos-actualizador (ADR-159). Written in source and reviewed
+# by David on 2026-10-07;
+# scripts/check-translations.py keeps it complete and free of stale entries.
+msgid ""
+msgstr ""
+"Project-Id-Version: mimos-actualizador\n"
+"Language: ca\n"
+"PO-Revision-Date: 2026-10-07\n"
+"Last-Translator: XI14\n"
+"Language-Team: MimOS\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "No hay ninguna terminal para mostrar la actualización."
+msgstr "No hi ha cap terminal per mostrar l'actualització."
+
+msgid "Uso: mimos-actualizador [--daemon|--ahora]"
+msgstr "Ús: mimos-actualizador [--daemon|--ahora]"
+
+msgid "Pulsa Intro para cerrar esta ventana."
+msgstr "Prem Retorn per tancar aquesta finestra."
+
+msgid "Actualizando MimOS"
+msgstr "Actualitzant MimOS"
+
+msgid ""
+"  Cada paso deja una instantánea, así que si algo sale mal\n"
+"  puedes volver atrás desde el menú de arranque."
+msgstr ""
+"  Cada pas deixa una instantània, així que si alguna cosa va malament\n"
+"  pots tornar enrere des del menú d'arrencada."
+
+msgid "1 de 3 · Repositorios oficiales y MimOS"
+msgstr "1 de 3 · Repositoris oficials i MimOS"
+
+msgid "La actualización oficial no ha terminado bien."
+msgstr "L'actualització oficial no ha acabat bé."
+
+msgid ""
+"  No se continúa con el AUR ni con Flatpak: instalar sobre una\n"
+"  actualización a medias es peor que no actualizar."
+msgstr ""
+"  No es continua amb l'AUR ni amb Flatpak: instal·lar sobre una\n"
+"  actualització a mitges és pitjor que no actualitzar."
+
+msgid "2 de 3 · AUR"
+msgstr "2 de 3 · AUR"
+
+msgid "paru no está instalado; se omite."
+msgstr "paru no està instal·lat; s'omet."
+
+msgid "Algún paquete del AUR no se ha podido actualizar."
+msgstr "Algun paquet de l'AUR no s'ha pogut actualitzar."
+
+msgid ""
+"  El sistema oficial sí está al día. El AUR es software sin\n"
+"  revisar: que uno falle no rompe tu MimOS."
+msgstr ""
+"  El sistema oficial sí que està al dia. L'AUR és programari sense\n"
+"  revisar: que un falli no trenca el teu MimOS."
+
+msgid "3 de 3 · Flatpak"
+msgstr "3 de 3 · Flatpak"
+
+msgid "Flatpak no está instalado; se omite."
+msgstr "Flatpak no està instal·lat; s'omet."
+
+msgid "Alguna aplicación Flatpak no se ha podido actualizar."
+msgstr "Alguna aplicació Flatpak no s'ha pogut actualitzar."
+
+msgid "Servicios que siguen con la versión antigua"
+msgstr "Serveis que continuen amb la versió antiga"
+
+msgid "Siguen funcionando con el código de antes de actualizar."
+msgstr "Continuen funcionant amb el codi d'abans d'actualitzar."
+
+msgid "Para reiniciarlos:"
+msgstr "Per reiniciar-los:"
+
+msgid "Reiniciar el ordenador también sirve, y es lo más sencillo."
+msgstr "Reiniciar l'ordinador també serveix, i és el més senzill."
+
+msgid "Listo"
+msgstr "Fet"

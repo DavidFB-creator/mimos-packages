@@ -1,0 +1,196 @@
+# Catalan catalogue for mimos-welcome (ADR-159). Written in source and reviewed
+# by David on 2026-10-07;
+# scripts/check-translations.py keeps it complete and free of stale entries.
+msgid ""
+msgstr ""
+"Project-Id-Version: mimos-welcome\n"
+"Language: ca\n"
+"PO-Revision-Date: 2026-10-07\n"
+"Last-Translator: XI14\n"
+"Language-Team: MimOS\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Centro de MimOS"
+msgstr "Centre de MimOS"
+
+msgid "La sesión Live no tiene disponible su Centro de MimOS."
+msgstr "La sessió Live no té disponible el seu Centre de MimOS."
+
+msgid "No se encuentra la interfaz de Centro de MimOS."
+msgstr "No es troba la interfície del Centre de MimOS."
+
+msgid "El entorno de Centro de MimOS no está disponible."
+msgstr "L'entorn del Centre de MimOS no està disponible."
+
+msgid "El instalador solo está disponible desde el entorno Live."
+msgstr "L'instal·lador només està disponible des de l'entorn Live."
+
+msgid "No se pudo aplicar MimOS Claro."
+msgstr "No s'ha pogut aplicar MimOS Clar."
+
+msgid "La herramienta de temas de Plasma no está disponible."
+msgstr "L'eina de temes de Plasma no està disponible."
+
+msgid "No se pudo aplicar MimOS Oscuro."
+msgstr "No s'ha pogut aplicar MimOS Fosc."
+
+msgid "La Tienda de MimOS no está disponible."
+msgstr "La Botiga de MimOS no està disponible."
+
+msgid "Tienda de MimOS"
+msgstr "Botiga de MimOS"
+
+msgid "La Tienda instala en un MimOS de verdad; en la sesión Live los cambios se perderían al apagar."
+msgstr "La Botiga instal·la en un MimOS de veritat; a la sessió Live els canvis es perdrien en apagar."
+
+msgid "No se encuentra la interfaz de la Tienda de MimOS."
+msgstr "No es troba la interfície de la Botiga de MimOS."
+
+msgid "El entorno de la Tienda de MimOS no está disponible."
+msgstr "L'entorn de la Botiga de MimOS no està disponible."
+
+msgid "Tienda de MimOS: selección fuera del catálogo, descartada: $descartados_lista"
+msgstr "Botiga de MimOS: selecció fora del catàleg, descartada: $descartados_lista"
+
+msgid "No hay nada válido que instalar."
+msgstr "No hi ha res de vàlid per instal·lar."
+
+msgid "El instalador de la Tienda no está disponible."
+msgstr "L'instal·lador de la Botiga no està disponible."
+
+msgid "No se ha encontrado una terminal para instalar."
+msgstr "No s'ha trobat cap terminal per instal·lar."
+
+msgid "No se ha encontrado paru o una terminal para abrirlo."
+msgstr "No s'ha trobat paru o un terminal per obrir-lo."
+
+msgid "Pulsa Intro para cerrar esta ventana."
+msgstr "Prem Retorn per tancar aquesta finestra."
+
+msgid "Nada que instalar."
+msgstr "Res a instal·lar."
+
+msgid "Nombre de paquete no válido: $token"
+msgstr "Nom de paquet no vàlid: $token"
+
+msgid "Va a instalarse desde los repositorios oficiales:"
+msgstr "S'instal·larà des dels repositoris oficials:"
+
+msgid ""
+"  Antes se pone el sistema al día: en Arch instalar sobre un\n"
+"  sistema desactualizado es la receta de un sistema roto, así que\n"
+"  la transacción es una sola. Cada paso deja una instantánea: si\n"
+"  algo sale mal puedes volver atrás desde el menú de arranque."
+msgstr ""
+"  Abans es posa el sistema al dia: a Arch instal·lar sobre un\n"
+"  sistema desactualitzat és la recepta d'un sistema trencat, així que\n"
+"  la transacció és una de sola. Cada pas deixa una instantània: si\n"
+"  alguna cosa va malament pots tornar enrere des del menú d'arrencada."
+
+msgid "Instalando"
+msgstr "Instal·lant"
+
+msgid ""
+"  La instalación no ha terminado bien; nada a medias queda\n"
+"  activo, y la instantánea previa sigue en el menú de arranque."
+msgstr ""
+"  La instal·lació no ha acabat bé; res a mitges no queda\n"
+"  actiu, i la instantània prèvia continua al menú d'arrencada."
+
+msgid "Listo"
+msgstr "Fet"
+
+msgid "Ya lo tienes en el menú de aplicaciones."
+msgstr "Ja ho tens al menú d'aplicacions."
+
+msgid ""
+"mimos-diagnostico [opciones]\n"
+"\n"
+"Reúne información básica del sistema en ficheros de texto, la anonimiza,\n"
+"te la enseña entera y, solo si tú lo pides, crea un archivo local.\n"
+"Nunca envía nada a ninguna parte.\n"
+"\n"
+"  --hardware    incluye el inventario de hardware (PCI, USB, memoria, discos)\n"
+"  --registros   incluye los avisos y errores del arranque actual (anonimizados)\n"
+"  --todo        equivale a --hardware --registros\n"
+"  --solo-ver    lo muestra todo por pantalla y no escribe nada\n"
+"  --crear       crea el archivo sin preguntar (para uso no interactivo)\n"
+"  --filtrar     filtra la entrada estándar con la anonimización y sale\n"
+"  --ayuda       esta ayuda\n"
+msgstr ""
+"mimos-diagnostico [opcions]\n"
+"\n"
+"Reuneix informació bàsica del sistema en fitxers de text, l'anonimitza,\n"
+"te la mostra sencera i, només si tu ho demanes, crea un fitxer local.\n"
+"Mai no envia res enlloc.\n"
+"\n"
+"  --hardware    inclou l'inventari de maquinari (PCI, USB, memòria, discs)\n"
+"  --registros   inclou els avisos i errors de l'arrencada actual (anonimitzats)\n"
+"  --todo        equival a --hardware --registros\n"
+"  --solo-ver    ho mostra tot per pantalla i no escriu res\n"
+"  --crear       crea el fitxer sense preguntar (per a ús no interactiu)\n"
+"  --filtrar     filtra l'entrada estàndard amb l'anonimització i surt\n"
+"  --ayuda       aquesta ajuda\n"
+
+msgid "(no disponible)"
+msgstr "(no disponible)"
+
+msgid "Opción desconocida: $opcion"
+msgstr "Opció desconeguda: $opcion"
+
+msgid ""
+"Diagnóstico manual de MimOS, generado el $fecha.\n"
+"\n"
+"Este archivo se creó a mano con mimos-diagnostico y NO se ha enviado a\n"
+"ninguna parte: la herramienta no tiene ninguna capacidad de red. Antes de\n"
+"escribirse, cada fichero pasó por la anonimización: direcciones IP, MAC,\n"
+"correos, rutas personales, el nombre de usuario y el nombre del equipo se\n"
+"sustituyen por marcadores como [IP] o [usuario].\n"
+"\n"
+"Contenido: sistema.txt (versión e idioma), paquetes-mimos.txt (versiones de\n"
+"los paquetes de MimOS), servicios.txt (unidades fallidas), y si se pidieron,\n"
+"hardware.txt y registros.txt. Compartirlo, y con quién, es decisión tuya."
+msgstr ""
+"Diagnòstic manual de MimOS, generat el $fecha.\n"
+"\n"
+"Aquest fitxer es va crear a mà amb mimos-diagnostico i NO s'ha enviat\n"
+"enlloc: l'eina no té cap capacitat de xarxa. Abans d'escriure's, cada\n"
+"fitxer va passar per l'anonimització: adreces IP, MAC, correus, rutes\n"
+"personals, el nom d'usuari i el nom de l'equip se substitueixen per\n"
+"marcadors com [IP] o [usuario].\n"
+"\n"
+"Contingut: sistema.txt (versió i idioma), paquetes-mimos.txt (versions\n"
+"dels paquets de MimOS), servicios.txt (unitats fallides), i si es van\n"
+"demanar, hardware.txt i registros.txt. Compartir-lo, i amb qui, és decisió\n"
+"teva."
+
+msgid "(ningún paquete de MimOS instalado)"
+msgstr "(cap paquet de MimOS instal·lat)"
+
+msgid "Esto es todo lo que contiene el diagnóstico:"
+msgstr "Això és tot el que conté el diagnòstic:"
+
+msgid "Sin terminal interactiva: usa --crear para escribir el archivo o --solo-ver para revisarlo."
+msgstr "Sense terminal interactiu: fes servir --crear per escriure el fitxer o --solo-ver per revisar-lo."
+
+msgid "Puedes revisar cada fichero en $staging antes de decidir."
+msgstr "Pots revisar cada fitxer a $staging abans de decidir."
+
+msgid "¿Crear $destino? Escribe «si» para crearlo: "
+msgstr "Crear $destino? Escriu «si» per crear-lo: "
+
+msgid ""
+"No se ha creado nada. Los ficheros quedan en $staging para que los revises;\n"
+"bórralos con: rm -r $staging"
+msgstr ""
+"No s'ha creat res. Els fitxers queden a $staging perquè els revisis;\n"
+"esborra'ls amb: rm -r $staging"
+
+msgid ""
+"Creado $destino (solo legible por ti).\n"
+"No se ha enviado nada; compartirlo es siempre decisión tuya."
+msgstr ""
+"Creat $destino (només llegible per tu).\n"
+"No s'ha enviat res; compartir-lo és sempre decisió teva."

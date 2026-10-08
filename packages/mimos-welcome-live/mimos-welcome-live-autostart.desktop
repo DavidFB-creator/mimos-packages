@@ -1,7 +1,9 @@
 [Desktop Entry]
 Type=Application
 Name=Centro de MimOS
+Name[ca]=Centre de MimOS
 Comment=Bienvenida a MimOS
+Comment[ca]=Benvinguda a MimOS
 Exec=/usr/bin/mimos-welcome-live --autostart
 Icon=mimos-centro
 OnlyShowIn=KDE;

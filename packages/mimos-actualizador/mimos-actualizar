@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2016
 # Updates MimOS, in David's order: official repositories, then the AUR, then
 # Flatpaks.
 #
@@ -22,6 +23,15 @@
 # See ADR-104.
 set -Eeuo pipefail
 
+# Translations (ADR-159). Every string a person reads below is written in
+# Spanish and looked up in mimos-actualizador.mo for the session's language; a missing
+# catalogue means Spanish. eval_gettext keeps $variables inside the msgid so
+# the translator can move them, which is why SC2016 is off for this file.
+export TEXTDOMAIN=mimos-actualizador
+export TEXTDOMAINDIR="${mimos_test_textdomaindir:-/usr/share/locale}"
+# shellcheck disable=SC1091
+. gettext.sh
+
 titulo() {
   printf '\n\033[1;38;2;255;111;174m  %s\033[0m\n\n' "$*"
 }
@@ -31,44 +41,47 @@ aviso() {
 }
 
 pausa_final() {
-  printf '\n  Pulsa Intro para cerrar esta ventana.'
+  printf '\n  %s' "$(gettext 'Pulsa Intro para cerrar esta ventana.')"
   read -r _ || true
 }
 
-titulo 'Actualizando MimOS'
-printf '  Cada paso deja una instantánea, así que si algo sale mal\n'
-printf '  puedes volver atrás desde el menú de arranque.\n'
+titulo "$(gettext 'Actualizando MimOS')"
+gettext '  Cada paso deja una instantánea, así que si algo sale mal
+  puedes volver atrás desde el menú de arranque.'
+printf '\n'
 
 # --- 1. official repositories ------------------------------------------
-titulo '1 de 3 · Repositorios oficiales y MimOS'
+titulo "$(gettext '1 de 3 · Repositorios oficiales y MimOS')"
 if ! sudo pacman -Syu; then
-  aviso 'La actualización oficial no ha terminado bien.'
-  printf '  No se continúa con el AUR ni con Flatpak: instalar sobre una\n'
-  printf '  actualización a medias es peor que no actualizar.\n'
+  aviso "$(gettext 'La actualización oficial no ha terminado bien.')"
+  gettext '  No se continúa con el AUR ni con Flatpak: instalar sobre una
+  actualización a medias es peor que no actualizar.'
+  printf '\n'
   pausa_final
   exit 1
 fi
 
 # --- 2. the AUR --------------------------------------------------------
-titulo '2 de 3 · AUR'
+titulo "$(gettext '2 de 3 · AUR')"
 if ! command -v paru > /dev/null 2>&1; then
-  printf '  paru no está instalado; se omite.\n'
+  printf '  %s\n' "$(gettext 'paru no está instalado; se omite.')"
 elif ! paru -Sua; then
   # Deliberately not fatal. The official system is already updated and
   # consistent at this point; one AUR package that fails to build is that
   # package's problem, and stopping here would leave Flatpak unattended for
   # no gain.
-  aviso 'Algún paquete del AUR no se ha podido actualizar.'
-  printf '  El sistema oficial sí está al día. El AUR es software sin\n'
-  printf '  revisar: que uno falle no rompe tu MimOS.\n'
+  aviso "$(gettext 'Algún paquete del AUR no se ha podido actualizar.')"
+  gettext '  El sistema oficial sí está al día. El AUR es software sin
+  revisar: que uno falle no rompe tu MimOS.'
+  printf '\n'
 fi
 
 # --- 3. Flatpak --------------------------------------------------------
-titulo '3 de 3 · Flatpak'
+titulo "$(gettext '3 de 3 · Flatpak')"
 if ! command -v flatpak > /dev/null 2>&1; then
-  printf '  Flatpak no está instalado; se omite.\n'
+  printf '  %s\n' "$(gettext 'Flatpak no está instalado; se omite.')"
 elif ! flatpak update; then
-  aviso 'Alguna aplicación Flatpak no se ha podido actualizar.'
+  aviso "$(gettext 'Alguna aplicación Flatpak no se ha podido actualizar.')"
 fi
 
 # --- what is still running the old code --------------------------------
@@ -105,14 +118,14 @@ if command -v checkservices > /dev/null 2>&1; then
     grep -o "[A-Za-z0-9@._-]*\.service" | sort -u || true)"
 
   if [[ -n "${servicios}" ]]; then
-    titulo 'Servicios que siguen con la versión antigua'
+    titulo "$(gettext 'Servicios que siguen con la versión antigua')"
     printf '%s\n' "${servicios}" | sed 's/^/    /'
-    printf '\n  Siguen funcionando con el código de antes de actualizar.\n'
-    printf '  Para reiniciarlos:\n\n'
+    printf '\n  %s\n' "$(gettext 'Siguen funcionando con el código de antes de actualizar.')"
+    printf '  %s\n\n' "$(gettext 'Para reiniciarlos:')"
     printf '    sudo systemctl restart %s\n\n' "${servicios//$'\n'/ }"
-    printf '  Reiniciar el ordenador también sirve, y es lo más sencillo.\n'
+    printf '  %s\n' "$(gettext 'Reiniciar el ordenador también sirve, y es lo más sencillo.')"
   fi
 fi
 
-titulo 'Listo'
+titulo "$(gettext 'Listo')"
 pausa_final

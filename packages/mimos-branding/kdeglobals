@@ -124,6 +124,7 @@ ForegroundVisited=122,62,156
 [General]
 ColorScheme=MimOS Claro
 Name=MimOS Claro
+Name[ca]=MimOS Clar
 shadeSortColumn=true
 
 [KDE]

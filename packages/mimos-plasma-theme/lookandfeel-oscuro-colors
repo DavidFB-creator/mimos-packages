@@ -123,6 +123,7 @@ ForegroundVisited=217,160,240
 [General]
 ColorScheme=MimOS Oscuro
 Name=MimOS Oscuro
+Name[ca]=MimOS Fosc
 shadeSortColumn=true
 
 [KDE]

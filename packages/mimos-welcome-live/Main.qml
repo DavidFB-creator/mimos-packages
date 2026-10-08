@@ -139,8 +139,7 @@ Item {
                     // The OS in Besito is the logotype treatment; on light
                     // grounds it is a recorded brand exemption, never a
                     // licence for Besito body text.
-                    text: "Bienvenido a Mim<font color=\""
-                          + root.kiss + "\">OS</font>"
+                    text: qsTr("Bienvenido a Mim<font color=\"%1\">OS</font>").arg(root.kiss)
                     color: root.ink
                     font.pixelSize: 34
                     font.bold: true
@@ -167,7 +166,7 @@ Item {
                         id: releaseLabel
                         objectName: "releaseLabel"
                         anchors.centerIn: parent
-                        text: root.releaseChannel + " · ENTORNO LIVE"
+                        text: root.releaseChannel + qsTr(" · ENTORNO LIVE")
                         color: root.ink
                         font.pixelSize: 11
                         font.bold: true
@@ -178,7 +177,7 @@ Item {
                     objectName: "homeIntro"
                     Layout.alignment: Qt.AlignHCenter
                     Layout.fillWidth: true
-                    text: "Gracias por probar MimOS. Explora KDE Plasma con calma: nada de lo que hagas aquí toca tus discos."
+                    text: qsTr("Gracias por probar MimOS. Explora KDE Plasma con calma: nada de lo que hagas aquí toca tus discos.")
                     color: root.inkMuted
                     font.pixelSize: 14
                     horizontalAlignment: Text.AlignHCenter
@@ -202,7 +201,7 @@ Item {
 
                         Text {
                             objectName: "contextCardTitle"
-                            text: "Un espacio seguro para probar"
+                            text: qsTr("Un espacio seguro para probar")
                             color: root.ink
                             font.pixelSize: 18
                             font.bold: true
@@ -211,7 +210,7 @@ Item {
                         Text {
                             objectName: "contextCardBody"
                             Layout.fillWidth: true
-                            text: "Puedes probar MimOS sin tocar el disco. Si decides instalarlo, el instalador sí modifica el disco que elijas."
+                            text: qsTr("Puedes probar MimOS sin tocar el disco. Si decides instalarlo, el instalador sí modifica el disco que elijas.")
                             color: root.inkMuted
                             font.pixelSize: 14
                             wrapMode: Text.WordWrap
@@ -225,9 +224,9 @@ Item {
                     Layout.alignment: Qt.AlignHCenter
                     Layout.preferredWidth: 300
                     implicitHeight: 84
-                    text: "Instalar MimOS"
+                    text: qsTr("Instalar MimOS")
                     Accessible.name: text
-                    Accessible.description: "Abre el instalador, que modificará el disco que elijas"
+                    Accessible.description: qsTr("Abre el instalador, que modificará el disco que elijas")
                     Keys.onReturnPressed: installerButton.clicked()
                     Keys.onEnterPressed: installerButton.clicked()
                     onClicked: root.installerRequested()
@@ -279,7 +278,7 @@ Item {
                             objectName: "websiteRow"
                             Layout.fillWidth: true
                             glyph: "🌐"
-                            label: "Sitio web"
+                            label: qsTr("Sitio web")
                             value: "mimoslinux.org"
                         }
 
@@ -287,7 +286,7 @@ Item {
                             objectName: "discordRow"
                             Layout.fillWidth: true
                             glyph: "💬"
-                            label: "Discord de MimOS"
+                            label: qsTr("Discord de MimOS")
                             value: "discord.gg/RQ4ftnb9mB"
                         }
 
@@ -295,7 +294,7 @@ Item {
                             objectName: "sourcesRow"
                             Layout.fillWidth: true
                             glyph: "🧡"
-                            label: "Código fuente"
+                            label: qsTr("Código fuente")
                             value: "github.com/DavidFB-creator"
                         }
                     }
@@ -306,7 +305,7 @@ Item {
 
                     Text {
                         Layout.fillWidth: true
-                        text: "Tab navegar · Enter activar · Esc cerrar"
+                        text: qsTr("Tab navegar · Enter activar · Esc cerrar")
                         color: root.inkMuted
                         font.pixelSize: 12
                     }
@@ -321,7 +320,7 @@ Item {
                     MimosButton {
                         id: closeButton
                         objectName: "closeButton"
-                        text: "Cerrar"
+                        text: qsTr("Cerrar")
                         Accessible.name: text
                         onClicked: root.closeRequested()
                     }

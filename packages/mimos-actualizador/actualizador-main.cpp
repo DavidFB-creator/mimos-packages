@@ -32,8 +32,11 @@
 // daemon never launched this, so nothing ever ran it where it breaks.
 // See ADR-121.
 #include <QApplication>
+#include <QCoreApplication>
 #include <QIcon>
+#include <QLocale>
 #include <QQmlApplicationEngine>
+#include <QTranslator>
 #include <QUrl>
 
 namespace {
@@ -58,7 +61,17 @@ int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
     QApplication::setDesktopFileName(QStringLiteral("mimos-actualizador"));
-    QApplication::setApplicationName(QStringLiteral("Actualizar MimOS"));
+    // The session's language, installed before the QML loads (ADR-159): the
+    // tray's sentences and the notification are qsTr() strings, and the
+    // Catalan half lives in actualizador_ca.qm. No catalogue means Spanish.
+    QTranslator traductor;
+    if (traductor.load(QLocale(), QStringLiteral("actualizador"),
+                       QStringLiteral("_"),
+                       QStringLiteral(TRADUCCIONES_DIR))) {
+        QCoreApplication::installTranslator(&traductor);
+    }
+    QApplication::setApplicationName(
+        QCoreApplication::translate("Actualizador", "Actualizar MimOS"));
     QApplication::setWindowIcon(
         QIcon::fromTheme(QStringLiteral("system-software-update")));
     // A tray-only application: without this the process would exit the moment

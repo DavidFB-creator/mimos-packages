@@ -1,7 +1,7 @@
 # Maintainer: XI14 <https://github.com/DavidFB-creator/MimOS>
 
 pkgname=mimos-plasma-theme
-pkgver=1.0.0
+pkgver=1.0.1
 pkgrel=1
 pkgdesc='MimOS Claro and MimOS Oscuro Plasma Global Themes with the MIMI splash'
 arch=('any')
@@ -29,18 +29,18 @@ source=(
   'preview-oscuro.png'
   'LICENSE'
 )
-sha256sums=('c64ce39587fdd00fcf3740ac706dd6e3e2e2f9efe341c32f0a5508d1c70fe879'
-            '6b9a9b32f608c44f560664c9dc9d65db83f2aba77051d5bdea1a507af6db6482'
+sha256sums=('4fb0a3089e2d9c498646e00578b927bda5cb42ca128a104eaeaa281fcc6b958d'
+            '19b7039e8eef77813508854999ad00d819a7c73fa55b9b7fa4eae1434eeefc8c'
             '90ca556558d13c662560785b14d10d160475702ee0f47ac1779513d9e6288b95'
             '9211af50724cce9a65345b1d1259f9f273ee412b278914c132508943bc67caee'
             '8cc51a1ea809dc979d0976abe8f7161684ca94615108957c3104718d9aa59f1c'
-            '9fa2d3fe9ec2eeb967e07ef52388d63b623f0c9d0e8d703dfb62fe4a1786068c'
-            'cfcb83398486bf65ed4d1392ac40830ecb99f11d082eede842ec8561e5efe8ea'
+            '19e9c986f1b9a66a00446be1f9fd125e5942c5ca3a03bcee27a59224da4c726d'
+            'a3c713a614664e418bbb3bdf9797315898362d42ea4d077f9e9b925a8de09125'
             'f845a15ec41d5396f6e1d98b7e26ba092a5b0cf8dd3172cbae0151d93d4d6263'
-            '0e47f98077aeafb774c8550bcf7ce3613c160307d5330f3b09406aa06ab9ffd7'
-            '86b0e9e78dd8248dbfd779d7e83d650678e8dad6d372aa1362875f2b5cb13821'
-            '603920daf8f15d22e362b6f1de3b45e36335bb7475d155a9781af997e381488a'
-            '64271502b084c026b2d9c6e8fc9a00244f9ebd6fbaf00839460886f7ddbb02e6'
+            'd94f5e677ba35387032f18d9fa9dcfb6bd847e8998e03aa4a537a1558f4c47ee'
+            '27e8f3c4751e80eec67329261f1fb7c9f448d601d89b6188ee6d7a07db7d5447'
+            '4bbee7f78ca9e93f7e2f74f8d35ef48a2e615a6af9d842bc70cf2cd8950faac9'
+            'b3a92175d0eb97a2c1b25c52ccd58609a66a0296bffbe80427c97184375ba5ed'
             'c4f48df31768ad576925151d2f2ccbaca91f4b3709f1aae6848b644e8cedde4a'
             'e3fe67bf014a64022461b1f774a2b90d3f24a03672f5282a759aa4fe0bc45015'
             '8f3ea114a646483afdc446d235b311cda2d11efab4b394302f203ca6968c8b34'

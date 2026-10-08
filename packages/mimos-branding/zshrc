@@ -114,6 +114,12 @@ mimos_saludo() {
   if [[ "${TERM_PROGRAM:-}" == 'ghostty' ]]; then
     config=/usr/share/mimos/branding/fastfetch-config.jsonc
   fi
+  # Fastfetch has no notion of a locale, so the Catalan labels are a second
+  # pair of files chosen here by LANG (ADR-159). Only the language matters,
+  # not the territory: ca_ES and ca_AD read the same greeting.
+  if [[ "${LANG:-}" == ca_* || "${LANG:-}" == ca.* ]]; then
+    config="${config%.jsonc}.ca.jsonc"
+  fi
   [[ -r "${config}" ]] || return 0
 
   if (( ${COLUMNS:-80} < 78 )); then
